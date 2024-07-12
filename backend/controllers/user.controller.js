@@ -7,9 +7,13 @@ import bcrypt from 'bcryptjs';
 
 export const getUserProfile = async (req, res) => {
   const { username } = req.params;
+  console.log(username);
 
   try {
-    const user = await User.findOne({ username }).select('-password');
+    const user = await User.findOne({ username }).select('-password').populate({
+      path: 'followers',
+      select: '-password',
+    });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
