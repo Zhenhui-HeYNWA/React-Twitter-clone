@@ -7,8 +7,12 @@ import { MdEdit } from 'react-icons/md';
 import EditProfileModal from './EditProfileModal';
 import { IoCalendarOutline } from 'react-icons/io5';
 import Posts from '../../components/common/Posts';
+import { useQuery } from '@tanstack/react-query';
 
 const ProfilePage = () => {
+  //referring the getMe() to different query
+  const { data: authUser } = useQuery({ queryKey: ['authUser'] });
+
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [feedType, setFeedType] = useState('posts');
@@ -31,7 +35,7 @@ const ProfilePage = () => {
     followers: ['1', '2', '3'],
   };
   const handleImgChange = (e, state) => {
-    const file = e.target.file[0];
+    const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -82,6 +86,7 @@ const ProfilePage = () => {
                 <input
                   type='file'
                   hidden
+                  accept='image/*'
                   ref={coverImgRef}
                   onChange={(e) => handleImgChange(e, 'coverImg')}
                 />
@@ -89,13 +94,13 @@ const ProfilePage = () => {
                 <input
                   type='file'
                   hidden
+                  accept='image/*'
                   ref={profileImgRef}
                   onChange={(e) => handleImgChange(e, 'profileImg')}
                 />
                 {/* User AVATAR */}
                 <div className='avatar absolute -bottom-16 left-4'>
                   <div className='w-32 rounded-full relative group/avatar'>
-                    {' '}
                     <img
                       src={
                         profileImg ||
