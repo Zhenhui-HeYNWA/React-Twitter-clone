@@ -4,10 +4,13 @@ import { BsEmojiSmileFill } from 'react-icons/bs';
 import { IoCloseSharp } from 'react-icons/io5';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import Picker from '@emoji-mart/react';
+import data from '@emoji-mart/data';
 
 const CreatePost = () => {
   const [text, setText] = useState('');
   const [img, setImg] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imgRef = useRef(null);
 
   const { data: authUser } = useQuery({
@@ -40,7 +43,7 @@ const CreatePost = () => {
     onSuccess: () => {
       setText('');
       setImg(null);
-      toast.success('Post create successfully');
+      toast.success('Post created successfully');
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
   });
@@ -55,16 +58,24 @@ const CreatePost = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setImg(reader.result);
+        setImg(reader.result); // Base64 string
       };
       reader.readAsDataURL(file);
     }
   };
+
+  const handleEmojiSelect = (emoji) => {
+    setText((prevText) => prevText + emoji.native);
+  };
+
   return (
     <div className='flex p-4 items-start gap-4 border-b border-gray-700'>
       <div className='avatar'>
         <div className='w-8 rounded-full'>
-          <img src={authUser.profileImg || '/avatar-placeholder.png'} />
+          <img
+            src={authUser?.profileImg || '/avatar-placeholder.png'}
+            alt='Profile'
+          />
         </div>
       </div>
       <form className='flex flex-col gap-2 w-full' onSubmit={handelSubmit}>
@@ -83,10 +94,10 @@ const CreatePost = () => {
                 imgRef.current.value = null;
               }}
             />
-
             <img
               src={img}
               className='w-full mx-auto h-72 object-contain rounded'
+              alt='Preview'
             />
           </div>
         )}
@@ -96,7 +107,15 @@ const CreatePost = () => {
               className='fill-primary w-6 h-6 cursor-pointer'
               onClick={() => imgRef.current.click()}
             />
-            <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer' />
+            <BsEmojiSmileFill
+              className='fill-primary w-5 h-5 cursor-pointer'
+              onClick={() => setShowEmojiPicker((prev) => !prev)}
+            />
+            {showEmojiPicker && (
+              <div className='absolute top-44'>
+                <Picker data={data} onEmojiSelect={handleEmojiSelect} />
+              </div>
+            )}
           </div>
           <input
             type='file'
