@@ -53,6 +53,11 @@ const LoginPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleTestUserLogin = (userData) => {
+    setFormData(userData);
+    login(userData);
+  };
+
   return (
     <div className=' max-w-screen-xl mx-auto flex h-screen'>
       <div className='flex-1 hidden lg:flex items-center  justify-center'>
@@ -99,6 +104,26 @@ const LoginPage = () => {
               Sign up
             </button>
           </Link>
+          <button
+            className='btn rounded-full btn-primary text-white'
+            onClick={() =>
+              handleTestUserLogin({
+                username: 'testuser123',
+                password: '123456789',
+              })
+            }>
+            TestUser123
+          </button>
+          <button
+            className='btn rounded-full btn-primary text-white'
+            onClick={() =>
+              handleTestUserLogin({
+                username: 'testuser456',
+                password: '987654321',
+              })
+            }>
+            TestUser456
+          </button>
         </div>
       </div>
     </div>
