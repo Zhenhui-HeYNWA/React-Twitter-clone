@@ -51,7 +51,7 @@ function App() {
           path='/signUp'
           element={!authUser ? <SignUpPage /> : <Navigate to='/' />}></Route>
         <Route
-          path='/notification'
+          path='/notifications'
           element={
             authUser ? <NotificationPage /> : <Navigate to='/login' />
           }></Route>

@@ -192,8 +192,8 @@ export const getFollowingPosts = async (req, res) => {
 
     if (!user) res.status(404).json({ error: 'User not found' });
 
-    const following = user.followings;
-    const followingPosts = await Post.find({ user: { $in: following } })
+    const followings = user.followings;
+    const followingPosts = await Post.find({ user: { $in: followings } })
       .sort({
         createdAt: -1,
       })

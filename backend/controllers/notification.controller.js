@@ -4,15 +4,17 @@ export const getNotifications = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const notification = await Notification.find({ to: userId }).populate({
+    const notifications = await Notification.find({ to: userId }).populate({
       path: 'from',
       select: 'username profileImg',
     });
+
     await Notification.updateMany({ to: userId }, { read: true });
-    res.status(200).json({ notification });
+
+    res.status(200).json(notifications);
   } catch (error) {
-    console.log('Error in getNotifications controller:', error.message);
-    rea.status(500).json({ error: 'Internal server error' });
+    console.log('Error in getNotifications function', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 

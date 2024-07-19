@@ -85,7 +85,6 @@ export const getSuggestedUser = async (req, res) => {
       //return 10 random users
       { $sample: { size: 10 } },
     ]);
-    console.log(users);
 
     const filteredUsers = users.filter(
       (user) => !userFollowingByMe.followings.includes(user._id)

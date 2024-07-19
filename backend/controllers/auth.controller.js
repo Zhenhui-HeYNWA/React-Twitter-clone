@@ -51,7 +51,7 @@ export const signup = async (req, res) => {
         username: newUser.username,
         email: newUser.email,
         followers: newUser.followers,
-        following: newUser.followings,
+        followings: newUser.followings,
         profileImg: newUser.profileImg,
         coverImg: newUser.coverImg,
       });
@@ -84,7 +84,7 @@ export const login = async (req, res) => {
       username: user.username,
       email: user.email,
       followers: user.followers,
-      following: user.followings,
+      followings: user.followings,
       profileImg: user.profileImg,
       coverImg: user.coverImg,
     });
