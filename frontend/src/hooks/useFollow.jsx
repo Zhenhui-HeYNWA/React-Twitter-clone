@@ -12,7 +12,7 @@ const useFollow = () => {
           method: 'POST',
         });
         const data = res.json();
-        if (!res.ok) throw new Error(data.message || 'Something went wrong');
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
         return data;
       } catch (error) {
         throw new Error(error.message);
