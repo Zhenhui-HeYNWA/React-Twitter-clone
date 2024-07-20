@@ -22,7 +22,7 @@ function App() {
         const data = await res.json();
         if (data.error) return null;
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        console.log('Auth User:', data);
+
         return data;
       } catch (error) {
         throw new Error(error);
@@ -38,7 +38,7 @@ function App() {
       </div>
     );
   }
-  console.log('Auth user:', authUser);
+
   return (
     <div className='flex max-w-6xl mx-auto'>
       {/* Common component */}

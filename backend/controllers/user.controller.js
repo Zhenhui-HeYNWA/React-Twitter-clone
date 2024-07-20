@@ -7,7 +7,6 @@ import bcrypt from 'bcryptjs';
 
 export const getUserProfile = async (req, res) => {
   const { username } = req.params;
-  console.log(username);
 
   try {
     const user = await User.findOne({ username }).select('-password');
@@ -71,7 +70,7 @@ export const getSuggestedUser = async (req, res) => {
     const userId = req.user._id;
 
     const userFollowingByMe = await User.findById(userId).select('followings');
-    console.log(userFollowingByMe);
+    
     const users = await User.aggregate([
       {
         $match: {

@@ -32,11 +32,9 @@ const SignUpPage = () => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error) || 'Failed to create account';
 
-        console.log(data);
         return data;
       } catch (error) {
-        console.log(error);
-        throw error;
+        throw new Error(error.message);
       }
     },
     onSuccess: () => {
