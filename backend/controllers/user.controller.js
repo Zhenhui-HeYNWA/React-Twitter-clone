@@ -95,7 +95,37 @@ export const getSuggestedUser = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+export const getFollowersUser = async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username })
+      .select('followers')
+      .populate('followers', '-password -email'); // 填充 followers 信息，并排除 password 和 email 字段
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user.followers);
+  } catch (error) {
+    console.log('Error in getFollowers:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
 
+export const getFollowingUser = async (req, res) => {
+  const { username } = req.params;
+  try {
+    const user = await User.findOne({ username })
+      .select('followings')
+      .populate('followings', '-password -email');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user.followings);
+  } catch (error) {
+    console.log('Error in getFollowers:', error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
 export const updateUser = async (req, res) => {
   const { fullName, email, username, currentPassword, newPassword, bio, link } =
     req.body;

@@ -131,14 +131,14 @@ const ProfilePage = () => {
                         '/avatar-placeholder.png'
                       }
                     />
-                    <div className='absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer'>
-                      {isMyProfile && (
+                    {isMyProfile && (
+                      <div className='absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer'>
                         <MdEdit
                           className='w-4 h-4 text-white'
                           onClick={() => profileImgRef.current.click()}
                         />
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -149,7 +149,7 @@ const ProfilePage = () => {
                     className='btn btn-outline rounded-full btn-sm'
                     onClick={() => follow(user?._id)}>
                     {isPending && 'Loading...'}
-                    {!isPending && amIFollowing && 'Unfollow'}
+                    {!isPending && amIFollowing && 'Following'}
                     {!isPending && !amIFollowing && 'Follow'}
                   </button>
                 )}
@@ -197,18 +197,27 @@ const ProfilePage = () => {
                   </div>
                 </div>
                 <div className='flex gap-2'>
-                  <div className='flex gap-1 items-center'>
-                    <span className='font-bold text-xs'>
-                      {user?.followings.length}
-                    </span>
-                    <span className='text-slate-500 text-xs'>Following</span>
-                  </div>
-                  <div className='flex gap-1 items-center'>
-                    <span className='font-bold text-xs'>
-                      {user?.followers.length}
-                    </span>
-                    <span className='text-slate-500 text-xs'>Followers</span>
-                  </div>
+                  <Link
+                    to={`/follow/${user.username}`}
+                    className='flex items-center justify-between gap-4'>
+                    <div className='flex gap-1 items-center'>
+                      <span className='font-bold text-xs'>
+                        {user?.followings.length}
+                      </span>
+                      <span className='text-slate-500 text-xs'>Following</span>
+                    </div>
+                  </Link>
+
+                  <Link
+                    to={`/follow/${user.username}`}
+                    className='flex items-center justify-between gap-4'>
+                    <div className='flex gap-1 items-center'>
+                      <span className='font-bold text-xs'>
+                        {user?.followers.length}
+                      </span>
+                      <span className='text-slate-500 text-xs'>Followers</span>
+                    </div>
+                  </Link>
                 </div>
               </div>
               <div className='flex w-full border-b border-gray-700 mt-4'>

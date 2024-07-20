@@ -64,7 +64,7 @@ function App() {
             authUser ? <ProfilePage /> : <Navigate to='/login' />
           }></Route>
         <Route
-          path='/follow'
+          path='/follow/:username'
           element={
             authUser ? <FollowPage /> : <Navigate to='/login' />
           }></Route>
