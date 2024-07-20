@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { Link } from 'react-router-dom';
-import FollowingSkeleton from './skeletons/FollowingSkeleton';
+import FollowingSkeleton from '../skeletons/FollowingSkeleton';
 import useFollow from './hooks/useFollow';
 const FollowAndFollowing = ({ feedType, username }) => {
   const getPostEndPoint = () => {
