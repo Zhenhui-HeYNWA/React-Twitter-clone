@@ -72,7 +72,7 @@ const ProfilePage = () => {
 
   return (
     <>
-      <div className='flex-[4_4_0]  border-r border-gray-700 min-h-screen '>
+      <div className='flex-[4_4_0]  border-r  border-gray-200 dark:border-gray-700 min-h-screen '>
         {/* HEADER */}
         {(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
         {!isLoading && !isRefetching && !user && (
@@ -222,7 +222,7 @@ const ProfilePage = () => {
               </div>
               <div className='flex w-full border-b border-gray-700 mt-4'>
                 <div
-                  className='flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer'
+                  className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
                   onClick={() => setFeedType('posts')}>
                   Posts
                   {feedType === 'posts' && (
@@ -230,7 +230,7 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div
-                  className='flex justify-center flex-1 p-3 text-slate-500 hover:bg-secondary transition duration-300 relative cursor-pointer'
+                  className='flex justify-center flex-1 p-3 text-slate-500 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
                   onClick={() => setFeedType('likes')}>
                   Likes
                   {feedType === 'likes' && (

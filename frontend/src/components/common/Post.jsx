@@ -134,7 +134,7 @@ const Post = ({ post }) => {
 
   return (
     <>
-      <div className='flex gap-2 items-start p-4 border-b border-gray-700'>
+      <div className='flex gap-2 items-start p-4 border-b border-gray-200 dark:border-gray-700'>
         <div className='avatar'>
           <Link
             to={`/profile/${postOwner.username}`}
@@ -171,7 +171,7 @@ const Post = ({ post }) => {
             {post.img && (
               <img
                 src={post.img}
-                className='h-80 object-contain rounded-lg border border-gray-700'
+                className='h-80 object-cover rounded-lg border border-gray-700'
                 alt=''
               />
             )}

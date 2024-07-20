@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* 默认模式下的背景色 */
+body {
+  @apply bg-gray-100 text-black;
+}
+
+/* 暗黑模式下的背景色 */
+.dark body {
+  @apply bg-secondary text-white;
+}

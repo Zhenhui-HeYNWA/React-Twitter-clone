@@ -1,17 +1,16 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import SignUpPage from './pages/auth/signup/SignUpPage';
+import './index.css';
+import Sidebar from './components/common/Sidebar';
+import RightPanel from './components/common/RightPanel';
 import HomePage from './pages/home/HomePage';
 import LoginPage from './pages/auth/login/LoginPage';
-import Sidebar from './components/common/Sidebar';
-import FollowPage from './pages/follow/FollowPage';
-import RightPanel from './components/common/RightPanel';
+import SignUpPage from './pages/auth/signup/SignUpPage';
 import NotificationPage from './pages/notification/NotificationPage';
-
 import ProfilePage from './pages/profile/ProfilePage';
-
+import FollowPage from './pages/follow/FollowPage';
 import { Toaster } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './components/common/LoadingSpinner';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -28,48 +27,46 @@ function App() {
         throw new Error(error);
       }
     },
-
     retry: false,
   });
+
   if (isLoading) {
     return (
-      <div className='h-screen flex justify-center items-center '>
+      <div className='h-screen flex justify-center items-center'>
         <LoadingSpinner size='large' />
       </div>
     );
   }
 
   return (
-    <div className='flex max-w-6xl mx-auto'>
-      {/* Common component */}
+    <div className='flex max-w-6xl mx-auto bg-gray-100 dark:bg-secondary text-black dark:text-white'>
       <Sidebar />
       <Routes>
         <Route
           path='/'
-          element={authUser ? <HomePage /> : <Navigate to='/login' />}></Route>
+          element={authUser ? <HomePage /> : <Navigate to='/login' />}
+        />
         <Route
           path='/login'
-          element={!authUser ? <LoginPage /> : <Navigate to='/' />}></Route>
+          element={!authUser ? <LoginPage /> : <Navigate to='/' />}
+        />
         <Route
           path='/signUp'
-          element={!authUser ? <SignUpPage /> : <Navigate to='/' />}></Route>
+          element={!authUser ? <SignUpPage /> : <Navigate to='/' />}
+        />
         <Route
           path='/notifications'
-          element={
-            authUser ? <NotificationPage /> : <Navigate to='/login' />
-          }></Route>
+          element={authUser ? <NotificationPage /> : <Navigate to='/login' />}
+        />
         <Route
           path='/profile/:username'
-          element={
-            authUser ? <ProfilePage /> : <Navigate to='/login' />
-          }></Route>
+          element={authUser ? <ProfilePage /> : <Navigate to='/login' />}
+        />
         <Route
           path='/follow/:username'
-          element={
-            authUser ? <FollowPage /> : <Navigate to='/login' />
-          }></Route>
+          element={authUser ? <FollowPage /> : <Navigate to='/login' />}
+        />
       </Routes>
-
       <RightPanel />
       <Toaster />
     </div>

@@ -81,7 +81,9 @@ const FollowAndFollowing = ({ feedType, username }) => {
           const isMySelf = authUser?._id === relationship._id; // Use _id to compare
 
           return (
-            <div className='border-gray-700 p-6' key={relationship._id}>
+            <div
+              className='border-gray-200 dark:border-gray-700 p-6'
+              key={relationship._id}>
               <Link
                 to={`/profile/${relationship.username}`}
                 className='flex items-center justify-between gap-4'>
