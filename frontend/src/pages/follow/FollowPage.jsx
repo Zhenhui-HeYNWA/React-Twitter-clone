@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
 import { useState } from 'react';
+
 import { FaArrowLeft } from 'react-icons/fa';
 
 import FollowAndFollowing from '../../components/common/FollowAndFollowing';

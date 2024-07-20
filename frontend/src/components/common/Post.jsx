@@ -1,12 +1,13 @@
-import { FaRegComment } from 'react-icons/fa';
-import { BiRepost } from 'react-icons/bi';
-import { FaRegHeart } from 'react-icons/fa';
-import { FaRegBookmark } from 'react-icons/fa6';
-import { FaTrash } from 'react-icons/fa';
 import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { FaRegComment, FaRegHeart, FaTrash } from 'react-icons/fa';
+import { FaRegBookmark } from 'react-icons/fa6';
+import { BiRepost } from 'react-icons/bi';
+
 import LoadingSpinner from './LoadingSpinner';
 import { formatPostDate } from '../../utils/date';
 

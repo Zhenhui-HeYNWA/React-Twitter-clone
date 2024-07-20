@@ -1,9 +1,10 @@
-import { Link } from 'react-router-dom';
-import RightPanelSkeleton from '../skeletons/RightPanelSkeleton';
-import LoadingSpinner from './LoadingSpinner';
-
 import { useQuery } from '@tanstack/react-query';
 import useFollow from '../../hooks/useFollow';
+
+import { Link } from 'react-router-dom';
+
+import LoadingSpinner from './LoadingSpinner';
+import RightPanelSkeleton from '../skeletons/RightPanelSkeleton';
 
 const RightPanel = () => {
   const { data: suggestedUsers, isLoading } = useQuery({

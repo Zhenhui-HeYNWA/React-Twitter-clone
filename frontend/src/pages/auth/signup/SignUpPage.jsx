@@ -1,14 +1,16 @@
 import { Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 import XSvg from '../../../components/svgs/X';
 
-import { MdOutlineMail } from 'react-icons/md';
+import {
+  MdOutlineMail,
+  MdPassword,
+  MdDriveFileRenameOutline,
+} from 'react-icons/md';
 import { FaUser } from 'react-icons/fa';
-import { MdPassword } from 'react-icons/md';
-import { MdDriveFileRenameOutline } from 'react-icons/md';
-import toast from 'react-hot-toast';
 
 const SignUpPage = () => {
   const [formData, setFormData] = useState({

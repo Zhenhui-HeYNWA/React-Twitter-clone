@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 import { IoSettingsOutline } from 'react-icons/io5';
-import { FaUser } from 'react-icons/fa';
-import { FaHeart } from 'react-icons/fa6';
+import { FaUser, FaHeart } from 'react-icons/fa';
 
 const NotificationPage = () => {
   const queryClient = useQueryClient();

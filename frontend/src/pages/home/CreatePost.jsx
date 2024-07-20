@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react';
+
 import { CiImageOn } from 'react-icons/ci';
 import { BsEmojiSmileFill } from 'react-icons/bs';
 import { IoCloseSharp } from 'react-icons/io5';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
-
 const CreatePost = () => {
   const [text, setText] = useState('');
   const [img, setImg] = useState(null);

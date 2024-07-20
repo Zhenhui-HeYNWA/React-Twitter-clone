@@ -1,9 +1,11 @@
-import { MdOutlineMail, MdPassword } from 'react-icons/md';
-import XSvg from '../../../components/svgs/X';
-import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+
+import { MdOutlineMail, MdPassword } from 'react-icons/md';
+
+import XSvg from '../../../components/svgs/X';
+import { Link } from 'react-router-dom';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({

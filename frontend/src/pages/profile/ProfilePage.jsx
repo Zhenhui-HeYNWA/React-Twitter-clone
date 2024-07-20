@@ -1,16 +1,18 @@
-import { FaArrowLeft, FaLink } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+
+import { FaArrowLeft, FaLink } from 'react-icons/fa';
+import { MdEdit } from 'react-icons/md';
+import { IoCalendarOutline } from 'react-icons/io5';
+
 import { POSTS } from '../../utils/db/dummy';
 import ProfileHeaderSkeleton from '../../components/skeletons/ProfileHeaderSkeleton';
-import { useEffect, useRef, useState } from 'react';
-import { MdEdit } from 'react-icons/md';
 import EditProfileModal from './EditProfileModal';
-import { IoCalendarOutline } from 'react-icons/io5';
 import Posts from '../../components/common/Posts';
+
 import { useQuery } from '@tanstack/react-query';
 import { formatMemberSinceDate } from '../../utils/date';
 import useFollow from '../../hooks/useFollow';
-
 import useUpdateProfile from '../../hooks/useUpdateProfile';
 
 const ProfilePage = () => {
