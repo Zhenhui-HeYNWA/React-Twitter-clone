@@ -41,7 +41,7 @@ const EditProfileModal = ({ authUser }) => {
         Edit profile
       </button>
       <dialog id='edit_profile_modal' className='modal'>
-        <div className='modal-box border rounded-md border-gray-700 shadow-md'>
+        <div className='modal-box border rounded-md border-gray-700 shadow-md bg-gray-100 dark:bg-secondary'>
           <h3 className='font-bold text-lg my-3'>Update Profile</h3>
           <form
             className='flex flex-col gap-4'
@@ -53,7 +53,7 @@ const EditProfileModal = ({ authUser }) => {
               <input
                 type='text'
                 placeholder='Full Name'
-                className='flex-1 input border border-gray-700 rounded p-2 input-md'
+                className='flex-1 input border border-gray-700 rounded p-2 input-md bg-gray-100 dark:bg-secondary'
                 value={formData.fullName}
                 name='fullName'
                 onChange={handleInputChange}
@@ -61,7 +61,7 @@ const EditProfileModal = ({ authUser }) => {
               <input
                 type='text'
                 placeholder='Username'
-                className='flex-1 input border border-gray-700 rounded p-2 input-md'
+                className='flex-1 input border border-gray-700 rounded p-2 input-md bg-gray-100 dark:bg-secondary'
                 value={formData.username}
                 name='username'
                 onChange={handleInputChange}
@@ -71,14 +71,14 @@ const EditProfileModal = ({ authUser }) => {
               <input
                 type='email'
                 placeholder='Email'
-                className='flex-1 input border border-gray-700 rounded p-2 input-md'
+                className='flex-1 input border border-gray-700 rounded p-2 input-md bg-gray-100 dark:bg-secondary'
                 value={formData.email}
                 name='email'
                 onChange={handleInputChange}
               />
               <textarea
                 placeholder='Bio'
-                className='flex-1 input border border-gray-700 rounded p-2 input-md'
+                className='flex-1 input border border-gray-700 rounded p-2 input-md bg-gray-100 dark:bg-secondary'
                 value={formData.bio}
                 name='bio'
                 onChange={handleInputChange}
@@ -88,7 +88,7 @@ const EditProfileModal = ({ authUser }) => {
               <input
                 type='password'
                 placeholder='Current Password'
-                className='flex-1 input border border-gray-700 rounded p-2 input-md'
+                className='flex-1 input border border-gray-700 rounded p-2 input-md bg-gray-100 dark:bg-secondary'
                 value={formData.currentPassword}
                 name='currentPassword'
                 onChange={handleInputChange}
@@ -96,7 +96,7 @@ const EditProfileModal = ({ authUser }) => {
               <input
                 type='password'
                 placeholder='New Password'
-                className='flex-1 input border border-gray-700 rounded p-2 input-md'
+                className='flex-1 input border border-gray-700 rounded p-2 input-md bg-gray-100 dark:bg-secondary'
                 value={formData.newPassword}
                 name='newPassword'
                 onChange={handleInputChange}
@@ -105,7 +105,7 @@ const EditProfileModal = ({ authUser }) => {
             <input
               type='text'
               placeholder='Link'
-              className='flex-1 input border border-gray-700 rounded p-2 input-md'
+              className='flex-1 input border border-gray-700 rounded p-2 input-md bg-gray-100 dark:bg-secondary'
               value={formData.link}
               name='link'
               onChange={handleInputChange}
