@@ -225,20 +225,6 @@ export const getUserPosts = async (req, res) => {
         path: 'user',
         select: '-password',
       })
-      .populate({
-        path: 'user',
-        populate: {
-          path: 'followers',
-          select: '-password', // fields to select
-        },
-      })
-      .populate({
-        path: 'user',
-        populate: {
-          path: 'followings',
-          select: '-password', // fields to select
-        },
-      })
 
       .populate({
         path: 'comments.user',

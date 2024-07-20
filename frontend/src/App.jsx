@@ -3,9 +3,12 @@ import SignUpPage from './pages/auth/signup/SignUpPage';
 import HomePage from './pages/home/HomePage';
 import LoginPage from './pages/auth/login/LoginPage';
 import Sidebar from './components/common/Sidebar';
+import FollowPage from './pages/follow/FollowPage';
 import RightPanel from './components/common/RightPanel';
 import NotificationPage from './pages/notification/NotificationPage';
+
 import ProfilePage from './pages/profile/ProfilePage';
+
 import { Toaster } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './components/common/LoadingSpinner';
@@ -60,7 +63,13 @@ function App() {
           element={
             authUser ? <ProfilePage /> : <Navigate to='/login' />
           }></Route>
+        <Route
+          path='/follow'
+          element={
+            authUser ? <FollowPage /> : <Navigate to='/login' />
+          }></Route>
       </Routes>
+
       <RightPanel />
       <Toaster />
     </div>

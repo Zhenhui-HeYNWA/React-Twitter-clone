@@ -7,18 +7,27 @@ import { MdEdit } from 'react-icons/md';
 import EditProfileModal from './EditProfileModal';
 import { IoCalendarOutline } from 'react-icons/io5';
 import Posts from '../../components/common/Posts';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatMemberSinceDate } from '../../utils/date';
+import useFollow from '../../hooks/useFollow';
+import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [feedType, setFeedType] = useState('posts');
+
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
+  const queryClient = useQueryClient();
 
-  const isMyProfile = true;
   const { username } = useParams();
+
+  const { data: authUser } = useQuery({
+    queryKey: ['authUser'],
+  });
+
+  const { follow, isPending } = useFollow();
 
   const {
     data: user,
@@ -32,14 +41,50 @@ const ProfilePage = () => {
         const res = await fetch(`/api/users/profile/${username}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        console.log(data);
         return data;
       } catch (error) {
         throw new Error(error.message);
       }
     },
   });
+  const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch('/api/users/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            coverImg,
+            profileImg,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        return data;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: () => {
+      toast.success('Profile update successfully');
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['authUser'] }),
+        queryClient.invalidateQueries({ queryKey: ['userProfile'] }),
+      ]);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const isMyProfile = authUser._id === user?._id;
+
   const joinDate = formatMemberSinceDate(user?.createdAt);
+
+  const amIFollowing = authUser?.followings.includes(user?._id);
+
   const handleImgChange = (e, state) => {
     const file = e.target.files[0];
     if (file) {
@@ -57,13 +102,13 @@ const ProfilePage = () => {
 
   return (
     <>
-      <div className='flex-[4_4_0] border-r border-gray-700 min-h-screen'>
-        {/* Header */}
+      <div className='flex-[4_4_0]  border-r border-gray-700 min-h-screen '>
+        {/* HEADER */}
         {(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
         {!isLoading && !isRefetching && !user && (
-          <p className='text-center text-lg mt-4 '>User not found</p>
+          <p className='text-center text-lg mt-4'>User not found</p>
         )}
-        <div>
+        <div className='flex flex-col'>
           {!isLoading && !isRefetching && user && (
             <>
               <div className='flex gap-10 px-4 py-2 items-center'>
@@ -73,12 +118,11 @@ const ProfilePage = () => {
                 <div className='flex flex-col'>
                   <p className='font-bold text-lg'>{user?.fullName}</p>
                   <span className='text-sm text-slate-500'>
-                    {POSTS?.length} Posts
+                    {POSTS?.length} posts
                   </span>
                 </div>
               </div>
-              {/* COVER IMG  */}
-
+              {/* COVER IMG */}
               <div className='relative group/cover'>
                 <img
                   src={coverImg || user?.coverImg || '/cover.png'}
@@ -87,7 +131,7 @@ const ProfilePage = () => {
                 />
                 {isMyProfile && (
                   <div
-                    className='absolute top-2 right-2 rounded-full  p-2 bg-gray-800 bg-opacity-75 cursor-pointer'
+                    className='absolute top-2 right-2 rounded-full p-2 bg-gray-800 bg-opacity-75 cursor-pointer opacity-0 group-hover/cover:opacity-100 transition duration-200'
                     onClick={() => coverImgRef.current.click()}>
                     <MdEdit className='w-5 h-5 text-white' />
                   </div>
@@ -100,7 +144,6 @@ const ProfilePage = () => {
                   ref={coverImgRef}
                   onChange={(e) => handleImgChange(e, 'coverImg')}
                 />
-
                 <input
                   type='file'
                   hidden
@@ -108,7 +151,7 @@ const ProfilePage = () => {
                   ref={profileImgRef}
                   onChange={(e) => handleImgChange(e, 'profileImg')}
                 />
-                {/* User AVATAR */}
+                {/* USER AVATAR */}
                 <div className='avatar absolute -bottom-16 left-4'>
                   <div className='w-32 rounded-full relative group/avatar'>
                     <img
@@ -129,26 +172,31 @@ const ProfilePage = () => {
                   </div>
                 </div>
               </div>
-
               <div className='flex justify-end px-4 mt-5'>
-                {isMyProfile && <EditProfileModal />}
+                {isMyProfile && <EditProfileModal authUser={authUser} />}
                 {!isMyProfile && (
                   <button
                     className='btn btn-outline rounded-full btn-sm'
-                    onClick={() => alert('Followed successfully')}>
-                    Follow
+                    onClick={() => follow(user?._id)}>
+                    {isPending && 'Loading...'}
+                    {!isPending && amIFollowing && 'Unfollow'}
+                    {!isPending && !amIFollowing && 'Follow'}
                   </button>
                 )}
                 {(coverImg || profileImg) && (
                   <button
                     className='btn btn-primary rounded-full btn-sm text-white px-4 ml-2'
-                    onClick={() => alert('Profile updated successfully')}>
-                    Update
+                    onClick={async () => {
+                      await updateProfile({ coverImg, profileImg });
+                      setProfileImg(null);
+                      setCoverImg(null);
+                    }}>
+                    {isUpdatingProfile ? 'Updating...' : 'Update'}
                   </button>
                 )}
               </div>
 
-              <div className='flex flex-col gap-4 mt-14 px-4 '>
+              <div className='flex flex-col gap-4 mt-14 px-4'>
                 <div className='flex flex-col'>
                   <span className='font-bold text-lg'>{user?.fullName}</span>
                   <span className='text-sm text-slate-500'>
@@ -159,15 +207,16 @@ const ProfilePage = () => {
 
                 <div className='flex gap-2 flex-wrap'>
                   {user?.link && (
-                    <div className='flex gap-1 items-center'>
+                    <div className='flex gap-1 items-center '>
                       <>
                         <FaLink className='w-3 h-3 text-slate-500' />
                         <a
-                          href='/'
+                          href='https://youtube.com/@asaprogrammer_'
                           target='_blank'
                           rel='noreferrer'
-                          className='text-sm text-blue-500  hover:underline'>
-                          www.xxx.com
+                          className='text-sm text-blue-500 hover:underline'>
+                          {/* Updated this after recording the video. I forgot to update this while recording, sorry, thx. */}
+                          {user?.link}
                         </a>
                       </>
                     </div>
@@ -176,46 +225,43 @@ const ProfilePage = () => {
                     <IoCalendarOutline className='w-4 h-4 text-slate-500' />
                     <span className='text-sm text-slate-500'>{joinDate}</span>
                   </div>
-
-                  <div className='flex gap-2'>
-                    <div className='flex gap-1 items-center'>
-                      <span className='font-bold text-xs'>
-                        {/* {user?.followings.length} */}
-                        {user?.followings.length}
-                      </span>
-                      <span className='text-slate-500 text-xs'>Following</span>
-                    </div>
-
-                    <div className='flex gap-1 items-center'>
-                      <span className='font-bold text-xs'>
-                        {user?.followers.length}
-                      </span>
-                      <span className='text-slate-500 text-xs'>Followers</span>
-                    </div>
+                </div>
+                <div className='flex gap-2'>
+                  <div className='flex gap-1 items-center'>
+                    <span className='font-bold text-xs'>
+                      {user?.followings.length}
+                    </span>
+                    <span className='text-slate-500 text-xs'>Following</span>
+                  </div>
+                  <div className='flex gap-1 items-center'>
+                    <span className='font-bold text-xs'>
+                      {user?.followers.length}
+                    </span>
+                    <span className='text-slate-500 text-xs'>Followers</span>
                   </div>
                 </div>
-
-                <div className=' flex w-full border-b border-gray-700 mt-4'>
-                  <div
-                    className='flex justify-center flex-1 p-3  hover:bg-secondary transition duration-300 relative cursor-point delay-300 ease-in-out'
-                    onClick={() => setFeedType('posts')}>
-                    Posts
-                    {feedType === 'posts' && (
-                      <div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
-                    )}
-                  </div>
-                  <div
-                    className='flex justify-center flex-1 p-3 text-slate-500 hover:bg-secondary transition duration-300 relative cursor-pointer delay-300 ease-in-out'
-                    onClick={() => setFeedType('likes')}>
-                    Likes
-                    {feedType === 'likes' && (
-                      <div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
-                    )}
-                  </div>
+              </div>
+              <div className='flex w-full border-b border-gray-700 mt-4'>
+                <div
+                  className='flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer'
+                  onClick={() => setFeedType('posts')}>
+                  Posts
+                  {feedType === 'posts' && (
+                    <div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
+                  )}
+                </div>
+                <div
+                  className='flex justify-center flex-1 p-3 text-slate-500 hover:bg-secondary transition duration-300 relative cursor-pointer'
+                  onClick={() => setFeedType('likes')}>
+                  Likes
+                  {feedType === 'likes' && (
+                    <div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary' />
+                  )}
                 </div>
               </div>
             </>
           )}
+
           <Posts feedType={feedType} username={username} userId={user?._id} />
         </div>
       </div>
