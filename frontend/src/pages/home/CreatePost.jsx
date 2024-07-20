@@ -114,7 +114,7 @@ const CreatePost = () => {
               onClick={() => setShowEmojiPicker((prev) => !prev)}
             />
             {showEmojiPicker && (
-              <div className='absolute top-44 '>
+              <div className='absolute top-44 right-4 z-10'>
                 <Picker data={data} onEmojiSelect={handleEmojiSelect} />
               </div>
             )}

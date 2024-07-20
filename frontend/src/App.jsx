@@ -1,5 +1,8 @@
-import './index.css';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import LoadingSpinner from './components/common/LoadingSpinner';
 import Sidebar from './components/common/Sidebar';
+import MobileBar from './components/common/MobileBar'; // 导入 MobileBar
 import RightPanel from './components/common/RightPanel';
 import HomePage from './pages/home/HomePage';
 import LoginPage from './pages/auth/login/LoginPage';
@@ -8,9 +11,7 @@ import NotificationPage from './pages/notification/NotificationPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import FollowPage from './pages/follow/FollowPage';
 import { Toaster } from 'react-hot-toast';
-import { useQuery } from '@tanstack/react-query';
-import LoadingSpinner from './components/common/LoadingSpinner';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import useMediaQuery from './hooks/useMediaQuery'; // 导入 useMediaQuery
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -30,6 +31,8 @@ function App() {
     retry: false,
   });
 
+  const isMobile = useMediaQuery('(max-width: 768px)'); // 判断是否是手机屏幕
+
   if (isLoading) {
     return (
       <div className='h-screen flex justify-center items-center'>
@@ -40,7 +43,7 @@ function App() {
 
   return (
     <div className='flex max-w-6xl mx-auto bg-gray-100 dark:bg-secondary text-black dark:text-white'>
-      <Sidebar />
+      {!isMobile && <Sidebar />} {/* 在非手机屏幕下显示 Sidebar */}
       <Routes>
         <Route
           path='/'
@@ -56,7 +59,13 @@ function App() {
         />
         <Route
           path='/notifications'
-          element={authUser ? <NotificationPage /> : <Navigate to='/login' />}
+          element={
+            authUser ? (
+              <NotificationPage authUser={authUser} />
+            ) : (
+              <Navigate to='/login' />
+            )
+          }
         />
         <Route
           path='/profile/:username'
@@ -68,7 +77,8 @@ function App() {
         />
       </Routes>
       {authUser && <RightPanel />}
-
+      {authUser && isMobile && <MobileBar authUser={authUser} />}{' '}
+      {/* 在手机屏幕下显示 MobileBar */}
       <Toaster />
     </div>
   );

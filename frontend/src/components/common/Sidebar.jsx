@@ -76,7 +76,7 @@ const Sidebar = () => {
               </span>
             </Link>
           </li>
-          <li className='flex justify-center items-center  md:justify-start p-2'>
+          <li className='flex justify-center items-center  md:justify-start md:p-2'>
             <ThemeToggler />
           </li>
         </ul>

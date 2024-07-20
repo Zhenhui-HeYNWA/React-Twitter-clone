@@ -5,17 +5,17 @@ const ThemeToggler = () => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <div>
+    <>
       <button
-        className='outline-none border-none bg-transparent'
+        className='outline-none border-none bg-transparent  items-center'
         onClick={toggleTheme}>
         {theme === 'light' ? (
-          <MdSunny className='w-6 h-6 text-secondary dark:text-white' />
+          <MdSunny className='w-6 h-6 text-secondary dark:text-white  items-center' />
         ) : (
-          <MdNightlight className='w-6 h-6 text-secondary dark:text-white' />
+          <MdNightlight className='w-6 h-6 text-secondary dark:text-white  items-center' />
         )}
       </button>
-    </div>
+    </>
   );
 };
 

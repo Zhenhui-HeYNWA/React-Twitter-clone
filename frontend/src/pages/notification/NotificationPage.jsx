@@ -5,10 +5,10 @@ import { toast } from 'react-hot-toast';
 
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
-import { IoSettingsOutline } from 'react-icons/io5';
+import { IoTrashBin } from 'react-icons/io5';
 import { FaUser, FaHeart } from 'react-icons/fa';
 
-const NotificationPage = () => {
+const NotificationPage = ({ authUser }) => {
   const queryClient = useQueryClient();
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['notifications'],
@@ -51,18 +51,14 @@ const NotificationPage = () => {
     <>
       <div className='flex-[4_4_0] border-l border-r  border-gray-200 dark:border-gray-700 min-h-screen'>
         <div className='flex justify-between items-center p-4 border-b  border-gray-200 dark:border-gray-700'>
+          <div className='w-8 rounded-full'>
+            <img src={authUser.profileImg} alt='' />
+          </div>
           <p className='font-bold'>Notifications</p>
           <div className='dropdown '>
             <div tabIndex={0} role='button' className='m-1'>
-              <IoSettingsOutline className='w-4' />
+              <IoTrashBin onClick={deleteNotifications} className='w-6 h-6' />
             </div>
-            <ul
-              tabIndex={0}
-              className='dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52'>
-              <li>
-                <a onClick={deleteNotifications}>Delete all notifications</a>
-              </li>
-            </ul>
           </div>
         </div>
         {isLoading && (
