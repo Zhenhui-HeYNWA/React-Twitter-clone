@@ -67,7 +67,8 @@ function App() {
           element={authUser ? <FollowPage /> : <Navigate to='/login' />}
         />
       </Routes>
-      <RightPanel />
+      {authUser && <RightPanel />}
+
       <Toaster />
     </div>
   );
