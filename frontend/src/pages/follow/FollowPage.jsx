@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
 
 import FollowAndFollowing from '../../components/common/FollowAndFollowing';
+import SearchUser from '../auth/searchUser/SearchUser';
 
 const FollowPage = () => {
   const [followType, setFollowType] = useState('following');
@@ -16,7 +17,10 @@ const FollowPage = () => {
           <FaArrowLeft className='w-4 h-4' />
         </Link>
         <p className='font-bold'>{username}</p>
-        <div className='dropdown '></div>
+        <div className='dropdown items-center justify-center '>
+          {' '}
+          <SearchUser className='w-4 h-4' />
+        </div>
       </div>
       <div className='flex w-full border-b border-gray-200 dark:border-gray-700 pt-3 items-center '>
         <div

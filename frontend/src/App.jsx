@@ -31,7 +31,7 @@ function App() {
     retry: false,
   });
 
-  const isMobile = useMediaQuery('(max-width: 768px)'); // 判断是否是手机屏幕
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   if (isLoading) {
     return (
@@ -43,7 +43,7 @@ function App() {
 
   return (
     <div className='flex max-w-6xl mx-auto bg-gray-100 dark:bg-secondary text-black dark:text-white'>
-      {!isMobile && <Sidebar />} {/* 在非手机屏幕下显示 Sidebar */}
+      {authUser && !isMobile && <Sidebar />} {/* 在非手机屏幕下显示 Sidebar */}
       <Routes>
         <Route
           path='/'
@@ -53,6 +53,7 @@ function App() {
           path='/login'
           element={!authUser ? <LoginPage /> : <Navigate to='/' />}
         />
+
         <Route
           path='/signUp'
           element={!authUser ? <SignUpPage /> : <Navigate to='/' />}
@@ -67,6 +68,7 @@ function App() {
             )
           }
         />
+
         <Route
           path='/profile/:username'
           element={authUser ? <ProfilePage /> : <Navigate to='/login' />}

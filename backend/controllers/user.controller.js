@@ -70,7 +70,7 @@ export const getSuggestedUser = async (req, res) => {
     const userId = req.user._id;
 
     const userFollowingByMe = await User.findById(userId).select('followings');
-    
+
     const users = await User.aggregate([
       {
         $match: {
@@ -194,5 +194,24 @@ export const updateUser = async (req, res) => {
   } catch (error) {
     console.log('Error in updateUser:', error.message);
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const getSearchUser = async (req, res) => {
+  try {
+    const { q } = req.query;
+    if (!q)
+      return res.status(400).json({ error: 'Query parameter is required' });
+
+    const users = await User.find({
+      $or: [
+        { username: { $regex: q, $options: 'i' } },
+        { fullName: { $regex: q, $options: 'i' } },
+      ],
+    });
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

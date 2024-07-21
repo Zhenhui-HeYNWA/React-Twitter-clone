@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-
 import { Link } from 'react-router-dom';
 import FollowingSkeleton from '../skeletons/FollowingSkeleton';
 import useFollow from '../../hooks/useFollow';
+
+
 const FollowAndFollowing = ({ feedType, username }) => {
   const getPostEndPoint = () => {
     switch (feedType) {
@@ -51,7 +52,7 @@ const FollowAndFollowing = ({ feedType, username }) => {
   }, [username, refetch, feedType, authLoading]);
 
   return (
-    <>
+    <div className='flex-[4_4_0] border-l border-r border-gray-200 dark:border-gray-700 min-h-screen'>
       {authLoading && <p>Loading...</p>}
       {!isLoading && !isRefetching && relationships?.length === 0 && (
         <>
@@ -82,12 +83,12 @@ const FollowAndFollowing = ({ feedType, username }) => {
 
           return (
             <div
-              className='border-gray-200 dark:border-gray-700 p-6'
+              className='flex justify-between items-center p-2'
               key={relationship._id}>
               <Link
                 to={`/profile/${relationship.username}`}
-                className='flex items-center justify-between gap-4'>
-                <div className='flex gap-2 items-center'>
+                className='flex items-center gap-4 w-full'>
+                <div className='flex gap-2 items-center w-full'>
                   <div className='avatar'>
                     <div className='w-8 rounded-full'>
                       <img
@@ -98,14 +99,14 @@ const FollowAndFollowing = ({ feedType, username }) => {
                       />
                     </div>
                   </div>
-                  <div className='flex flex-col'>
-                    <span className='font-semibold tracking-tight truncate w-28'>
+                  <div className='flex flex-col w-full'>
+                    <span className='font-semibold tracking-tight truncate w-full'>
                       {relationship.fullName}
                     </span>
                     <span className='text-sm text-slate-500'>
                       @{relationship.username}
                     </span>
-                    <span className='font-basic tracking-tight truncate w-72'>
+                    <span className='font-basic tracking-tight truncate w-full '>
                       {relationship.bio}
                     </span>
                   </div>
@@ -130,7 +131,8 @@ const FollowAndFollowing = ({ feedType, username }) => {
             </div>
           );
         })}
-    </>
+     
+    </div>
   );
 };
 

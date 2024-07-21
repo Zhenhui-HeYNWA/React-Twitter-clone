@@ -51,8 +51,10 @@ const NotificationPage = ({ authUser }) => {
     <>
       <div className='flex-[4_4_0] border-l border-r  border-gray-200 dark:border-gray-700 min-h-screen'>
         <div className='flex justify-between items-center p-4 border-b  border-gray-200 dark:border-gray-700'>
-          <div className='w-8 rounded-full'>
-            <img src={authUser.profileImg} alt='' />
+          <div className='avatar'>
+            <div className='w-8 rounded-full'>
+              <img src={authUser.profileImg || '/avatar-placeholder.png'} />
+            </div>
           </div>
           <p className='font-bold'>Notifications</p>
           <div className='dropdown '>
