@@ -140,6 +140,44 @@ export const likeUnlikePost = async (req, res) => {
   }
 };
 
+export const bookmarkUnBookmark = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id: postId } = req.params;
+
+    const post = await Post.findById(postId);
+    const user = await User.findById(userId);
+
+    if (!post || !user) {
+      return res.status(404).json({ error: 'Post or User not found' });
+    }
+
+    const userBookmarkedPost = post.bookmarks.includes(userId);
+
+    if (userBookmarkedPost) {
+      //Unbookmark post
+      await Post.updateOne({ _id: postId }, { $pull: { bookmarks: userId } });
+      await User.updateOne({ _id: userId }, { $pull: { bookmarks: postId } });
+
+      const updatedBookmarks = post.bookmarks.filter(
+        (id) => id.toString() !== userId.toString()
+      );
+      res.status(200).json(updatedBookmarks);
+    } else {
+      //BookMark post
+      post.bookmarks.push(userId);
+      await User.updateOne({ _id: userId }, { $push: { bookmarks: postId } });
+      await post.save();
+
+      const updatedBookmarks = post.bookmarks;
+      res.status(200).json(updatedBookmarks);
+    }
+  } catch (error) {
+    console.log('Error in bookmarkUnBookmarkPost controller:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 export const getAllPosts = async (req, res) => {
   try {
     //.populate() can show the entire document ( detail)  in the posts not just the reference
@@ -235,5 +273,28 @@ export const getUserPosts = async (req, res) => {
   } catch (error) {
     console.log('Error in getUserPosts Controller:', error);
     res.status(500).json('Internal server error');
+  }
+};
+
+export const getBookmarkPost = async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ error: 'User not found' });
+    }
+
+    const bookmarks = await Post.find({ _id: { $in: user.bookmarks } })
+      .populate({ path: 'user', select: '-password' })
+      .populate({
+        path: 'comments.user',
+        select: '-password',
+      });
+
+    res.status(200).json(bookmarks);
+  } catch (error) {
+    console.log('Error in getBookmarks controller:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

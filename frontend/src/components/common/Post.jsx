@@ -4,8 +4,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
-import { FaRegComment, FaRegHeart, FaTrash } from 'react-icons/fa';
-import { FaRegBookmark } from 'react-icons/fa6';
+import {
+  FaRegComment,
+  FaRegHeart,
+  FaTrash,
+  FaRegBookmark,
+  FaBookmark,
+} from 'react-icons/fa';
+
 import { BiRepost } from 'react-icons/bi';
 
 import LoadingSpinner from './LoadingSpinner';
@@ -22,6 +28,9 @@ const Post = ({ post }) => {
   const postOwner = post.user;
 
   const isLiked = post.likes.includes(authUser._id);
+
+  const isMarked = post.bookmarks.includes(authUser._id);
+  console.log(isMarked);
 
   const isMyPost = authUser._id === post.user._id;
 
@@ -119,6 +128,37 @@ const Post = ({ post }) => {
     },
   });
 
+  const { mutate: bookmarkPost, isPending: isBookmarking } = useMutation({
+    mutationFn: async () => {
+      try {
+        const res = await fetch(`/api/posts/bookmark/${post._id}`, {
+          method: 'POST',
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        return data;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: (updatedBookmarks) => {
+      // //TOFIX: is not a good ux
+      // queryClient.invalidateQueries({ queryKey: ['posts'] });
+      //Instead, update the cache directly for that post
+      queryClient.setQueryData(['posts'], (oldData) => {
+        return oldData.map((p) => {
+          if (p._id === post._id) {
+            return { ...p, bookmarks: updatedBookmarks };
+          }
+          return p;
+        });
+      });
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   const handleDeletePost = () => {
     deletePost();
   };
@@ -126,6 +166,11 @@ const Post = ({ post }) => {
     e.preventDefault();
     if (isCommenting) return;
     commentPost({ postId: post._id, text: comment });
+  };
+
+  const handleBookmarkPost = () => {
+    if (isBookmarking) return;
+    bookmarkPost();
   };
 
   const handleLikePost = () => {
@@ -253,12 +298,6 @@ const Post = ({ post }) => {
                   0
                 </span>
               </div>
-              <div className='flex gap-1 items-center group cursor-pointer'>
-                <BiRepost className='w-6 h-6  text-slate-500 group-hover:text-green-500' />
-                <span className='text-sm text-slate-500 group-hover:text-green-500'>
-                  0
-                </span>
-              </div>
               <div
                 className='flex gap-1 items-center group cursor-pointer'
                 onClick={handleLikePost}>
@@ -278,8 +317,16 @@ const Post = ({ post }) => {
                 </span>
               </div>
             </div>
-            <div className='flex w-1/3 justify-end gap-2 items-center'>
-              <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer' />
+            <div
+              className='flex w-1/3 justify-end gap-2 group items-center'
+              onClick={handleBookmarkPost}>
+              {isBookmarking && <LoadingSpinner size='sm' />}
+              {!isMarked && !isBookmarking && (
+                <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+              )}
+              {isMarked && !isBookmarking && (
+                <FaBookmark className='w-4 h-4 cursor-pointer  ' />
+              )}
             </div>
           </div>
         </div>

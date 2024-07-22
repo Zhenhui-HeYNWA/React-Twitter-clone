@@ -42,47 +42,52 @@ function App() {
   }
 
   return (
-    <div className='flex max-w-6xl mx-auto bg-gray-100 dark:bg-secondary text-black dark:text-white'>
-      {authUser && !isMobile && <Sidebar />} {/* 在非手机屏幕下显示 Sidebar */}
-      <Routes>
-        <Route
-          path='/'
-          element={authUser ? <HomePage /> : <Navigate to='/login' />}
-        />
-        <Route
-          path='/login'
-          element={!authUser ? <LoginPage /> : <Navigate to='/' />}
-        />
+    <>
+      <div className='flex max-w-6xl mx-auto bg-gray-100 dark:bg-secondary text-black dark:text-white pb-8'>
+        {authUser && !isMobile && <Sidebar />}{' '}
+        {/* 在非手机屏幕下显示 Sidebar */}
+        <Routes>
+          <Route
+            path='/'
+            element={authUser ? <HomePage /> : <Navigate to='/login' />}
+          />
+          <Route
+            path='/login'
+            element={!authUser ? <LoginPage /> : <Navigate to='/' />}
+          />
 
-        <Route
-          path='/signUp'
-          element={!authUser ? <SignUpPage /> : <Navigate to='/' />}
-        />
-        <Route
-          path='/notifications'
-          element={
-            authUser ? (
-              <NotificationPage authUser={authUser} />
-            ) : (
-              <Navigate to='/login' />
-            )
-          }
-        />
+          <Route
+            path='/signUp'
+            element={!authUser ? <SignUpPage /> : <Navigate to='/' />}
+          />
+          <Route
+            path='/notifications'
+            element={
+              authUser ? (
+                <NotificationPage authUser={authUser} />
+              ) : (
+                <Navigate to='/login' />
+              )
+            }
+          />
 
-        <Route
-          path='/profile/:username'
-          element={authUser ? <ProfilePage /> : <Navigate to='/login' />}
-        />
-        <Route
-          path='/follow/:username'
-          element={authUser ? <FollowPage /> : <Navigate to='/login' />}
-        />
-      </Routes>
-      {authUser && <RightPanel />}
-      {authUser && isMobile && <MobileBar authUser={authUser} />}{' '}
-      {/* 在手机屏幕下显示 MobileBar */}
-      <Toaster />
-    </div>
+          <Route
+            path='/profile/:username'
+            element={authUser ? <ProfilePage /> : <Navigate to='/login' />}
+          />
+          <Route
+            path='/follow/:username'
+            element={authUser ? <FollowPage /> : <Navigate to='/login' />}
+          />
+        </Routes>
+        {authUser && <RightPanel />}
+        {authUser && isMobile && <MobileBar authUser={authUser} />}{' '}
+        {/* 在手机屏幕下显示 MobileBar */}
+      </div>
+      <div>
+        <Toaster />
+      </div>
+    </>
   );
 }
 

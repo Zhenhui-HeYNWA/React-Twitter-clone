@@ -23,19 +23,18 @@ const userSchema = new mongoose.Schema(
     },
     followers: [
       {
-        type: mongoose.Schema.Types.ObjectId, //16 characters
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: [],
       },
     ],
     followings: [
       {
-        type: mongoose.Schema.Types.ObjectId, //16 characters
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: [],
       },
     ],
-
     profileImg: {
       type: String,
       default: '',
@@ -59,8 +58,14 @@ const userSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    bookmarks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post',
+        default: [],
+      },
+    ],
   },
-  //the time create account "createdAt"
   { timestamps: true }
 );
 

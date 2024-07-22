@@ -34,7 +34,7 @@ const MobileBar = () => {
 
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
   return (
-    <div className='md:hidden fixed bottom-0 left-0 w-full bg-gray-100 dark:bg-secondary border-t border-gray-200 dark:border-gray-700'>
+    <div className='md:hidden  fixed bottom-0 left-0 w-full bg-gray-100 dark:bg-secondary border-t border-gray-200 dark:border-gray-700'>
       <div className='flex justify-around items-center p-2'>
         <Link
           to='/'
