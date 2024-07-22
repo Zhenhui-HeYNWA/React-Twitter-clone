@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import debounce from 'lodash.debounce';
+import { debounce } from 'lodash';
 
 import { FaSearch, FaUser } from 'react-icons/fa';
 
@@ -84,7 +84,7 @@ const SearchUser = ({ authUser }) => {
           </div>
           <div className='search-results bg-gray-200 dark:bg-secondary overflow-y-auto max-h-64'>
             {isFetching ? (
-              <div>Loading...</div>
+              <div>Loading..</div>
             ) : users && users.length > 0 ? (
               users.map((user) => {
                 const isFollowing = authUser?.followings.includes(user._id);
