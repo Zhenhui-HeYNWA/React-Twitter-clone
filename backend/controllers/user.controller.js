@@ -208,7 +208,7 @@ export const getSearchUser = async (req, res) => {
         { username: { $regex: q, $options: 'i' } },
         { fullName: { $regex: q, $options: 'i' } },
       ],
-    });
+    }).select('-password');
     res.json(users);
   } catch (error) {
     console.error(error);

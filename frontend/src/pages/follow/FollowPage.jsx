@@ -5,10 +5,15 @@ import { FaArrowLeft } from 'react-icons/fa';
 
 import FollowAndFollowing from '../../components/common/FollowAndFollowing';
 import SearchUser from '../auth/searchUser/SearchUser';
+import { useQuery } from '@tanstack/react-query';
 
 const FollowPage = () => {
   const [followType, setFollowType] = useState('following');
   const { username } = useParams();
+  
+  const { data: authUser } = useQuery({
+    queryKey: ['authUser'],
+  });
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen'>
@@ -19,7 +24,7 @@ const FollowPage = () => {
         <p className='font-bold'>{username}</p>
         <div className='dropdown items-center justify-center '>
           {' '}
-          <SearchUser className='w-4 h-4' />
+          <SearchUser className='w-4 h-4' authUser={authUser} />
         </div>
       </div>
       <div className='flex w-full border-b border-gray-200 dark:border-gray-700 pt-3 items-center '>
