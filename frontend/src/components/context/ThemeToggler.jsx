@@ -10,9 +10,9 @@ const ThemeToggler = () => {
         className='outline-none border-none bg-transparent  items-center'
         onClick={toggleTheme}>
         {theme === 'light' ? (
-          <MdSunny className='w-6 h-6 text-secondary dark:text-white  items-center' />
+          <MdSunny className='w-5 h-5 text-secondary dark:text-white  items-center' />
         ) : (
-          <MdNightlight className='w-6 h-6 text-secondary dark:text-white  items-center' />
+          <MdNightlight className='w-5 h-5 text-secondary dark:text-white  items-center' />
         )}
       </button>
     </>

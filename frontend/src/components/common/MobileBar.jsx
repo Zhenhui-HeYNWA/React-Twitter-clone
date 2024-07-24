@@ -44,7 +44,7 @@ const MobileBar = () => {
         <Link
           to='/notifications'
           className='flex gap-2 items-center text-gray-800 dark:text-white'>
-          <IoNotifications className='w-6 h-6' />
+          <IoNotifications className='w-5 h-5' />
         </Link>
         <Link
           to={`/profile/${authUser?.username}`}
@@ -55,7 +55,7 @@ const MobileBar = () => {
         {authUser && (
           <>
             <BiLogOut
-              className='w-6 h-6 cursor-pointer text-gray-800 dark:text-white'
+              className='w-5 h-5 cursor-pointer text-gray-800 dark:text-white'
               onClick={(e) => {
                 e.preventDefault();
                 logout();

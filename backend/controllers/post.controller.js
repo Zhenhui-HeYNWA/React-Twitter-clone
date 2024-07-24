@@ -298,3 +298,26 @@ export const getBookmarkPost = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const getSinglePost = async (req, res) => {
+  const { id: postId } = req.params;
+
+  try {
+    const post = await Post.findById(postId)
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'user',
+          select: '-password', // select fields to exclude password
+        },
+      })
+      .populate('user', '-password'); // populate post user without password
+
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+
+    res.status(200).json(post);
+  } catch (error) {
+    console.log('Error in getSinglePost controller:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

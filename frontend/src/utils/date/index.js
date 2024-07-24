@@ -45,3 +45,19 @@ export const formatMemberSinceDate = (createdAt) => {
   const year = date.getFullYear();
   return `Joined ${month} ${year}`;
 };
+
+export const formatDateTime = (createdAt) => {
+  const date = new Date(createdAt);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12;
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  const timeString = `${formattedHours}:${formattedMinutes} ${ampm}`;
+
+  const month = date.toLocaleString('en-US', { month: 'short' });
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  return `${timeString} · ${month} ${day}, ${year}`;
+};

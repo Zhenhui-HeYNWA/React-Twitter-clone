@@ -11,6 +11,7 @@ import {
   getLikedPosts,
   getUserPosts,
   likeUnlikePost,
+  getSinglePost,
 } from '../controllers/post.controller.js';
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.get('/following', protectRoute, getFollowingPosts);
 router.get('/likes/:id', protectRoute, getLikedPosts);
 router.get('/user/:username', protectRoute, getUserPosts);
 router.get('/bookmark/:id', protectRoute, getBookmarkPost);
+router.get('/:username/status/:id', protectRoute, getSinglePost);
 router.post('/create', protectRoute, createPost);
 router.post('/like/:id', protectRoute, likeUnlikePost);
 router.post('/comment/:id', protectRoute, commentOnPost);
