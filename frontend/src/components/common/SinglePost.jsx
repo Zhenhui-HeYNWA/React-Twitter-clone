@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { BiRepost } from 'react-icons/bi';
 import {
   FaArrowLeft,
+  FaBookmark,
   FaRegBookmark,
   FaRegComment,
   FaRegHeart,
@@ -59,8 +60,12 @@ const SinglePost = () => {
       return data;
     },
   });
-  const { commentPostSimple } = usePostMutations(postId);
+  const { commentPostSimple, likePost, isLiking, bookmarkPost, isBookmarking } =
+    usePostMutations(postId);
 
+  const isLiked = post ? post.likes.includes(authUser._id) : false;
+  const isMarked = post ? post.bookmarks.includes(authUser._id) : false;
+  console.log(isLiked);
   const handleCommentSubmit = (e) => {
     e.preventDefault();
     if (commentPostSimple.isLoading) return;
@@ -72,7 +77,20 @@ const SinglePost = () => {
     }
   };
 
+  const handleLikePost = () => {
+    if (isLiking) return;
+    likePost();
+  };
+  const handleBookmarkingPost = () => {
+    if (isBookmarking) return;
+    bookmarkPost();
+  };
+
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
+  // useEffect(() => {
+  //   // Update isLiked based on the post data or user's like status
+  //   setIsLiked(post.likes.includes(authUser?.id)); // Adjust based on your logic
+  // }, [post.likes, authUser?.id]);
 
   console.log(commentPostSimple.isPending);
 
@@ -215,18 +233,35 @@ const SinglePost = () => {
                 0
               </span>
             </div>
-            <div className='flex gap-1 items-center group cursor-pointer'>
-              <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500' />
-              {/* <span
-                className={`text-sm group-hover:text-pink-500 ${
+            <div
+              className='flex gap-1 items-center group cursor-pointer'
+              onClick={handleLikePost}>
+              {isLiking && <LoadingSpinner size='sm' />}
+              {!isLiked && !isLiking && (
+                <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
+              )}
+              {isLiked && !isLiking && (
+                <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />
+              )}
+
+              <span
+                className={`text-sm  group-hover:text-pink-500 ${
                   isLiked ? 'text-pink-500' : 'text-slate-500'
                 }`}>
-                {post.likes.length}
-              </span> */}
+                {post?.likes.length}
+              </span>
             </div>
           </div>
-          <div className='flex w-1/3 justify-end gap-2 group items-center'>
-            <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:text-sky-400' />
+          <div
+            className='flex w-1/3 justify-end gap-2 group items-center'
+            onClick={handleBookmarkingPost}>
+            {isBookmarking && <LoadingSpinner size='sm' />}
+            {!isMarked && !isBookmarking && (
+              <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+            )}
+            {isMarked && !isBookmarking && (
+              <FaBookmark className='w-4 h-4 cursor-pointer  ' />
+            )}
           </div>
         </div>
 

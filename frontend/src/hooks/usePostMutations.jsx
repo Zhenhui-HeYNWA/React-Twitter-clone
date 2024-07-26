@@ -26,7 +26,7 @@ const usePostMutations = (postId) => {
     },
   });
 
-  const likePost = useMutation({
+  const { mutate: likePost, isPending: isLiking } = useMutation({
     mutationFn: async () => {
       try {
         const res = await fetch(`/api/posts/like/${postId}`, {
@@ -40,13 +40,27 @@ const usePostMutations = (postId) => {
       }
     },
     onSuccess: (updatedLikes) => {
+      // Update the 'posts' query data
       queryClient.setQueryData(['posts'], (oldData) => {
-        return oldData.map((p) => {
-          if (p._id === postId) {
-            return { ...p, likes: updatedLikes };
-          }
-          return p;
-        });
+        if (oldData) {
+          return oldData.map((p) => {
+            if (p._id === postId) {
+              return { ...p, likes: updatedLikes };
+            }
+            return p;
+          });
+        } else {
+          // Handle the case when oldData is undefined
+          return [];
+        }
+      });
+
+      // Update the specific 'post' query data
+      queryClient.setQueryData(['post', postId], (oldPost) => {
+        if (oldPost) {
+          return { ...oldPost, likes: updatedLikes };
+        }
+        return oldPost;
       });
     },
     onError: (error) => {
@@ -54,7 +68,7 @@ const usePostMutations = (postId) => {
     },
   });
 
-  const bookmarkPost = useMutation({
+  const { mutate: bookmarkPost, isPending: isBookmarking } = useMutation({
     mutationFn: async () => {
       try {
         const res = await fetch(`/api/posts/bookmark/${postId}`, {
@@ -68,13 +82,27 @@ const usePostMutations = (postId) => {
       }
     },
     onSuccess: (updatedBookmarks) => {
+      // Update the 'posts' query data
       queryClient.setQueryData(['posts'], (oldData) => {
-        return oldData.map((p) => {
-          if (p._id === postId) {
-            return { ...p, bookmarks: updatedBookmarks };
-          }
-          return p;
-        });
+        if (oldData) {
+          return oldData.map((p) => {
+            if (p._id === postId) {
+              return { ...p, bookmarks: updatedBookmarks };
+            }
+            return p;
+          });
+        } else {
+          // Handle the case when oldData is undefined
+          return [];
+        }
+      });
+
+      // Update the specific 'post' query data
+      queryClient.setQueryData(['post', postId], (oldPost) => {
+        if (oldPost) {
+          return { ...oldPost, bookmarks: updatedBookmarks };
+        }
+        return oldPost;
       });
     },
     onError: (error) => {
@@ -143,7 +171,9 @@ const usePostMutations = (postId) => {
   return {
     deletePost,
     likePost,
+    isLiking,
     bookmarkPost,
+    isBookmarking,
     commentPostSimple,
     commentPostAdvanced,
   };
