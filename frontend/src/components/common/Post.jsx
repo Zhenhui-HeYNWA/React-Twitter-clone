@@ -214,11 +214,11 @@ const Post = ({ post }) => {
           </div>
           <div className='flex flex-col gap-3 overflow-hidden'>
             <Link to={`/${authUser.username}/status/${post._id}`}>
-              <span>{post.text}</span>
+              <span className='text-lg'>{post.text}</span>
               {post.img && (
                 <img
                   src={post.img}
-                  className='h-80 object-cover rounded-lg border border-gray-700'
+                  className='h-80 object-cover rounded-lg border border-gray-700 mt-2'
                   alt=''
                 />
               )}

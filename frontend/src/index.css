@@ -11,3 +11,20 @@ body {
 .dark body {
   @apply bg-secondary text-white;
 }
+.transition-height {
+  transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.height-0 {
+  height: 0;
+  opacity: 0;
+}
+
+.height-auto {
+  height: auto;
+  opacity: 1;
+}
+.transition-opacity {
+  transition: opacity 0.3s ease-in-out;
+}
