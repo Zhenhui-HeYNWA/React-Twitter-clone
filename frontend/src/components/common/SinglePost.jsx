@@ -87,12 +87,8 @@ const SinglePost = () => {
   };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
-  // useEffect(() => {
-  //   // Update isLiked based on the post data or user's like status
-  //   setIsLiked(post.likes.includes(authUser?.id)); // Adjust based on your logic
-  // }, [post.likes, authUser?.id]);
 
-  console.log(commentPostSimple.isPending);
+  // TODO fix the repost'post wont display
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen p-2'>

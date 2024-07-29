@@ -32,7 +32,7 @@ const postSchema = new mongoose.Schema(
             required: true,
           },
         },
-        { timestamps: true } // This will add createdAt and updatedAt fields
+        { timestamps: true }
       ),
     ],
     bookmarks: [
@@ -41,6 +41,38 @@ const postSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+    repost: {
+      originalPost: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post',
+      },
+      postOwner: {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        username: { type: String },
+        fullName: { type: String },
+        profileImg: { type: String },
+      },
+      originalText: { type: String },
+      originalImg: { type: String },
+      repostUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      repostNum: { type: Number, default: 0 },
+    },
+    repostByNum: { type: Number, default: 0 },
+    repostBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    quote: {
+      originalPost: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post',
+      },
+      originalUser: {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        username: { type: String },
+        fullName: { type: String },
+        profileImg: { type: String },
+      },
+      originalText: { type: String },
+      originalImg: { type: String },
+    },
   },
   { timestamps: true }
 );
