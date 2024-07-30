@@ -75,7 +75,6 @@ const Post = ({ post, posts }) => {
       }
     },
     onSuccess: (updatedLikes) => {
-     
       queryClient.setQueryData(['posts'], (oldData) => {
         return oldData.map((p) => {
           if (p._id === post._id) {
@@ -211,9 +210,7 @@ const Post = ({ post, posts }) => {
     repostPost({ actionType: 'repost' });
     return;
   };
-  console.log(posts);
-  console.log(authUser);
-  //"66a662a4d423db2d8102eca6" //"66a662a4d423db2d8102eca6"
+
   return (
     <>
       <div className='flex flex-col'>

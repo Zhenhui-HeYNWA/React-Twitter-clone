@@ -9,7 +9,7 @@ body {
 
 /* 暗黑模式下的背景色 */
 .dark body {
-  @apply bg-secondary text-white;
+  @apply bg-[#15202B] text-white;
 }
 .transition-height {
   transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;

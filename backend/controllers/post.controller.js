@@ -271,7 +271,7 @@ export const repostPost = async (req, res) => {
 
       // 从用户的 repostedPosts 中移除已删除的转发
       await User.findByIdAndUpdate(userId, {
-        $pull: { repostedPosts: existingRepost._id },
+        $pull: { repostedPosts: originalPostId }, // 这里需要移除原始帖子的 ID
       });
 
       return res.status(200).json({ message: 'Repost successfully removed' });

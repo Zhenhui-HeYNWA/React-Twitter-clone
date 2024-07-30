@@ -44,7 +44,7 @@ function App() {
 
   return (
     <>
-      <div className='flex max-w-6xl mx-auto bg-gray-100 dark:bg-secondary text-black dark:text-white pb-8'>
+      <div className='flex max-w-6xl mx-auto bg-gray-100 dark:bg-[#15202B] text-black dark:text-white pb-8'>
         {authUser && !isMobile && <Sidebar />}{' '}
         {/* 在非手机屏幕下显示 Sidebar */}
         <Routes>

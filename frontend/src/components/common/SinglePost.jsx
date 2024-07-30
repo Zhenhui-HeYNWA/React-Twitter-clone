@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { BiRepost } from 'react-icons/bi';
+import { BiComment, BiRepost } from 'react-icons/bi';
 import {
   FaArrowLeft,
   FaBookmark,
@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
 import { formatDateTime, formatPostDate } from '../../utils/date';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PostSkeleton from '../skeletons/PostSkeleton';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 
@@ -19,23 +19,10 @@ import usePostMutations from '../../hooks/usePostMutations';
 import LoadingSpinner from './LoadingSpinner';
 
 const SinglePost = () => {
-  const { username, postId } = useParams();
-  const [comment, setComment] = useState('');
-  const [showNav, setShowNav] = useState(false);
-
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
-
-  const radioRef = useRef(null);
-
-  const handleTextareaClick = () => {
-    setShowNav(true);
-    if (radioRef.current) {
-      radioRef.current.checked = true; // Simulate click to open accordion
-    }
-  };
-
+  const { username, postId } = useParams();
   // Fetch post data
   const { data: post, isLoading: isPostLoading } = useQuery({
     queryKey: ['post', postId],
@@ -47,6 +34,36 @@ const SinglePost = () => {
       return data;
     },
   });
+
+  const [comment, setComment] = useState('');
+  const [showNav, setShowNav] = useState(false);
+
+  const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
+  const isAuthUserRepost = post?.user._id === authUser._id;
+
+  console.log(post);
+  const isOriginalPost = post?.repost?.originalPost == null;
+  useEffect(() => {
+    if (authUser) {
+      // 查找源帖子 ID（如果是转发的帖子）
+      const originalPostId = post?.repost?.originalPost || post?._id;
+
+      // 检查当前用户是否在转发列表中
+      const isReposted = authUser.repostedPosts.includes(originalPostId);
+      setIsRepostedByAuthUser(isReposted);
+    } else {
+      setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
+    }
+  }, [authUser, post]);
+
+  const radioRef = useRef(null);
+
+  const handleTextareaClick = () => {
+    setShowNav(true);
+    if (radioRef.current) {
+      radioRef.current.checked = true; // Simulate click to open accordion
+    }
+  };
 
   // Fetch comments data
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
@@ -60,12 +77,20 @@ const SinglePost = () => {
       return data;
     },
   });
-  const { commentPostSimple, likePost, isLiking, bookmarkPost, isBookmarking } =
-    usePostMutations(postId);
+  const {
+    commentPostSimple,
+    isCommenting,
+    likePost,
+    isLiking,
+    bookmarkPost,
+    isBookmarking,
+    repostPost,
+    isReposting,
+  } = usePostMutations(postId);
 
   const isLiked = post ? post.likes.includes(authUser._id) : false;
   const isMarked = post ? post.bookmarks.includes(authUser._id) : false;
-  console.log(isLiked);
+
   const handleCommentSubmit = (e) => {
     e.preventDefault();
     if (commentPostSimple.isLoading) return;
@@ -85,14 +110,40 @@ const SinglePost = () => {
     if (isBookmarking) return;
     bookmarkPost();
   };
+  console.log(authUser);
+
+  const handleRepost = () => {
+    if (isReposting) return;
+
+    if (isRepostedByAuthUser) {
+      repostPost({ actionType: 'remove' });
+      return;
+    }
+    repostPost({ actionType: 'repost' });
+    return;
+  };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
-
-  // TODO fix the repost'post wont display
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen p-2'>
       <div className='flex flex-col'>
+        {!isOriginalPost && !isAuthUserRepost && (
+          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
+            {' '}
+            <BiRepost className='w-4 h-4  text-slate-500' />
+            {post.user.username} reposted
+          </span>
+        )}
+
+        {!isOriginalPost && isAuthUserRepost && (
+          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
+            {' '}
+            <BiRepost className='w-4 h-4  text-slate-500' />
+            You reposted
+          </span>
+        )}
+
         <div className='flex gap-10 px-4 py-2 items-center'>
           <Link to='/'>
             <FaArrowLeft className='w-4 h-4' />
@@ -102,7 +153,7 @@ const SinglePost = () => {
           </div>
         </div>
 
-        <div className='flex gap-2 items-start p-4 border-b border-gray-200 dark:border-gray-700'>
+        <div className='flex gap-2 items-start py-2 px-4 border-b border-gray-200 dark:border-gray-700 justify-center'>
           {isPostLoading && <PostSkeleton />}
           {!isPostLoading && !post && (
             <p className='text-center text-lg mt-4'>Post not found</p>
@@ -110,37 +161,93 @@ const SinglePost = () => {
 
           {!isPostLoading && post && (
             <div className='flex flex-col flex-1'>
-              <div className='flex flex-row gap-3 items-center'>
+              <div className='flex flex-row gap-2 items-center'>
                 <div className='avatar'>
-                  <Link
-                    to={`/profile/${post?.user.username}`}
-                    className='w-10 h-10 rounded-full overflow-hidden'>
-                    <img
-                      src={post?.user.profileImg || '/avatar-placeholder.png'}
-                      alt='User Avatar'
-                    />
-                  </Link>
+                  {/* Avatar */}
+                  {isOriginalPost && (
+                    <Link
+                      to={`/profile/${post.user.username}`}
+                      className='w-12 h-12 rounded-full overflow-hidden'>
+                      <img
+                        src={post.user.profileImg || '/avatar-placeholder.png'}
+                        alt={`${post.user.profileImg}'s avatar`}
+                      />
+                    </Link>
+                  )}
+                  {!isOriginalPost && (
+                    <Link
+                      to={`/profile/${post.repost.postOwner?.username}`}
+                      className='w-12 h-12 rounded-full overflow-hidden'>
+                      <img
+                        src={
+                          post.repost.postOwner?.profileImg ||
+                          '/avatar-placeholder.png'
+                        }
+                      />
+                    </Link>
+                  )}
                 </div>
                 <div className='flex flex-col'>
-                  <Link
-                    to={`/profile/${post?.user.username}`}
-                    className='font-bold'>
-                    {post?.user.fullName}
-                  </Link>
+                  {/* fullName */}
+                  {isOriginalPost && (
+                    <Link
+                      to={`/profile/${post.user.username}`}
+                      className='font-bold'>
+                      {post.user.fullName}
+                    </Link>
+                  )}
+                  {!isOriginalPost && (
+                    <Link
+                      to={`/profile/${post.repost.postOwner.username}`}
+                      className='font-bold'>
+                      {post.repost.postOwner.fullName}
+                    </Link>
+                  )}
+
                   <span className='text-gray-700 flex gap-1 text-sm'>
-                    <Link to={`/profile/${post?.user.username}`}>
-                      @{post?.user.username}
+                    <Link
+                      to={`/profile/${
+                        isOriginalPost
+                          ? post.user.username
+                          : post.repost.postOwner.username
+                      }`}>
+                      @
+                      {isOriginalPost
+                        ? post.user.username
+                        : post.repost.postOwner.username}
                     </Link>
                   </span>
+                  {/* {isMyPost && (
+                    <span className='flex justify-end flex-1'>
+                      {!isDeleting && (
+                        <FaTrash
+                          className='cursor-pointer hover:text-red-500'
+                          onClick={handleDeletePost}
+                        />
+                      )}
+                      {isDeleting && <LoadingSpinner size='sm' />}
+                    </span>
+                  )} */}
                 </div>
               </div>
-              <div className='flex flex-col gap-3 overflow-hidden mt-3'>
-                <span className='text-lg'>{post?.text}</span>
-                {post?.img && (
+              <div className='flex flex-col gap-3 overflow-hidden'>
+                {isOriginalPost && <span className='text-lg'>{post.text}</span>}
+                {!isOriginalPost && (
+                  <span className='text-lg'>{post.repost.originalText}</span>
+                )}
+
+                {isOriginalPost && post.img && (
                   <img
-                    src={post?.img}
-                    className='h-80 object-cover rounded-lg border border-gray-700'
-                    alt='Post Image'
+                    src={post.img}
+                    className='h-80 object-fit rounded-lg border border-gray-700 mt-2'
+                    alt=''
+                  />
+                )}
+                {!isOriginalPost && post.repost.originalImg && (
+                  <img
+                    src={post.repost.originalImg}
+                    className='h-80 object-fit rounded-lg border border-gray-700 mt-2'
+                    alt=''
                   />
                 )}
               </div>
@@ -159,10 +266,16 @@ const SinglePost = () => {
                   .getElementById('comments_modal' + post?._id)
                   .showModal()
               }>
-              <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
-              <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                {comments?.length}
-              </span>
+              {isCommenting && <LoadingSpinner size='sm' />}
+              {!isCommenting && (
+                <>
+                  {' '}
+                  <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
+                  <span className='text-sm text-slate-500 group-hover:text-sky-400'>
+                    {comments?.length}
+                  </span>{' '}
+                </>
+              )}
             </div>
             <dialog
               id={`comments_modal${post?._id}`}
@@ -223,11 +336,74 @@ const SinglePost = () => {
                 <button className='outline-none'>close</button>
               </form>
             </dialog>
-            <div className='flex gap-1 items-center group cursor-pointer'>
-              <BiRepost className='w-6 h-6 text-slate-500 group-hover:text-green-500' />
-              <span className='text-sm text-slate-500 group-hover:text-green-500'>
-                0
-              </span>
+            <div className='dropdown dropdown-top'>
+              <div
+                tabIndex={0}
+                role={`${isRepostedByAuthUser ? 'button' : ''}`}
+                className={`flex gap-1 items-center group cursor-pointer  
+                    
+                        btn rounded-none  btn-ghost btn-xs  p-0 border-none hover:bg-inherit
+                    
+                     `}
+                onClick={!isRepostedByAuthUser ? handleRepost : undefined}>
+                {isRepostedByAuthUser ? (
+                  <ul
+                    tabIndex={0}
+                    className='dropdown-content menu bg-gray-100 dark:bg-secondary  border-gray-600 rounded-box z-[1] w-52 p-2 shadow  '>
+                    <li onClick={handleRepost}>
+                      <button className='text-red-500'>Undo repost</button>
+                    </li>
+                  </ul>
+                ) : (
+                  ''
+                )}
+
+                {isReposting && <LoadingSpinner size='sm' />}
+
+                {isOriginalPost && (
+                  <>
+                    {!isReposting && (
+                      <BiRepost
+                        className={`w-6 h-6 ${
+                          isRepostedByAuthUser
+                            ? ' text-green-500 group-hover:text-red-600'
+                            : ' text-slate-500 group-hover:text-green-500'
+                        }`}
+                      />
+                    )}
+                    <span
+                      className={`text-sm ${
+                        isRepostedByAuthUser
+                          ? ' text-green-500 group-hover:text-red-600'
+                          : ' text-slate-500 group-hover:text-green-500'
+                      }`}>
+                      {post?.repostByNum}
+                    </span>
+                  </>
+                )}
+                {!isOriginalPost && (
+                  <>
+                    {!isReposting && (
+                      <BiRepost
+                        className={`w-6 h-6 ${
+                          isRepostedByAuthUser
+                            ? ' text-green-500 group-hover:text-red-600'
+                            : ' text-slate-500 group-hover:text-green-500'
+                        }`}
+                      />
+                    )}
+
+                    <span
+                      className={`text-sm ${
+                        isRepostedByAuthUser
+                          ? ' text-green-500 group-hover:text-red-600'
+                          : ' text-slate-500 group-hover:text-green-500'
+                      }`}>
+                      {post.repost.repostNum}
+                    </span>
+                  </>
+                )}
+              </div>
             </div>
             <div
               className='flex gap-1 items-center group cursor-pointer'

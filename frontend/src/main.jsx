@@ -5,6 +5,8 @@ import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from './components/context/ThemeProvider.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import ReactQueryRewind from 'react-query-rewind';
 
 const queryClient = new QueryClient({
   //when user change the focus to different windows, reactquery will refetch the data from the page
@@ -21,7 +23,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ThemeProvider>
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
+          <ReactQueryRewind />
           <App />
+          <ReactQueryDevtools />
         </QueryClientProvider>
       </BrowserRouter>
     </ThemeProvider>

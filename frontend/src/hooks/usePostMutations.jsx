@@ -17,9 +17,10 @@ const usePostMutations = (postId) => {
         throw new Error(error);
       }
     },
-    onSuccess: () => {
-      toast.success('Post deleted successfully');
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+    onSuccess: ({ data, actionType }) => {
+      toast.success(`Post ${actionType} successfully`);
+      queryClient.setQueryData(['post', postId], data); // Directly update post data
+      queryClient.invalidateQueries(['posts']);
     },
     onError: (error) => {
       toast.error(error.message);
@@ -110,7 +111,7 @@ const usePostMutations = (postId) => {
     },
   });
 
-  const commentPostSimple = useMutation({
+  const { mutate: commentPostSimple, isPending: isCommenting } = useMutation({
     mutationFn: async ({ text }) => {
       const res = await fetch(`/api/posts/comment/${postId}`, {
         method: 'POST',
@@ -167,6 +168,29 @@ const usePostMutations = (postId) => {
       toast.error(error.message);
     },
   });
+  const { mutate: repostPost, isPending: isReposting } = useMutation({
+    mutationFn: async ({ actionType }) => {
+      try {
+        const res = await fetch(`/api/posts/repost/${postId}`, {
+          method: 'POST',
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        return { data, actionType };
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: ({ actionType }) => {
+      toast.success(`Post ${actionType} successfully`);
+
+      // Ensure that the queryKey is consistent with the one used in useQuery
+      queryClient.invalidateQueries(['post', postId]); // Invalidate post query
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
 
   return {
     deletePost,
@@ -175,7 +199,10 @@ const usePostMutations = (postId) => {
     bookmarkPost,
     isBookmarking,
     commentPostSimple,
+    isCommenting,
     commentPostAdvanced,
+    repostPost,
+    isReposting,
   };
 };
 
