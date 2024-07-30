@@ -19,6 +19,7 @@ const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
   const [profileImg, setProfileImg] = useState(null);
   const [feedType, setFeedType] = useState('posts');
+  const [isCoverTheButton, setIsCoverTheButton] = useState(false);
 
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
@@ -72,26 +73,58 @@ const ProfilePage = () => {
     refetch();
   }, [username, refetch]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsCoverTheButton(scrollPosition > 300);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+  useEffect(() => {
+    refetch();
+  }, [username, refetch]);
+
   return (
     <>
-      <div className='flex-[4_4_0]  border-r  border-gray-200 dark:border-gray-700 min-h-screen '>
+      <div className=' flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
         {/* HEADER */}
         {(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
         {!isLoading && !isRefetching && !user && (
           <p className='text-center text-lg mt-4'>User not found</p>
         )}
-        <div className='flex flex-col'>
+
+        <div className='flex flex-col h-full  '>
           {!isLoading && !isRefetching && user && (
             <>
-              <div className='flex gap-10 px-4 py-2 items-center'>
-                <Link to='/'>
-                  <FaArrowLeft className='w-4 h-4' />
-                </Link>
-                <div className='flex flex-col'>
-                  <p className='font-bold text-lg'>{user?.fullName}</p>
-                  <span className='text-sm text-slate-500'>
-                    {POSTS?.length} posts
-                  </span>
+              <div className='sticky top-0   z-10 w-full   backdrop-blur-sm px-4 py-2 '>
+                <div className=' mx-auto flex items-center  justify-between '>
+                  <div className='flex  flex-row items-center gap-10'>
+                    <Link to='/'>
+                      <FaArrowLeft className='w-4 h-4' />
+                    </Link>
+                    <div className='flex flex-col '>
+                      <p className='font-bold text-lg'>{user?.fullName}</p>
+                      <span className='text-sm text-slate-500'>
+                        {POSTS?.length} posts
+                      </span>
+                    </div>
+                  </div>
+                  <div>
+                    {!isMyProfile && isCoverTheButton && (
+                      <button
+                        className='btn btn-outline rounded-full btn-sm'
+                        onClick={() => follow(user?._id)}>
+                        {isPending && 'Loading...'}
+                        {!isPending && amIFollowing && 'Following'}
+                        {!isPending && !amIFollowing && 'Follow'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
               {/* COVER IMG */}
@@ -203,10 +236,10 @@ const ProfilePage = () => {
                     to={`/follow/${user.username}`}
                     className='flex items-center justify-between gap-4'>
                     <div className='flex gap-1 items-center'>
-                      <span className='font-bold text-xs'>
+                      <span className='font-bold text-sm'>
                         {user?.followings.length}
                       </span>
-                      <span className='text-slate-500 text-xs'>Following</span>
+                      <span className='text-slate-500 text-sm'>Following</span>
                     </div>
                   </Link>
 
@@ -214,17 +247,42 @@ const ProfilePage = () => {
                     to={`/follow/${user.username}`}
                     className='flex items-center justify-between gap-4'>
                     <div className='flex gap-1 items-center'>
-                      <span className='font-bold text-xs'>
+                      <span className='font-bold text-sm'>
                         {user?.followers.length}
                       </span>
-                      <span className='text-slate-500 text-xs'>Followers</span>
+                      <span className='text-slate-500 text-sm'>Followers</span>
                     </div>
                   </Link>
                 </div>
+
+                {/* <div className=' flex flex-row  items-center justify-start  gap-x-2 '>
+                  <div className='isolate flex -space-x-2 '>
+                    <img
+                      className='relative z-30 inline-block h-6 w-6 rounded-full  '
+                      src={user?.profileImg}
+                      alt=''
+                    />
+                    <img
+                      className='relative z-20 inline-block h-6 w-6 rounded-full '
+                      src={user?.profileImg}
+                      alt=''
+                    />
+
+                    <img
+                      className='relative z-0 inline-block h-6 w-6 rounded-full '
+                      src={user?.profileImg}
+                      alt=''
+                    />
+                  </div>
+                  <div className='text-slate-500 text-sm'>
+                    Followed by Anfield Edition,The Anfield Talk,and David
+                    Ornstein
+                  </div>
+                </div> */}
               </div>
               <div className='flex w-full border-b border-gray-700 mt-4'>
                 <div
-                  className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
+                  className='flex justify-center flex-1 p-3  transition duration-300 relative cursor-pointer'
                   onClick={() => setFeedType('posts')}>
                   Posts
                   {feedType === 'posts' && (
@@ -232,7 +290,7 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div
-                  className='flex justify-center flex-1 p-3 text-slate-500 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
+                  className='flex justify-center flex-1 p-3 text-slate-500  transition duration-300 relative cursor-pointer'
                   onClick={() => setFeedType('likes')}>
                   Likes
                   {feedType === 'likes' && (
@@ -240,7 +298,7 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div
-                  className='flex justify-center flex-1 p-3 text-slate-500 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
+                  className='flex justify-center flex-1 p-3 text-slate-500  transition duration-300 relative cursor-pointer'
                   onClick={() => setFeedType('bookmarks')}>
                   Bookmarks
                   {feedType === 'bookmarks' && (
