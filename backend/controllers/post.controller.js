@@ -75,6 +75,16 @@ export const deletePost = async (req, res) => {
       };
 
       await updateRelatedPosts(originalPostId);
+
+      // 从所有转发该原始帖子的用户中移除该帖子
+      const usersWithRepostedPost = await User.find({
+        repostedPosts: originalPostId,
+      });
+      for (const user of usersWithRepostedPost) {
+        await User.findByIdAndUpdate(user._id, {
+          $pull: { repostedPosts: post._id },
+        });
+      }
     }
 
     await Post.findByIdAndDelete(req.params.id);
@@ -199,10 +209,10 @@ export const bookmarkUnBookmark = async (req, res) => {
 
 export const repostPost = async (req, res) => {
   try {
-    const { id: postId } = req.params; // ID of the post to be reposted
-    const userId = req.user._id; // Current user's ID
+    const { id: postId } = req.params; // 转发的帖子ID
+    const userId = req.user._id; // 当前用户ID
 
-    // Find the post being reposted
+    // 查找转发的帖子
     const repostPost = await Post.findById(postId).populate(
       'user',
       'username fullName profileImg'
@@ -211,38 +221,38 @@ export const repostPost = async (req, res) => {
       return res.status(404).json({ message: 'Post not found' });
     }
 
-    // Get the ID of the original post
+    // 获取原始帖子的ID
     const originalPostId = repostPost.repost?.originalPost || postId;
 
-    // Find the original post
+    // 查找原始帖子
     const originalPost = await Post.findById(originalPostId);
     if (!originalPost) {
       return res.status(404).json({ message: 'Original post not found' });
     }
 
-    // Get the user information of the original post
+    // 获取原始帖子的用户信息
     const originalUser = await User.findById(originalPost.user);
     if (!originalUser) {
       return res.status(404).json({ message: 'Original post user not found' });
     }
 
-    // Check if the current user has already reposted the original post
+    // 检查当前用户是否已经转发了原始帖子
     const existingRepost = await Post.findOne({
       'repost.originalPost': originalPostId,
       user: userId,
     });
 
     if (existingRepost) {
-      // If repost already exists, remove it
+      // 如果转发已经存在，则删除
       await Post.findByIdAndDelete(existingRepost._id);
 
-      // Update the repost count of the original post
+      // 更新原始帖子的转发数量
       await Post.findByIdAndUpdate(originalPostId, {
-        $inc: { repostByNum: -1 }, // Decrease repost count
-        $pull: { repostBy: userId }, // Remove the current user from the repostBy list
+        $inc: { repostByNum: -1 }, // 减少转发数量
+        $pull: { repostBy: userId }, // 从 repostBy 列表中移除当前用户
       });
 
-      // Update the repost count of all related reposts
+      // 更新所有相关转发帖子的转发数量
       const updateRelatedPosts = async (postId) => {
         const relatedPosts = await Post.find({ 'repost.originalPost': postId });
         for (const post of relatedPosts) {
@@ -250,19 +260,24 @@ export const repostPost = async (req, res) => {
             $set: {
               'repost.repostNum': (
                 await Post.findById(post.repost.originalPost)
-              ).repostByNum, // Set repostNum to the repostByNum of the original post
+              ).repostByNum, // 设置 repostNum 为原始帖子的 repostByNum
             },
           });
-          await updateRelatedPosts(post._id); // Recursively update related posts
+          await updateRelatedPosts(post._id); // 递归更新相关帖子
         }
       };
 
       await updateRelatedPosts(originalPostId);
 
+      // 从用户的 repostedPosts 中移除已删除的转发
+      await User.findByIdAndUpdate(userId, {
+        $pull: { repostedPosts: existingRepost._id },
+      });
+
       return res.status(200).json({ message: 'Repost successfully removed' });
     }
 
-    // Create a new repost
+    // 创建新的转发
     const newRepost = new Post({
       user: userId,
       repost: {
@@ -276,20 +291,20 @@ export const repostPost = async (req, res) => {
         originalText: originalPost.text,
         originalImg: originalPost.img,
         repostUser: userId,
-        repostNum: 1, // Initial repost count
+        repostNum: 1, // 初始转发数量
       },
-      repostBy: [userId], // Add the current user to the repostBy list
+      repostBy: [userId], // 将当前用户添加到 repostBy 列表
     });
 
     await newRepost.save();
 
-    // Update the repost count of the original post
+    // 更新原始帖子的转发数量
     await Post.findByIdAndUpdate(originalPostId, {
-      $inc: { repostByNum: 1 }, // Increase repost count
-      $addToSet: { repostBy: userId }, // Add the current user to the repostBy list if not already present
+      $inc: { repostByNum: 1 }, // 增加转发数量
+      $addToSet: { repostBy: userId }, // 将当前用户添加到 repostBy 列表中（如果尚未存在）
     });
 
-    // Update the repost count of all related reposts
+    // 更新所有相关转发帖子的转发数量
     const updateRelatedPosts = async (postId) => {
       const relatedPosts = await Post.find({ 'repost.originalPost': postId });
       for (const post of relatedPosts) {
@@ -297,22 +312,26 @@ export const repostPost = async (req, res) => {
           $set: {
             'repost.repostNum': (
               await Post.findById(post.repost.originalPost)
-            ).repostByNum, // Set repostNum to the repostByNum of the original post
+            ).repostByNum, // 设置 repostNum 为原始帖子的 repostByNum
           },
         });
-        await updateRelatedPosts(post._id); // Recursively update related posts
+        await updateRelatedPosts(post._id); // 递归更新相关帖子
       }
     };
 
     await updateRelatedPosts(originalPostId);
 
-    res.status(201).json(newRepost); // Respond with the newly created repost
+    // 将转发的帖子ID添加到用户的 repostedPosts 中
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { repostedPosts: originalPostId }, // 确保 ID 唯一
+    });
+
+    res.status(201).json(newRepost); // 返回新创建的转发
   } catch (error) {
     console.log('Error in repostPost controller:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 export const quotePost = async (req, res) => {
   try {
     const { text } = req.body;

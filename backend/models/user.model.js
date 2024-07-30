@@ -65,6 +65,13 @@ const userSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    repostedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post',
+        default: [],
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -13,6 +13,7 @@ import { formatPostDate } from '../../utils/date';
 
 const Post = ({ post, posts }) => {
   const [comment, setComment] = useState('');
+  const queryClient = useQueryClient();
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
@@ -23,18 +24,13 @@ const Post = ({ post, posts }) => {
       // 查找源帖子 ID（如果是转发的帖子）
       const originalPostId = post.repost?.originalPost || post._id;
 
-      // 查找所有帖子中是否有源帖子
-      const originalPost = posts.find((p) => p._id === originalPostId);
-
-      if (originalPost) {
-        // 检查当前用户是否在转发列表中
-        const isReposted = originalPost.repostBy.includes(authUser._id);
-        setIsRepostedByAuthUser(isReposted);
-      }
+      // 检查当前用户是否在转发列表中
+      const isReposted = authUser.repostedPosts.includes(originalPostId);
+      setIsRepostedByAuthUser(isReposted);
+    } else {
+      setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
     }
   }, [authUser, post, posts]);
-
-  const queryClient = useQueryClient();
 
   const isLiked = post.likes.includes(authUser._id);
 
@@ -79,9 +75,7 @@ const Post = ({ post, posts }) => {
       }
     },
     onSuccess: (updatedLikes) => {
-      // //TOFIX: is not a good ux
-      // queryClient.invalidateQueries({ queryKey: ['posts'] });
-      //Instead, update the cache directly for that post
+     
       queryClient.setQueryData(['posts'], (oldData) => {
         return oldData.map((p) => {
           if (p._id === post._id) {
@@ -217,7 +211,9 @@ const Post = ({ post, posts }) => {
     repostPost({ actionType: 'repost' });
     return;
   };
-
+  console.log(posts);
+  console.log(authUser);
+  //"66a662a4d423db2d8102eca6" //"66a662a4d423db2d8102eca6"
   return (
     <>
       <div className='flex flex-col'>
