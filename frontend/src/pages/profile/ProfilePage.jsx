@@ -85,6 +85,7 @@ const ProfilePage = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+  console.log(isCoverTheButton);
   useEffect(() => {
     refetch();
   }, [username, refetch]);
@@ -123,6 +124,9 @@ const ProfilePage = () => {
                         {!isPending && amIFollowing && 'Following'}
                         {!isPending && !amIFollowing && 'Follow'}
                       </button>
+                    )}
+                    {isMyProfile && isCoverTheButton && (
+                      <EditProfileModal authUser={authUser} />
                     )}
                   </div>
                 </div>
@@ -179,6 +183,7 @@ const ProfilePage = () => {
               </div>
               <div className='flex justify-end px-4 mt-5'>
                 {isMyProfile && <EditProfileModal authUser={authUser} />}
+
                 {!isMyProfile && (
                   <button
                     className='btn btn-outline rounded-full btn-sm'

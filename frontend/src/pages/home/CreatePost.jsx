@@ -1,24 +1,90 @@
-import { useRef, useState } from 'react';
-
+import { useState, useRef } from 'react';
 import { CiImageOn } from 'react-icons/ci';
 import { BsEmojiSmileFill } from 'react-icons/bs';
 import { IoCloseSharp } from 'react-icons/io5';
-
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
+import { Mention } from 'primereact/mention';
+import './CreatePost.css';
+import { useTheme } from '../../components/context/ThemeProvider';
+
 const CreatePost = () => {
+  const { theme } = useTheme();
   const [text, setText] = useState('');
   const [img, setImg] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imgRef = useRef(null);
+
+  const queryClient = useQueryClient();
 
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
-  const queryClient = useQueryClient();
+
+  // Your existing searchUsers function
+  const searchUsers = async (query) => {
+    const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`);
+    if (!res.ok) {
+      throw new Error('Error fetching search results');
+    }
+    return res.json();
+  };
+
+  const onSearch = async (event) => {
+    const query = event.query.trim();
+
+    if (query) {
+      try {
+        const users = await searchUsers(query);
+        setSuggestions(users);
+      } catch (error) {
+        console.error('Failed to fetch search results:', error);
+      }
+    } else {
+      setSuggestions([]); // Clear suggestions if query is empty
+    }
+  };
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setText(value);
+
+    const lastAt = value.lastIndexOf('@');
+    if (lastAt !== -1 && value[lastAt + 1] !== ' ') {
+      const query = value.substring(lastAt + 1);
+      onSearch({ query });
+    }
+  };
+
+  const itemTemplate = (user) => {
+    return (
+      <div className='card rounded-none z-0 bg-gray-100 dark:bg-[#15202B] w-60  h-18 flex ring-1 ring-white'>
+        <div className='card-body p-0'>
+          <div
+            className='flex gap-2 items-center hover:bg-slate-400 dark:hover:bg-cyan-900 p-2'
+            key={user._id}>
+            <div className='avatar'>
+              <div className='w-8 rounded-full'>
+                <img
+                  src={user.profileImg || '/avatar-placeholder.png'}
+                  alt={`${user.fullName}'s profile`}
+                />
+              </div>
+            </div>
+            <div className='flex flex-col'>
+              <span className='font-semibold tracking-tight truncate w-28'>
+                {user.fullName}
+              </span>
+              <span className='text-sm text-slate-500'>@{user.username}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   const {
     mutate: createPost,
@@ -27,20 +93,16 @@ const CreatePost = () => {
     error,
   } = useMutation({
     mutationFn: async ({ text, img }) => {
-      try {
-        const res = await fetch('/api/posts/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ text, img }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return data;
-      } catch (error) {
-        throw new Error(error);
-      }
+      const res = await fetch('/api/posts/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text, img }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+      return data;
     },
     onSuccess: () => {
       setText('');
@@ -50,7 +112,7 @@ const CreatePost = () => {
     },
   });
 
-  const handelSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     createPost({ text, img });
   };
@@ -60,7 +122,7 @@ const CreatePost = () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setImg(reader.result); // Base64 string
+        setImg(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -71,7 +133,7 @@ const CreatePost = () => {
   };
 
   return (
-    <div className='flex p-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700'>
+    <div className='  flex p-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700'>
       <div className='avatar'>
         <div className='w-8 rounded-full'>
           <img
@@ -80,12 +142,16 @@ const CreatePost = () => {
           />
         </div>
       </div>
-      <form className='flex flex-col gap-2 w-full' onSubmit={handelSubmit}>
-        <textarea
-          className='textarea w-full p-0 text-lg resize-none border-none focus:outline-none bg-inherit'
-          placeholder='What is happening?!'
+      <form className=' flex flex-col gap-2 w-full' onSubmit={handleSubmit}>
+        <Mention
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={handleChange}
+          suggestions={suggestions}
+          onSearch={onSearch}
+          field='username'
+          placeholder='What is happening?!'
+          itemTemplate={itemTemplate}
+          autoResize
         />
         {img && (
           <div className='relative w-72 mx-auto'>
@@ -93,7 +159,6 @@ const CreatePost = () => {
               className='absolute top-0 right-0 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
               onClick={() => {
                 setImg(null);
-                imgRef.current.value = null;
               }}
             />
             <img
@@ -103,8 +168,8 @@ const CreatePost = () => {
             />
           </div>
         )}
-        <div className='flex justify-between border-t py-2 border-t-gray-700'>
-          <div className='flex gap-1 items-center '>
+        <div className=' relative flex justify-between border-t py-2 border-t-gray-700'>
+          <div className='flex gap-1 items-center'>
             <CiImageOn
               className='fill-primary w-6 h-6 cursor-pointer'
               onClick={() => imgRef.current.click()}
@@ -114,8 +179,13 @@ const CreatePost = () => {
               onClick={() => setShowEmojiPicker((prev) => !prev)}
             />
             {showEmojiPicker && (
-              <div className='absolute top-44 right-4 z-10'>
-                <Picker data={data} onEmojiSelect={handleEmojiSelect} />
+              <div className='absolute top-10 left z-10'>
+                <Picker
+                  data={data}
+                  onEmojiSelect={handleEmojiSelect}
+                  className='bg-slate-100 dark:bg-current'
+                  theme={theme === 'dark' ? 'dark' : 'light'}
+                />
               </div>
             )}
           </div>

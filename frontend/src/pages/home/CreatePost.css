@@ -1,0 +1,13 @@
+textarea {
+  width: 100%; /* w-full */
+  padding: 0; /* p-0 */
+  font-size: 1.125rem; /* text-lg (18px) */
+  resize: none;
+  border: none; /* border-none */
+  outline: none; /* focus:outline-none */
+  background-color: inherit; /* bg-inherit */
+}
+
+.p-mention-panel {
+  scrollbar-width: none;
+}
