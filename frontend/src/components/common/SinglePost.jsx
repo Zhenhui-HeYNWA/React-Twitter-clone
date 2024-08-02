@@ -6,6 +6,7 @@ import {
   FaRegBookmark,
   FaRegComment,
   FaRegHeart,
+  FaTrash,
 } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
 import { formatDateTime, formatPostDate } from '../../utils/date';
@@ -37,6 +38,7 @@ const SinglePost = () => {
 
   const [comment, setComment] = useState('');
   const [showNav, setShowNav] = useState(false);
+  const isMyPost = authUser._id === post?.user._id;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
   const isAuthUserRepost = post?.user._id === authUser._id;
@@ -86,11 +88,17 @@ const SinglePost = () => {
     isBookmarking,
     repostPost,
     isReposting,
+    deletePost,
+    isDeleting,
   } = usePostMutations(postId);
 
   const isLiked = post ? post.likes.includes(authUser._id) : false;
   const isMarked = post ? post.bookmarks.includes(authUser._id) : false;
 
+  const handleDeletePost = () => {
+    if (isDeleting) return;
+    deletePost;
+  };
   const handleCommentSubmit = (e) => {
     e.preventDefault();
     if (commentPostSimple.isLoading) return;
@@ -121,6 +129,26 @@ const SinglePost = () => {
     }
     repostPost({ actionType: 'repost' });
     return;
+  };
+
+  const highlightMentions = (text) => {
+    const regex = /@\w+/g; // Regex to find mentions in the text
+    return text.split(regex).map((part, index) => {
+      const match = text.match(regex)?.[index];
+      if (match) {
+        return (
+          <Link key={index} to={`/profile/${post.user.username}`}>
+            <span>
+              {part}
+              <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
+                {match}
+              </span>
+            </span>
+          </Link>
+        );
+      }
+      return part;
+    });
   };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
@@ -161,63 +189,69 @@ const SinglePost = () => {
 
           {!isPostLoading && post && (
             <div className='flex flex-col flex-1'>
-              <div className='flex flex-row gap-2 items-center'>
-                <div className='avatar'>
-                  {/* Avatar */}
-                  {isOriginalPost && (
-                    <Link
-                      to={`/profile/${post.user.username}`}
-                      className='w-12 h-12 rounded-full overflow-hidden'>
-                      <img
-                        src={post.user.profileImg || '/avatar-placeholder.png'}
-                        alt={`${post.user.profileImg}'s avatar`}
-                      />
-                    </Link>
-                  )}
-                  {!isOriginalPost && (
-                    <Link
-                      to={`/profile/${post.repost.postOwner?.username}`}
-                      className='w-12 h-12 rounded-full overflow-hidden'>
-                      <img
-                        src={
-                          post.repost.postOwner?.profileImg ||
-                          '/avatar-placeholder.png'
-                        }
-                      />
-                    </Link>
-                  )}
-                </div>
-                <div className='flex flex-col'>
-                  {/* fullName */}
-                  {isOriginalPost && (
-                    <Link
-                      to={`/profile/${post.user.username}`}
-                      className='font-bold'>
-                      {post.user.fullName}
-                    </Link>
-                  )}
-                  {!isOriginalPost && (
-                    <Link
-                      to={`/profile/${post.repost.postOwner.username}`}
-                      className='font-bold'>
-                      {post.repost.postOwner.fullName}
-                    </Link>
-                  )}
+              <div className='flex flex-row gap-2 items-center justify-between'>
+                <div className='flex  gap-4'>
+                  <div className='avatar'>
+                    {/* Avatar */}
+                    {isOriginalPost && (
+                      <Link
+                        to={`/profile/${post.user.username}`}
+                        className='w-12 h-12 rounded-full overflow-hidden'>
+                        <img
+                          src={
+                            post.user.profileImg || '/avatar-placeholder.png'
+                          }
+                          alt={`${post.user.profileImg}'s avatar`}
+                        />
+                      </Link>
+                    )}
+                    {!isOriginalPost && (
+                      <Link
+                        to={`/profile/${post.repost.postOwner?.username}`}
+                        className='w-12 h-12 rounded-full overflow-hidden'>
+                        <img
+                          src={
+                            post.repost.postOwner?.profileImg ||
+                            '/avatar-placeholder.png'
+                          }
+                        />
+                      </Link>
+                    )}
+                  </div>
+                  <div className='flex flex-col justify-start'>
+                    {/* fullName */}
+                    {isOriginalPost && (
+                      <Link
+                        to={`/profile/${post.user.username}`}
+                        className='font-bold'>
+                        {post.user.fullName}
+                      </Link>
+                    )}
+                    {!isOriginalPost && (
+                      <Link
+                        to={`/profile/${post.repost.postOwner.username}`}
+                        className='font-bold'>
+                        {post.repost.postOwner.fullName}
+                      </Link>
+                    )}
 
-                  <span className='text-gray-700 flex gap-1 text-sm'>
-                    <Link
-                      to={`/profile/${
-                        isOriginalPost
+                    <span className='text-gray-700 flex gap-1 text-sm'>
+                      <Link
+                        to={`/profile/${
+                          isOriginalPost
+                            ? post.user.username
+                            : post.repost.postOwner.username
+                        }`}>
+                        @
+                        {isOriginalPost
                           ? post.user.username
-                          : post.repost.postOwner.username
-                      }`}>
-                      @
-                      {isOriginalPost
-                        ? post.user.username
-                        : post.repost.postOwner.username}
-                    </Link>
-                  </span>
-                  {/* {isMyPost && (
+                          : post.repost.postOwner.username}
+                      </Link>
+                    </span>
+                  </div>
+                </div>
+                {isMyPost && (
+                  <div className=' flex justify-end items-center'>
                     <span className='flex justify-end flex-1'>
                       {!isDeleting && (
                         <FaTrash
@@ -227,13 +261,19 @@ const SinglePost = () => {
                       )}
                       {isDeleting && <LoadingSpinner size='sm' />}
                     </span>
-                  )} */}
-                </div>
+                  </div>
+                )}
               </div>
               <div className='flex flex-col gap-3 overflow-hidden'>
-                {isOriginalPost && <span className='text-lg'>{post.text}</span>}
+                {isOriginalPost && (
+                  <span className='text-lg'>
+                    {highlightMentions(post.text)}
+                  </span>
+                )}
                 {!isOriginalPost && (
-                  <span className='text-lg'>{post.repost.originalText}</span>
+                  <span className='text-lg'>
+                    {highlightMentions(post.repost.originalText)}
+                  </span>
                 )}
 
                 {isOriginalPost && post.img && (

@@ -211,6 +211,26 @@ const Post = ({ post, posts }) => {
     return;
   };
 
+  const highlightMentions = (text) => {
+    const regex = /@\w+/g; // Regex to find mentions in the text
+    return text.split(regex).map((part, index) => {
+      const match = text.match(regex)?.[index];
+      if (match) {
+        return (
+          <Link key={index} to={`/profile/${post.user.username}`}>
+            <span>
+              {part}
+              <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
+                {match}
+              </span>
+            </span>
+          </Link>
+        );
+      }
+      return part;
+    });
+  };
+
   return (
     <>
       <div className='flex flex-col'>
@@ -302,9 +322,15 @@ const Post = ({ post, posts }) => {
             </div>
             <div className='flex flex-col gap-3 overflow-hidden'>
               <Link to={`/${authUser.username}/status/${post._id}`}>
-                {isOriginalPost && <span className='text-lg'>{post.text}</span>}
+                {isOriginalPost && (
+                  <span className='text-lg'>
+                    {highlightMentions(post.text)}
+                  </span>
+                )}
                 {!isOriginalPost && (
-                  <span className='text-lg'>{post.repost.originalText}</span>
+                  <span className='text-lg'>
+                    {highlightMentions(post.repost.originalText)}
+                  </span>
                 )}
 
                 {isOriginalPost && post.img && (

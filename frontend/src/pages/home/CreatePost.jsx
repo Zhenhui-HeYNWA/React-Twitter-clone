@@ -151,8 +151,8 @@ const CreatePost = () => {
           field='username'
           placeholder='What is happening?!'
           itemTemplate={itemTemplate}
-          autoResize
         />
+
         {img && (
           <div className='relative w-72 mx-auto'>
             <IoCloseSharp
