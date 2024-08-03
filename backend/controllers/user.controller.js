@@ -215,3 +215,25 @@ export const getSearchUser = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const getMentionedUsers = async (req, res) => {
+  try {
+    const { usernames } = req.body;
+    const users = await User.find({ username: { $in: usernames } });
+    const userExistMap = users.reduce((acc, user) => {
+      acc[user.username] = true;
+      return acc;
+    }, {});
+
+    usernames.forEach((username) => {
+      if (!userExistMap[username]) {
+        userExistMap[username] = false;
+      }
+    });
+
+    res.json(userExistMap);
+  } catch (error) {
+    console.error('Error checking user existence:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

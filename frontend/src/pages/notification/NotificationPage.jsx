@@ -7,6 +7,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 import { IoTrashBin } from 'react-icons/io5';
 import { FaUser, FaHeart } from 'react-icons/fa';
+import { VscMention } from 'react-icons/vsc';
 
 const NotificationPage = ({ authUser }) => {
   const queryClient = useQueryClient();
@@ -77,10 +78,13 @@ const NotificationPage = ({ authUser }) => {
             key={notification._id}>
             <div className='flex gap-2 p-4'>
               {notification.type === 'follow' && (
-                <FaUser className='w-7 h-7 text-primary' />
+                <FaUser className='w-6 h-6 text-primary' />
               )}
               {notification.type === 'likes' && (
-                <FaHeart className='w-7 h-7 text-red-500' />
+                <FaHeart className='w-6 h-6 text-red-500' />
+              )}
+              {notification.type === 'mention' && (
+                <VscMention className='w-7 h-7 text-sky-600' />
               )}
               <Link to={`/profile/${notification.from.username}`}>
                 <div className='avatar'>
@@ -97,9 +101,9 @@ const NotificationPage = ({ authUser }) => {
                   <span className='font-bold'>
                     @{notification.from.username}
                   </span>{' '}
-                  {notification.type === 'follow'
-                    ? 'followed you'
-                    : 'liked your post'}
+                  {notification.type === 'follow' && 'followed you'}
+                  {notification.type === 'likes' && 'liked your post'}
+                  {notification.type === 'mention' && 'mention you'}
                 </div>
               </Link>
             </div>

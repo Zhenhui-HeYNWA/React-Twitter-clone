@@ -29,6 +29,22 @@ export const createPost = async (req, res) => {
       img,
     });
     await newPost.save();
+
+    const mentionRegex = /@(\w+)/g;
+    let match;
+    while ((match = mentionRegex.exec(text)) !== null) {
+      const mentionedUsername = match[1];
+      const mentionedUser = await User.findOne({ username: mentionedUsername });
+
+      if (mentionedUser) {
+        const notification = new Notification({
+          from: userId,
+          to: mentionedUser._id,
+          type: 'mention',
+        });
+        await notification.save();
+      }
+    }
     res.status(201).json(newPost);
   } catch (error) {
     console.log('error in createPost controller', error);
@@ -114,6 +130,12 @@ export const commentOnPost = async (req, res) => {
 
     post.comments.push(comment);
     await post.save();
+
+    // Populate user information in the comments
+    await post.populate({
+      path: 'comments.user',
+      select: 'fullName username profileImg', // Only select necessary fields
+    });
 
     const updatedComments = post.comments;
 

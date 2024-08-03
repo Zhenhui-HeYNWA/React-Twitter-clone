@@ -9,6 +9,7 @@ import {
   getUserProfile,
   updateUser,
   getSearchUser,
+  getMentionedUsers,
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.get('/following/:username', protectRoute, getFollowingUser);
 router.post('/follow/:id', protectRoute, followUnfollowUser);
 router.post('/update', protectRoute, updateUser);
 router.get('/search', protectRoute, getSearchUser);
+router.get('/check-user/:username', getMentionedUsers);
 
 export default router;

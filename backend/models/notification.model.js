@@ -15,7 +15,7 @@ const notificationSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ['follow', 'likes'],
+      enum: ['follow', 'likes', 'mention'], // 添加 'mention' 类型
     },
     read: {
       type: Boolean,
@@ -27,4 +27,3 @@ const notificationSchema = new mongoose.Schema(
 
 const Notification = mongoose.model('Notification', notificationSchema);
 export default Notification;
-//path:backend/models/post.model.js

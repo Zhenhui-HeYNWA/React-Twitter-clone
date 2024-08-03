@@ -9,9 +9,11 @@ import { BiLogOut } from 'react-icons/bi';
 
 import { Link } from 'react-router-dom';
 import ThemeToggler from '../context/ThemeToggler';
+import { useEffect, useState } from 'react';
 
 const Sidebar = () => {
   const queryClient = useQueryClient();
+  const [hasUnread, setHasUnread] = useState(false);
 
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
@@ -34,6 +36,27 @@ const Sidebar = () => {
       toast.error('Logout failed');
     },
   });
+  const { data, isSuccess, isError } = useQuery({
+    queryKey: ['unreadNotifications'],
+    queryFn: async () => {
+      const res = await fetch('/api/notifications/unread');
+      if (!res.ok) {
+        throw new Error('Failed to fetch unread notifications');
+      }
+      return res.json();
+    },
+    refetchInterval: 60000,
+  });
+  useEffect(() => {
+    if (isSuccess) {
+      setHasUnread(data?.unreadCount > 0);
+    }
+
+    if (isError) {
+      console.error('Failed to fetch unread notifications');
+      setHasUnread(false);
+    }
+  }, [data, isSuccess, isError]);
 
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
@@ -55,11 +78,16 @@ const Sidebar = () => {
             </Link>
           </li>
 
-          <li className='flex justify-center md:justify-start'>
+          <li
+            className='flex justify-center md:justify-start'
+            onClick={() => setHasUnread(false)}>
             <Link
               to='/notifications'
-              className='flex gap-3 items-center hover:bg-slate-100 dark:hover:bg-[#303134] transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'>
+              className=' relative flex gap-3 items-center hover:bg-slate-100 dark:hover:bg-[#303134] transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'>
               <IoNotifications className='w-6 h-6 text-secondary dark:text-white' />
+              {hasUnread && (
+                <span className='bg-sky-600 rounded-full h-2 w-2 absolute top-2 left-6'></span>
+              )}
               <span className='text-lg hidden md:block text-gray-800 dark:text-white'>
                 Notifications
               </span>

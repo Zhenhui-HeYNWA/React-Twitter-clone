@@ -51,3 +51,18 @@ export const deleteNotification = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const getUnreadNotifications = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const unreadCount = await Notification.countDocuments({
+      to: userId,
+      read: false,
+    });
+    res.status(200).json({ unreadCount });
+    console.log({ to: userId, read: false });
+  } catch (error) {
+    console.log('Error in getUnreadNotificationsCount:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

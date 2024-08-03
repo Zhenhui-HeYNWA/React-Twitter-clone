@@ -6,9 +6,11 @@ import ThemeToggler from '../context/ThemeToggler';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { BiLogOut } from 'react-icons/bi';
+import { useEffect, useState } from 'react';
 
 const MobileBar = () => {
   const queryClient = useQueryClient();
+  const [hasUnread, setHasUnread] = useState(false);
 
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
@@ -31,6 +33,27 @@ const MobileBar = () => {
       toast.error('Logout failed');
     },
   });
+  const { data, isSuccess, isError } = useQuery({
+    queryKey: ['unreadNotifications'],
+    queryFn: async () => {
+      const res = await fetch('/api/notifications/unread');
+      if (!res.ok) {
+        throw new Error('Failed to fetch unread notifications');
+      }
+      return res.json();
+    },
+    refetchInterval: 60000,
+  });
+  useEffect(() => {
+    if (isSuccess) {
+      setHasUnread(data?.unreadCount > 0);
+    }
+
+    if (isError) {
+      console.error('Failed to fetch unread notifications');
+      setHasUnread(false);
+    }
+  }, [data, isSuccess, isError]);
 
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
   return (
@@ -43,8 +66,11 @@ const MobileBar = () => {
         </Link>
         <Link
           to='/notifications'
-          className='flex gap-2 items-center text-gray-800 dark:text-white'>
+          className=' relative flex gap-2 items-center text-gray-800 dark:text-white'>
           <IoNotifications className='w-5 h-5' />
+          {hasUnread && (
+            <span className='bg-sky-600 rounded-full h-2 w-2 absolute top-0 left-3'></span>
+          )}
         </Link>
         <Link
           to={`/profile/${authUser?.username}`}

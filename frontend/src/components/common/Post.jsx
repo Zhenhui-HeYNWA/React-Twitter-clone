@@ -110,7 +110,8 @@ const Post = ({ post, posts }) => {
     onSuccess: ({ comments, postId }) => {
       toast.success('Comment posted successfully');
       setComment('');
-      // Update the cache directly for the specific post
+
+      // 更新缓存中的评论数据，包括完整的用户信息
       queryClient.setQueryData(['posts'], (oldData) => {
         return oldData.map((p) => {
           if (p._id === postId) {
@@ -119,6 +120,8 @@ const Post = ({ post, posts }) => {
           return p;
         });
       });
+
+      // 关闭评论模态框
       const modal = document.getElementById('comments_modal' + post._id);
       if (modal) {
         modal.close();
@@ -217,14 +220,14 @@ const Post = ({ post, posts }) => {
       const match = text.match(regex)?.[index];
       if (match) {
         return (
-          <Link key={index} to={`/profile/${post.user.username}`}>
-            <span>
-              {part}
+          <span key={index}>
+            {part}
+            <Link to={`/profile/${match.substring(1)}`}>
               <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
                 {match}
               </span>
-            </span>
-          </Link>
+            </Link>
+          </span>
         );
       }
       return part;
@@ -321,33 +324,33 @@ const Post = ({ post, posts }) => {
               )}
             </div>
             <div className='flex flex-col gap-3 overflow-hidden'>
-              <Link to={`/${authUser.username}/status/${post._id}`}>
-                {isOriginalPost && (
-                  <span className='text-lg'>
-                    {highlightMentions(post.text)}
-                  </span>
-                )}
-                {!isOriginalPost && (
-                  <span className='text-lg'>
-                    {highlightMentions(post.repost.originalText)}
-                  </span>
-                )}
+              {isOriginalPost && (
+                <span className='text-lg'>{highlightMentions(post.text)}</span>
+              )}
+              {!isOriginalPost && (
+                <span className='text-lg'>
+                  {highlightMentions(post.repost.originalText)}
+                </span>
+              )}
 
-                {isOriginalPost && post.img && (
+              {isOriginalPost && post.img && (
+                <Link to={`/${authUser.username}/status/${post._id}`}>
                   <img
                     src={post.img}
                     className='h-80 object-cover rounded-lg border border-gray-700 mt-2'
                     alt=''
                   />
-                )}
-                {!isOriginalPost && post.repost.originalImg && (
+                </Link>
+              )}
+              {!isOriginalPost && post.repost.originalImg && (
+                <Link to={`/${authUser.username}/status/${post._id}`}>
                   <img
                     src={post.repost.originalImg}
                     className='h-80 object-cover rounded-lg border border-gray-700 mt-2'
                     alt=''
                   />
-                )}
-              </Link>
+                </Link>
+              )}
             </div>
             <div className='flex justify-between mt-3'>
               <div className='flex gap-4 items-center w-2/3 justify-between'>
