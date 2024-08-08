@@ -44,6 +44,7 @@ const SinglePost = () => {
   const isAuthUserRepost = post?.user._id === authUser._id;
 
   console.log(post);
+
   const isOriginalPost = post?.repost?.originalPost == null;
   useEffect(() => {
     if (authUser) {
@@ -72,13 +73,14 @@ const SinglePost = () => {
     queryKey: ['comments', postId],
     queryFn: async () => {
       const res = await fetch(
-        `/api/posts/${username}/status/${postId}/comments`
+        `/api/comments/${username}/status/${postId}/comments`
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       return data;
     },
   });
+
   const {
     commentPostSimple,
     isCommenting,
@@ -154,8 +156,8 @@ const SinglePost = () => {
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
 
   return (
-    <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen p-2'>
-      <div className='flex flex-col'>
+    <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
+      <div className='flex flex-col '>
         {!isOriginalPost && !isAuthUserRepost && (
           <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
             {' '}
@@ -172,12 +174,14 @@ const SinglePost = () => {
           </span>
         )}
 
-        <div className='flex gap-10 px-4 py-2 items-center'>
-          <Link to='/'>
-            <FaArrowLeft className='w-4 h-4' />
-          </Link>
-          <div className='flex flex-col'>
-            <p className='font-bold text-lg'>Post</p>
+        <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
+          <div className='flex gap-10 px-4 py-1 items-center'>
+            <Link to='/'>
+              <FaArrowLeft className='w-4 h-4' />
+            </Link>
+            <div className='flex flex-col'>
+              <p className='font-bold text-lg'>Post</p>
+            </div>
           </div>
         </div>
 
@@ -480,16 +484,16 @@ const SinglePost = () => {
         {/* CREATE COMMENT */}
         <div className='transition-all duration-1000 ease-in-out'>
           <div
-            className={`px-16 flex justify-start items-center text-slate-500 transition-opacity duration-300 ease-in-out ${
+            className={`px-16  hidden md:flex justify-start items-center text-slate-500 transition-opacity duration-300 ease-in-out ${
               showNav ? 'opacity-100' : 'opacity-0'
             }`}>
             Replying to
             <p className='text-sky-500'> @{post?.user.username}</p>
           </div>
 
-          <div className='hidden md:flex items-start gap-4 border-b border-gray-200 dark:border-gray-700'>
+          <div className='hidden md:flex items-start gap-4 border-b border-gray-200 dark:border-gray-700 p-4'>
             <div className='avatar flex'>
-              <div className='w-10 h-10 rounded-full'>
+              <div className='w-12 h-12 rounded-full'>
                 <img
                   src={authUser?.profileImg || '/avatar-placeholder.png'}
                   alt='Profile'
@@ -499,7 +503,7 @@ const SinglePost = () => {
             </div>
 
             <form
-              className={`flex gap-2 w-full ${
+              className={`flex gap-2 w-full  ${
                 showNav ? 'flex-col' : 'flex-row'
               }`}
               onSubmit={handleCommentSubmit}>
@@ -511,7 +515,7 @@ const SinglePost = () => {
                 onClick={handleTextareaClick}
               />
 
-              <div className='flex flex-row justify-between'>
+              <div className='flex flex-row justify-between p-2'>
                 <div
                   className={`flex justify-between py-2 transition-all duration-1000 ease-in-out ${
                     showNav
@@ -542,70 +546,77 @@ const SinglePost = () => {
             </>
           ) : (
             comments.map((comment) => {
+              console.log('comment', comment);
               const formattedHours = formatPostDate(comment?.createdAt);
               return (
                 <div
                   key={comment._id}
-                  className='border-b border-gray-200 dark:border-gray-700'>
-                  <div className='flex gap-2 flex-col items-start'>
-                    <div className='px-2 py-1 flex gap-2'>
-                      <div className='avatar'>
-                        <div className='w-8 h-8 rounded-full'>
-                          <img
-                            src={
-                              comment.user?.profileImg ||
-                              '/avatar-placeholder.png'
-                            }
-                            alt='Comment User Avatar'
-                          />
+                  className='border-b border-gray-200 dark:border-gray-700 px-2'>
+                  <Link
+                    to={`/${postId}/comment/${comment.user.username}/${comment._id}`}>
+                    <div className='flex gap-2 flex-col items-start'>
+                      <div className='px-2 py-1 flex gap-2'>
+                        <div className='avatar'>
+                          <div className='w-12 h-12 rounded-full'>
+                            <img
+                              src={
+                                comment.user?.profileImg ||
+                                '/avatar-placeholder.png'
+                              }
+                              alt='Comment User Avatar'
+                            />
+                          </div>
                         </div>
-                      </div>
-                      <div className='flex flex-col'>
-                        <div className='flex items-center gap-1'>
-                          <span className='font-bold text-base'>
-                            {comment.user?.fullName}
-                          </span>
-                          <span className='text-gray-700 text-sm'>
-                            @{comment.user?.username}
-                          </span>
-                          <span className='text-gray-700 text-sm'>·</span>
-                          <span className='text-gray-700 text-sm'>
-                            {formattedHours}
-                          </span>
+                        <div className='flex flex-col'>
+                          <div className='flex items-center gap-1'>
+                            <span className='font-bold text-base'>
+                              {comment.user?.fullName}
+                            </span>
+                            <span className='text-gray-700 text-sm'>
+                              @{comment.user?.username}
+                            </span>
+                            <span className='text-gray-700 text-sm'>·</span>
+                            <span className='text-gray-700 text-sm'>
+                              {formattedHours}
+                            </span>
+                          </div>
+                          <div className='text-base'>{comment?.text}</div>
                         </div>
-                        <div className='text-sm'>{comment?.text}</div>
                       </div>
                     </div>
-                  </div>
-                  {/* comment like section */}
-                  <div className='flex justify-between my-1 px-12'>
-                    <div className='flex gap-4 items-center w-2/3 justify-between'>
-                      <div className='flex gap-1 items-center cursor-pointer group'>
-                        <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
-                        <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                          {/* {post.comments.length} */}
-                        </span>
-                      </div>
-                      <div className='flex gap-1 items-center group cursor-pointer'>
-                        <BiRepost className='w-6 h-6 text-slate-500 group-hover:text-green-500' />
-                        <span className='text-sm text-slate-500 group-hover:text-green-500'>
-                          0
-                        </span>
-                      </div>
-                      <div className='flex gap-1 items-center group cursor-pointer'>
-                        <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500' />
-                        {/* <span
+                    {/* comment like section */}
+                    <div className='flex justify-between my-1 px-12'>
+                      <div className='flex gap-4 items-center w-2/3 justify-between'>
+                        <div className='flex gap-1 items-center cursor-pointer group'>
+                          <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
+                          <span className='text-sm text-slate-500 group-hover:text-sky-400'>
+                            {/* {post.comments.length} */}
+                          </span>
+                        </div>
+                        <div className='flex gap-1 items-center group cursor-pointer'>
+                          <BiRepost className='w-6 h-6 text-slate-500 group-hover:text-green-500' />
+                          <span className='text-sm text-slate-500 group-hover:text-green-500'>
+                            0
+                          </span>
+                        </div>
+                        <div className='flex gap-1 items-center group cursor-pointer'>
+                          <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
+                          {/* <span
                       className={`text-sm group-hover:text-pink-500 ${
                         isLiked ? 'text-pink-500' : 'text-slate-500'
                       }`}>
                       {post.likes.length}
                     </span> */}
+                          <span className='text-sm text-slate-500 group-hover:text-pink-500'>
+                            0
+                          </span>
+                        </div>
+                      </div>
+                      <div className='flex w-1/3 justify-end gap-2 group items-center'>
+                        <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:text-sky-400' />
                       </div>
                     </div>
-                    <div className='flex w-1/3 justify-end gap-2 group items-center'>
-                      <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:text-sky-400' />
-                    </div>
-                  </div>
+                  </Link>
                 </div>
               );
             })

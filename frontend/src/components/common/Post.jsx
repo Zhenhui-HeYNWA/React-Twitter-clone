@@ -1,208 +1,138 @@
 import { useEffect, useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
-
 import { FaRegHeart, FaTrash, FaRegBookmark, FaBookmark } from 'react-icons/fa';
-
 import { BiRepost, BiComment } from 'react-icons/bi';
 
 import LoadingSpinner from './LoadingSpinner';
 import { formatPostDate } from '../../utils/date';
+import usePostMutations from '../../hooks/usePostMutations';
 
+// Function to check the existence of mentioned users
+const fetchMentionedUsersExistence = async (usernames) => {
+  const res = await fetch('/api/users/check-user', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ usernames }),
+  });
+  const data = await res.json();
+  return data; // This should return an object like { username1: true, username2: false }
+};
+
+// Post component
 const Post = ({ post, posts }) => {
-  const [comment, setComment] = useState('');
-  const queryClient = useQueryClient();
-  const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
-  const { data: authUser } = useQuery({ queryKey: ['authUser'] });
+  const [comment, setComment] = useState(''); // State to store comment input
+  const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
+  const [mentionedUsersExistence, setMentionedUsersExistence] = useState({}); // State to store the existence of mentioned users
+  const { data: authUser } = useQuery({ queryKey: ['authUser'] }); // Fetch the current authenticated user's data
 
-  const isOriginalPost = post.repost?.originalPost == null;
+  const postId = post?._id; // Get the current post ID
+  const isOriginalPost = post.repost?.originalPost == null; // Check if the post is an original post
 
+  // Check if the authenticated user has reposted this post
   useEffect(() => {
     if (authUser) {
-      // 查找源帖子 ID（如果是转发的帖子）
       const originalPostId = post.repost?.originalPost || post._id;
-
-      // 检查当前用户是否在转发列表中
       const isReposted = authUser.repostedPosts.includes(originalPostId);
       setIsRepostedByAuthUser(isReposted);
     } else {
-      setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
+      setIsRepostedByAuthUser(false);
     }
   }, [authUser, post, posts]);
 
-  const isLiked = post.likes.includes(authUser._id);
-
-  const isAuthUserRepost = post.user._id === authUser._id;
-  const isMarked = post.bookmarks.includes(authUser._id);
-  const isMyPost = authUser._id === post.user._id;
-
-  const formattedDate = formatPostDate(post.createdAt);
-
-  const { mutate: deletePost, isPending: isDeleting } = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch(`/api/posts/${post._id}`, {
-          method: 'DELETE',
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return data;
-      } catch (error) {
-        throw new Error(error);
-      }
-    },
-
-    onSuccess: () => {
-      toast.success('Post deleted successfully');
-      //TODO: Invalidate the query to refetch the data
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    },
-  });
-
-  const { mutate: likePost, isPending: isLiking } = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch(`/api/posts/like/${post._id}`, {
-          method: 'POST',
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return data;
-      } catch (error) {
-        throw new Error(error.message);
-      }
-    },
-    onSuccess: (updatedLikes) => {
-      queryClient.setQueryData(['posts'], (oldData) => {
-        return oldData.map((p) => {
-          if (p._id === post._id) {
-            return { ...p, likes: updatedLikes };
-          }
-          return p;
-        });
-      });
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const { mutate: commentPost, isPending: isCommenting } = useMutation({
-    mutationFn: async ({ postId, text }) => {
-      try {
-        const res = await fetch(`/api/posts/comment/${postId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ text }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return { comments: data, postId };
-      } catch (error) {
-        throw new Error(error.message);
-      }
-    },
-    onSuccess: ({ comments, postId }) => {
-      toast.success('Comment posted successfully');
-      setComment('');
-
-      // 更新缓存中的评论数据，包括完整的用户信息
-      queryClient.setQueryData(['posts'], (oldData) => {
-        return oldData.map((p) => {
-          if (p._id === postId) {
-            return { ...p, comments };
-          }
-          return p;
-        });
-      });
-
-      // 关闭评论模态框
-      const modal = document.getElementById('comments_modal' + post._id);
-      if (modal) {
-        modal.close();
-      }
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const { mutate: bookmarkPost, isPending: isBookmarking } = useMutation({
-    mutationFn: async () => {
-      try {
-        const res = await fetch(`/api/posts/bookmark/${post._id}`, {
-          method: 'POST',
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return data;
-      } catch (error) {
-        throw new Error(error.message);
-      }
-    },
-    onSuccess: (updatedBookmarks) => {
-      // queryClient.invalidateQueries({ queryKey: ['posts'] });
-      //Instead, update the cache directly for that post
-      queryClient.setQueryData(['posts'], (oldData) => {
-        return oldData.map((p) => {
-          if (p._id === post._id) {
-            return { ...p, bookmarks: updatedBookmarks };
-          }
-          return p;
-        });
-      });
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const { mutate: repostPost, isPending: isReposting } = useMutation({
-    mutationFn: async ({ actionType }) => {
-      try {
-        const res = await fetch(`/api/posts/repost/${post._id}`, {
-          method: 'POST',
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return { data, actionType };
-      } catch (error) {
-        throw new Error(error.message);
-      }
-    },
-    onSuccess: ({ actionType }) => {
-      toast.success(`Post ${actionType} successfully`);
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const handleDeletePost = () => {
-    deletePost();
+  // Fetch comments for the specific post
+  const fetchComments = async (postId) => {
+    const res = await fetch(`/api/posts/${postId}/comments`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Something went wrong');
+    return data;
   };
+
+  // Inside your Post component:
+  const { data: comments, isLoading: isLoadingComments } = useQuery({
+    queryKey: ['comments', postId],
+    queryFn: () => fetchComments(postId),
+  });
+
+  // Check if mentioned users exist
+  useEffect(() => {
+    const mentionedUsernames = (
+      post?.text?.match(/@\w+/g) ||
+      post?.repost?.originalText?.match(/@\w+/g) ||
+      []
+    ).map((m) => m.substring(1));
+
+    if (mentionedUsernames.length > 0) {
+      fetchMentionedUsersExistence(mentionedUsernames).then(
+        setMentionedUsersExistence
+      );
+    }
+  }, [post.text, post.repost.originalText]);
+
+  const isLiked = post.likes.includes(authUser._id); // Check if the post is liked by the authenticated user
+  const isAuthUserRepost = post.user._id === authUser._id; // Check if the repost was made by the authenticated user
+  const isMarked = post.bookmarks.includes(authUser._id); // Check if the post is bookmarked by the authenticated user
+  const isMyPost = authUser._id === post.user._id; // Check if the post belongs to the authenticated user
+  const formattedDate = formatPostDate(post.createdAt); // Format the post creation date
+
+  // Hook to handle post mutations like delete, like, bookmark, and repost
+  const {
+    commentPostAdvanced,
+    isPostCommenting,
+    likePost,
+    isLiking,
+    deletePost,
+    isDeleting,
+    bookmarkPost,
+    isBookmarking,
+    repostPost,
+    isReposting,
+  } = usePostMutations(postId);
+
+  // Handle post deletion
+  const handleDeletePost = () => {
+    if (isDeleting) return;
+    deletePost({
+      onSuccess: () => {
+        setIsRepostedByAuthUser(false); // Reset the repost state after deletion
+      },
+    });
+  };
+
+  // Handle comment submission
   const handlePostComment = (e) => {
     e.preventDefault();
-    if (isCommenting) return;
-    commentPost({ postId: post._id, text: comment });
+    if (isPostCommenting) return;
+    commentPostAdvanced(
+      { postId: postId, text: comment },
+      {
+        onSuccess: () => {
+          setComment(''); // Clear the comment input after successful submission
+
+          const modal = document.getElementById('comments_modal' + post._id);
+          if (modal) {
+            modal.close();
+          }
+        },
+      }
+    );
   };
 
+  // Handle bookmarking the post
   const handleBookmarkPost = () => {
     if (isBookmarking) return;
     bookmarkPost();
   };
 
+  // Handle liking the post
   const handleLikePost = () => {
     if (isLiking) return;
     likePost();
   };
 
+  // Handle reposting the post
   const handleRepost = () => {
     if (isReposting) return;
 
@@ -214,26 +144,36 @@ const Post = ({ post, posts }) => {
     return;
   };
 
+  // Highlight mentions in the post text
   const highlightMentions = (text) => {
-    const regex = /@\w+/g; // Regex to find mentions in the text
-    return text.split(regex).map((part, index) => {
-      const match = text.match(regex)?.[index];
-      if (match) {
-        return (
-          <span key={index}>
-            {part}
-            <Link to={`/profile/${match.substring(1)}`}>
-              <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
-                {match}
-              </span>
-            </Link>
-          </span>
-        );
-      }
-      return part;
-    });
-  };
+    const regex = /@\w+/g;
+    const handleClick = (e, path) => {
+      e.stopPropagation();
+      window.location.href = path;
+    };
 
+    return text.split(regex).reduce((acc, part, index) => {
+      if (index === 0) {
+        return [part];
+      }
+
+      const match = text.match(regex)[index - 1];
+      const username = match.substring(1);
+
+      acc.push(
+        <span
+          key={index}
+          className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'
+          onClick={(e) => handleClick(e, `/profile/${username}`)}
+          style={{ cursor: 'pointer' }}>
+          {match}
+        </span>,
+        part
+      );
+
+      return acc;
+    }, []);
+  };
   return (
     <>
       <div className='flex flex-col'>
@@ -325,16 +265,28 @@ const Post = ({ post, posts }) => {
             </div>
             <div className='flex flex-col gap-3 overflow-hidden'>
               {isOriginalPost && (
-                <span className='text-lg'>{highlightMentions(post.text)}</span>
+                <Link
+                  className='nav-link'
+                  to={`/${authUser.username}/status/${post._id}`}>
+                  <span className='text-lg'>
+                    {highlightMentions(post.text)}
+                  </span>
+                </Link>
               )}
               {!isOriginalPost && (
-                <span className='text-lg'>
-                  {highlightMentions(post.repost.originalText)}
-                </span>
+                <Link
+                  className='nav-link'
+                  to={`/${authUser.username}/status/${post._id}`}>
+                  <span className='text-lg'>
+                    {highlightMentions(post.repost.originalText)}
+                  </span>
+                </Link>
               )}
 
               {isOriginalPost && post.img && (
-                <Link to={`/${authUser.username}/status/${post._id}`}>
+                <Link
+                  className='nav-link'
+                  to={`/${authUser.username}/status/${post._id}`}>
                   <img
                     src={post.img}
                     className='h-80 object-cover rounded-lg border border-gray-700 mt-2'
@@ -343,7 +295,9 @@ const Post = ({ post, posts }) => {
                 </Link>
               )}
               {!isOriginalPost && post.repost.originalImg && (
-                <Link to={`/${authUser.username}/status/${post._id}`}>
+                <Link
+                  className='nav-link'
+                  to={`/${authUser.username}/status/${post._id}`}>
                   <img
                     src={post.repost.originalImg}
                     className='h-80 object-cover rounded-lg border border-gray-700 mt-2'
@@ -373,7 +327,7 @@ const Post = ({ post, posts }) => {
                   <div className='modal-box rounded border bg-gray-100 dark:bg-secondary  border-gray-600'>
                     <h3 className='font-bold text-lg mb-4'>COMMENTS</h3>
                     <div className='flex flex-col gap-3 max-h-60 overflow-auto'>
-                      {post.comments.length === 0 && (
+                      {post?.comments?.length === 0 && (
                         <p className='text-sm text-slate-500'>
                           No comments yet 🤔 Be the first one 😉
                         </p>
@@ -384,24 +338,19 @@ const Post = ({ post, posts }) => {
                           className='flex gap-2 items-start'>
                           <div className='avatar'>
                             <div className='w-8 rounded-full'>
-                              <img
-                                src={
-                                  comment.user.profileImg ||
-                                  '/avatar-placeholder.png'
-                                }
-                              />
+                              <img src={'/avatar-placeholder.png'} />
                             </div>
                           </div>
                           <div className='flex flex-col'>
                             <div className='flex items-center gap-1'>
                               <span className='font-bold'>
-                                {comment.user.fullName}
+                                {comment?.user?.fullName}
                               </span>
                               <span className='text-gray-700 text-sm'>
-                                @{comment.user.username}
+                                @{comment?.user?.username}
                               </span>
                             </div>
-                            <div className='text-sm'>{comment.text}</div>
+                            <div className='text-sm'>{comment?.text}</div>
                           </div>
                         </div>
                       ))}
@@ -416,7 +365,11 @@ const Post = ({ post, posts }) => {
                         onChange={(e) => setComment(e.target.value)}
                       />
                       <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
-                        {isCommenting ? <LoadingSpinner size='md' /> : 'Post'}
+                        {isPostCommenting ? (
+                          <LoadingSpinner size='md' />
+                        ) : (
+                          'Post'
+                        )}
                       </button>
                     </form>
                   </div>

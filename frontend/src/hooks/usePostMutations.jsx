@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 const usePostMutations = (postId) => {
   const queryClient = useQueryClient();
 
-  const deletePost = useMutation({
+  const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
       try {
         const res = await fetch(`/api/posts/${postId}`, {
@@ -113,7 +113,7 @@ const usePostMutations = (postId) => {
 
   const { mutate: commentPostSimple, isPending: isCommenting } = useMutation({
     mutationFn: async ({ text }) => {
-      const res = await fetch(`/api/posts/comment/${postId}`, {
+      const res = await fetch(`/api/comments/comment/${postId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,40 +134,46 @@ const usePostMutations = (postId) => {
     },
   });
 
-  const commentPostAdvanced = useMutation({
-    mutationFn: async ({ text }) => {
-      try {
-        const res = await fetch(`/api/posts/comment/${postId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ text }),
-        });
+  const { mutate: commentPostAdvanced, isPending: isPostCommenting } =
+    useMutation({
+      mutationFn: async ({ postId, text }) => {
+        try {
+          const res = await fetch(`/api/comments/comment/${postId}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text }),
+          });
 
-        const data = await res.json();
-        console.log(data);
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return { comments: data, postId };
-      } catch (error) {
-        throw new Error(error.message);
-      }
-    },
-    onSuccess: ({ updateComments, postId }) => {
-      toast.success('Comment posted successfully');
-      queryClient.setQueryData(['posts'], (oldData) => {
-        return oldData.map((p) => {
-          if (p._id === postId) {
-            return { ...p, comments: updateComments };
-          }
-          return p;
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Something went wrong');
+          return { comments: data, postId };
+        } catch (error) {
+          throw new Error(error.message);
+        }
+      },
+      onSuccess: ({ comments, postId }) => {
+        toast.success('Comment posted successfully');
+
+        // 更新缓存中的评论数据，包括完整的用户信息
+        queryClient.setQueryData(['posts'], (oldData) => {
+          return oldData.map((p) => {
+            if (p._id === postId) {
+              return { ...p, comments };
+            }
+            return p;
+          });
         });
-      });
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },
+    });
+
+
+
+    
   const { mutate: repostPost, isPending: isReposting } = useMutation({
     mutationFn: async ({ actionType }) => {
       try {
@@ -194,6 +200,7 @@ const usePostMutations = (postId) => {
 
   return {
     deletePost,
+    isDeleting,
     likePost,
     isLiking,
     bookmarkPost,
@@ -201,6 +208,7 @@ const usePostMutations = (postId) => {
     commentPostSimple,
     isCommenting,
     commentPostAdvanced,
+    isPostCommenting,
     repostPost,
     isReposting,
   };

@@ -13,6 +13,7 @@ import FollowPage from './pages/follow/FollowPage';
 import { Toaster } from 'react-hot-toast';
 import useMediaQuery from './hooks/useMediaQuery'; // 导入 useMediaQuery
 import SinglePost from './components/common/SinglePost';
+import CommentPage from './components/common/CommentPage';
 
 function App() {
   const { data: authUser, isLoading } = useQuery({
@@ -79,6 +80,10 @@ function App() {
           <Route
             path='/:username/status/:postId'
             element={authUser ? <SinglePost /> : <Navigate to='/login' />}
+          />
+          <Route
+            path='/:postId/comment/:username/:commentId'
+            element={authUser ? <CommentPage /> : <Navigate to='/login' />}
           />
           <Route
             path='/follow/:username'

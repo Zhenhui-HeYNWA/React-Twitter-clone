@@ -52,12 +52,13 @@ export const createPost = async (req, res) => {
   }
 };
 export const deletePost = async (req, res) => {
+  const userId = req.user._id;
   try {
     const post = await Post.findById(req.params.id);
     if (!post) {
       return res.status(404).json({ message: '帖子未找到' });
     }
-    if (post.user.toString() !== req.user._id.toString()) {
+    if (post.user.toString() !== userId.toString()) {
       return res.status(401).json({ message: '你没有权限删除此帖子' });
     }
 
@@ -66,9 +67,11 @@ export const deletePost = async (req, res) => {
       await cloudinary.uploader.destroy(imgId);
     }
 
-    // 如果帖子是转发帖，则更新原始帖子的转发数和所有相关转发帖子的转发数
+    let originalPostId;
+
+    // 如果帖子是转发帖，则更新原始帖子的转发数
     if (post.repost && post.repost.originalPost) {
-      const originalPostId = post.repost.originalPost;
+      originalPostId = post.repost.originalPost;
 
       await Post.findByIdAndUpdate(originalPostId, {
         $inc: { repostByNum: -1 },
@@ -92,17 +95,22 @@ export const deletePost = async (req, res) => {
 
       await updateRelatedPosts(originalPostId);
 
-      // 从所有转发该原始帖子的用户中移除该帖子
-      const usersWithRepostedPost = await User.find({
-        repostedPosts: originalPostId,
-      });
-      for (const user of usersWithRepostedPost) {
-        await User.findByIdAndUpdate(user._id, {
-          $pull: { repostedPosts: post._id },
-        });
-      }
+      // 从所有转发该原始帖子的用户的repostedPosts字段中移除原始帖子ID
+      await User.updateMany(
+        { repostedPosts: originalPostId },
+        { $pull: { repostedPosts: originalPostId } }
+      );
+    } else {
+      // 如果帖子是原始帖子，直接从所有用户的repostedPosts字段中移除帖子ID
+      originalPostId = req.params.id;
+
+      await User.updateMany(
+        { repostedPosts: originalPostId },
+        { $pull: { repostedPosts: originalPostId } }
+      );
     }
 
+    // 删除帖子
     await Post.findByIdAndDelete(req.params.id);
 
     res.status(200).json({ message: '帖子已从数据库中删除' });
@@ -111,40 +119,42 @@ export const deletePost = async (req, res) => {
     res.status(500).json({ error: '服务器内部错误' });
   }
 };
-export const commentOnPost = async (req, res) => {
-  try {
-    const { text } = req.body;
-    const postId = req.params.id;
-    const userId = req.user._id;
 
-    if (!text) {
-      return res.status(400).json({ error: 'Text field is required' });
-    }
+//To Fix
+// export const commentOnPost = async (req, res) => {
+//   try {
+//     const { text } = req.body;
+//     const postId = req.params.id;
+//     const userId = req.user._id;
 
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: 'Post not found' });
-    }
+//     if (!text) {
+//       return res.status(400).json({ error: 'Text field is required' });
+//     }
 
-    const comment = { user: userId, text };
+//     const post = await Post.findById(postId);
+//     if (!post) {
+//       return res.status(404).json({ message: 'Post not found' });
+//     }
 
-    post.comments.push(comment);
-    await post.save();
+//     const comment = { user: userId, text };
 
-    // Populate user information in the comments
-    await post.populate({
-      path: 'comments.user',
-      select: 'fullName username profileImg', // Only select necessary fields
-    });
+//     post.comments.push(comment);
+//     await post.save();
 
-    const updatedComments = post.comments;
+//     // Populate user information in the comments
+//     await post.populate({
+//       path: 'comments.user',
+//       select: 'fullName username profileImg', // Only select necessary fields
+//     });
 
-    res.status(200).json(updatedComments);
-  } catch (error) {
-    console.log('Error in commentOnPost controller:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+//     const updatedComments = post.comments;
+
+//     res.status(200).json(updatedComments);
+//   } catch (error) {
+//     console.log('Error in commentOnPost controller:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
 
 export const likeUnlikePost = async (req, res) => {
   try {
@@ -534,22 +544,53 @@ export const getSinglePost = async (req, res) => {
   }
 };
 
-export const getPostComments = async (req, res) => {
-  const { id: postId } = req.params;
+//To Fix
+// export const getPostComments = async (req, res) => {
+//   const { id: postId } = req.params;
 
-  try {
-    const post = await Post.findById(postId)
-      .select('comments') // select only comments field
-      .populate({
-        path: 'comments.user',
-        select: '-password', // populate user without password
-      });
+//   try {
+//     const post = await Post.findById(postId)
+//       .select('comments') // select only comments field
+//       .populate({
+//         path: 'comments.user',
+//         select: '-password', // populate user without password
+//       });
 
-    if (!post) return res.status(404).json({ error: 'Post not found' });
+//     if (!post) return res.status(404).json({ error: 'Post not found' });
 
-    res.status(200).json(post.comments);
-  } catch (error) {
-    console.log('Error in getPostComments controller:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-};
+//     res.status(200).json(post.comments);
+//   } catch (error) {
+//     console.log('Error in getPostComments controller:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
+//To Fix
+// export const getSingleComment = async (req, res) => {
+//   const { postId, username, commentId } = req.params;
+
+//   try {
+//     // Assuming you are using Mongoose and the comments are stored in a Post schema
+//     const post = await Post.findOne(
+//       { _id: postId, 'comments._id': commentId },
+//       { 'comments.$': 1 }
+//     ).populate({
+//       path: 'comments.user',
+//       select: '-password', // populate user without password
+//     });
+
+//     if (!post || !post.comments || post.comments.length === 0) {
+//       return res.status(404).json({ message: 'Comment not found' });
+//     }
+
+//     const comment = post.comments[0];
+
+//     // You can add additional checks here, such as verifying the username if necessary
+//     // For example, you might want to check if the comment's author matches the provided username
+
+//     return res.status(200).json(comment);
+//   } catch (error) {
+//     console.error(error);
+//     return res.status(500).json({ message: 'Server error' });
+//   }
+// };

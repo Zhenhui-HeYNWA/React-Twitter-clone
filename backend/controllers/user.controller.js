@@ -218,19 +218,29 @@ export const getSearchUser = async (req, res) => {
 
 export const getMentionedUsers = async (req, res) => {
   try {
+    // 获取 userames，如果未定义或者不是数组，设置为空数组
     const { usernames } = req.body;
+    if (!Array.isArray(usernames)) {
+      return res.status(400).json({ error: 'usernames must be an array' });
+    }
+
+    // 在数据库中查找这些用户名
     const users = await User.find({ username: { $in: usernames } });
+
+    // 使用 reduce 方法构建一个字典，将存在的用户名标记为 true
     const userExistMap = users.reduce((acc, user) => {
       acc[user.username] = true;
       return acc;
     }, {});
 
+    // 对于不存在的用户名，将其标记为 false
     usernames.forEach((username) => {
       if (!userExistMap[username]) {
         userExistMap[username] = false;
       }
     });
 
+    // 返回一个对象，表示每个用户名是否存在
     res.json(userExistMap);
   } catch (error) {
     console.error('Error checking user existence:', error);
