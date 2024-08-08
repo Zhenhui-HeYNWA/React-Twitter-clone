@@ -6,7 +6,7 @@ const userHighlightMentions = (text, username) => {
     const match = text.match(regex)?.[index];
     if (match) {
       return (
-        <Link key={index} to={`/profile/${username}`}>
+        <Link key={username + index} to={`/profile/${username}`}>
           <span>
             {part}
             <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>

@@ -139,7 +139,9 @@ const SinglePost = () => {
       const match = text.match(regex)?.[index];
       if (match) {
         return (
-          <Link key={index} to={`/profile/${post.user.username}`}>
+          <Link
+            key={post.user._id + index}
+            to={`/profile/${post.user.username}`}>
             <span>
               {part}
               <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
@@ -175,7 +177,7 @@ const SinglePost = () => {
         )}
 
         <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
-          <div className='flex gap-10 px-4 py-1 items-center'>
+          <div className='flex gap-10  py-1 items-center'>
             <Link to='/'>
               <FaArrowLeft className='w-4 h-4' />
             </Link>
@@ -546,7 +548,7 @@ const SinglePost = () => {
             </>
           ) : (
             comments.map((comment) => {
-              console.log('comment', comment);
+             
               const formattedHours = formatPostDate(comment?.createdAt);
               return (
                 <div

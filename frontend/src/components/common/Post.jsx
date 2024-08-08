@@ -44,7 +44,9 @@ const Post = ({ post, posts }) => {
 
   // Fetch comments for the specific post
   const fetchComments = async (postId) => {
-    const res = await fetch(`/api/posts/${postId}/comments`);
+    const res = await fetch(
+      `/api/comments/${post.user.username}/status/${postId}/comments`
+    );
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Something went wrong');
     return data;
@@ -162,7 +164,7 @@ const Post = ({ post, posts }) => {
 
       acc.push(
         <span
-          key={index}
+          key={post._id + index}
           className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'
           onClick={(e) => handleClick(e, `/profile/${username}`)}
           style={{ cursor: 'pointer' }}>
@@ -332,13 +334,19 @@ const Post = ({ post, posts }) => {
                           No comments yet 🤔 Be the first one 😉
                         </p>
                       )}
-                      {post.comments.map((comment) => (
+
+                      {comments?.map((comment) => (
                         <div
-                          key={comment._id}
+                          key={comment?._id}
                           className='flex gap-2 items-start'>
                           <div className='avatar'>
                             <div className='w-8 rounded-full'>
-                              <img src={'/avatar-placeholder.png'} />
+                              <img
+                                src={
+                                  comment.user.profileImg ||
+                                  '/avatar-placeholder.png'
+                                }
+                              />
                             </div>
                           </div>
                           <div className='flex flex-col'>

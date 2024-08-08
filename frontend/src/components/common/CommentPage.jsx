@@ -181,7 +181,7 @@ const CommentPage = () => {
         </div>
         <div>
           <div>
-            <div className='flex gap-2 items-start py-1 px-4 s justify-center hover:bg-gray-200'>
+            <div className='flex gap-2 items-start py-1 px-4 s justify-center hover:bg-slate-200 dark:hover:bg-inherit'>
               {isPostLoading && <PostSkeleton />}
               {!isPostLoading && !post && (
                 <p className='text-center text-lg mt-4'>Post not found</p>
@@ -220,7 +220,7 @@ const CommentPage = () => {
                             </Link>
                           )}
                         </div>
-                        <div className='w-0.5 bg-slate-300 h-full mt-1'></div>
+                        <div className='w-0.5 bg-slate-700 h-full mt-1'></div>
                       </div>
 
                       <div className='flex flex-col  w-full gap-2 '>
@@ -591,7 +591,7 @@ const CommentPage = () => {
               return (
                 <div
                   key={reply._id}
-                  className='md:px-2.5 border-b-2 hover:bg-gray-200'>
+                  className='md:px-2.5 border-b-2  border-gray-700 hover:bg-slate-200 dark:hover:bg-inherit'>
                   <RenderSubComments postComment={reply} />
                 </div>
               );

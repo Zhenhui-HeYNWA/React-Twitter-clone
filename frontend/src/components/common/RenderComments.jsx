@@ -62,7 +62,7 @@ const RenderComments = ({ comment }) => {
             return (
               <div key={structuredComment._id}>
                 {' '}
-                <div className='flex gap-2 items-start py-1 px-4 hover:bg-gray-200 relative'>
+                <div className='flex gap-2 items-start py-1 px-4  relative'>
                   {/* 线条 */}
 
                   <div className='relative flex flex-col flex-1'>
@@ -135,7 +135,7 @@ const RenderComments = ({ comment }) => {
                           </div>
 
                           {/* comment functions section*/}
-                          <div className='flex flex-row items-center justify-between bg-pink-200'>
+                          <div className='flex flex-row items-center justify-between '>
                             <div className='flex gap-1 items-center cursor-pointer group'>
                               <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
                               <span className='text-sm text-slate-500 group-hover:text-sky-400'>
@@ -220,7 +220,7 @@ const RenderComments = ({ comment }) => {
               <div className='text-gray-500'>
                 {formatDateTime(comment?.createdAt)}
               </div>
-              <div className='flex flex-row gap-5 items-center justify-between border-y-2 py-4'>
+              <div className='flex flex-row gap-5 items-center justify-between border-y-2  border-gray-700 py-4'>
                 <div className='flex flex-row gap-2 items-center text-slate-500 hover:text-sky-400 cursor-pointer'>
                   <BiComment size={20} />
                   <span>{comment?.replies?.length}</span>

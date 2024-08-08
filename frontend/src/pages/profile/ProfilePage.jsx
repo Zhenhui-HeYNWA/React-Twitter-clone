@@ -102,7 +102,7 @@ const ProfilePage = () => {
         <div className='flex flex-col h-full  '>
           {!isLoading && !isRefetching && user && (
             <>
-              <div className='sticky top-0   z-10 w-full   backdrop-blur-sm px-4 py-2 '>
+              <div className='sticky top-0   z-10 w-full   backdrop-blur-xl px-4 py-2 '>
                 <div className=' mx-auto flex items-center  justify-between '>
                   <div className='flex  flex-row items-center gap-10'>
                     <Link to='/'>
