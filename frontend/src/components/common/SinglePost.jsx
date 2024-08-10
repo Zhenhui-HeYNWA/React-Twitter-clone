@@ -303,7 +303,7 @@ const SinglePost = () => {
             </div>
           )}
         </div>
-        <div className='flex justify-between my-1 px-4 border-b border-gray-200 dark:border-gray-700 py-2'>
+        <div className='flex justify-between my-1 px-14 border-b border-gray-200 dark:border-gray-700 py-2   '>
           <div className='flex gap-4 items-center w-2/3 justify-between'>
             <div
               className='flex gap-1 items-center cursor-pointer group'
@@ -548,12 +548,11 @@ const SinglePost = () => {
             </>
           ) : (
             comments.map((comment) => {
-             
               const formattedHours = formatPostDate(comment?.createdAt);
               return (
                 <div
                   key={comment._id}
-                  className='border-b border-gray-200 dark:border-gray-700 px-2'>
+                  className='border-b border-gray-200 dark:border-gray-700 px-2 pt-2'>
                   <Link
                     to={`/${postId}/comment/${comment.user.username}/${comment._id}`}>
                     <div className='flex gap-2 flex-col items-start'>
@@ -592,7 +591,7 @@ const SinglePost = () => {
                         <div className='flex gap-1 items-center cursor-pointer group'>
                           <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
                           <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                            {/* {post.comments.length} */}
+                            {comment?.replies.length}
                           </span>
                         </div>
                         <div className='flex gap-1 items-center group cursor-pointer'>

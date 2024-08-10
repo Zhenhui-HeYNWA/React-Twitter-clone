@@ -56,10 +56,12 @@ export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) {
-      return res.status(404).json({ message: '帖子未找到' });
+      return res.status(404).json({ message: 'Post no found' });
     }
-    if (post.user.toString() !== userId.toString()) {
-      return res.status(401).json({ message: '你没有权限删除此帖子' });
+    if (post.user._id.toString() !== userId.toString()) {
+      return res
+        .status(401)
+        .json({ message: 'You have no right to delete this post' });
     }
 
     if (post.img) {

@@ -4,12 +4,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
 import { BiComment, BiRepost } from 'react-icons/bi';
 import { formatPostDate } from '../../utils/date';
+import useCommentMutations from '../../hooks/useCommentMutations';
 
 const RenderSubComments = ({ postComment }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
   const isMyComment = authUser._id === postComment?.user._id;
-  const isCommentDeleting = false;
+
   const navigate = useNavigate();
   const formattedPostDate = postComment
     ? formatPostDate(postComment.createdAt)
@@ -20,9 +21,18 @@ const RenderSubComments = ({ postComment }) => {
       `/${postComment?.postId}/comment/${postComment?.user?.username}/${postComment?._id}`
     );
   };
+
+  const { replyComment, isReplying, deleteComment, isCommentDeleting } =
+    useCommentMutations();
+
+  const handleDeleteComment = (commentId) => {
+    console.log(commentId);
+    if (isCommentDeleting) return;
+    deleteComment({ commentId });
+  };
   return (
-    <div className=' flex flex-col flex-1 justify-center py-2 '>
-      <div className='flex flex-col gap-2 justify-between px-4'>
+    <div className=' flex flex-col flex-1 justify-center py-2  '>
+      <div className='flex flex-col gap-2 justify-between px-4 '>
         <div className='flex gap-4  '>
           <div className='flex flex-col  items-center'>
             <div className=' avatar '>
@@ -67,7 +77,7 @@ const RenderSubComments = ({ postComment }) => {
                     {!isCommentDeleting && (
                       <FaTrash
                         className='cursor-pointer hover:text-red-500'
-                        // onClick={handleDeletePost}
+                        onClick={() => handleDeleteComment(postComment._id)}
                       />
                     )}
                     {isCommentDeleting && <LoadingSpinner size='sm' />}

@@ -17,65 +17,70 @@ import { CiImageOn } from 'react-icons/ci';
 import { BsEmojiSmileFill } from 'react-icons/bs';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 import userHighlightMentions from '../../hooks/userHighlightMentions';
-import Comments from './RenderComments';
+
 import RenderComments from './RenderComments';
 import RenderSubComments from './RenderSubComments';
 import SingleCommentSkeleton from '../skeletons/SingleCommentSkeleton';
+import useCommentMutations from '../../hooks/useCommentMutations';
 
 const CommentPage = () => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
+  const [comment, setComment] = useState('');
+  const [replyToPost, setReplyToPost] = useState('');
+  const [showNav, setShowNav] = useState(false);
+  const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
+
   const { username, postId, commentId } = useParams();
+
+  const radioRef = useRef(null);
+
   // Fetch post data
   const { data: post, isLoading: isPostLoading } = useQuery({
     queryKey: ['post', postId],
     queryFn: async () => {
       const res = await fetch(`/api/posts/${username}/status/${postId}`);
       const data = await res.json();
-      console.log(data);
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       return data;
     },
   });
-  const { data: postComment, isLoading } = useQuery({
+
+  //Post checked
+  const isMyPost = authUser._id === post?.user._id;
+  const isLiked = post ? post.likes.includes(authUser._id) : false;
+  const isMarked = post ? post.bookmarks.includes(authUser._id) : false;
+  const isAuthUserRepost = post?.user._id === authUser._id;
+  const isOriginalPost = post?.repost?.originalPost == null;
+
+  const formattedPostDate = post ? formatPostDate(post.createdAt) : '';
+
+  const { data: postComment } = useQuery({
     queryKey: ['comment', commentId],
     queryFn: async () => {
       const res = await fetch(
         `/api/comments/${postId}/comment/${username}/${commentId}`
       );
       const data = await res.json();
-      console.log(data);
+
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       return data;
     },
   });
-  console.log(postComment);
-  const [comment, setComment] = useState('');
-  const [showNav, setShowNav] = useState(false);
-  const isMyPost = authUser._id === post?.user._id;
 
-  const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
-  const isAuthUserRepost = post?.user._id === authUser._id;
-  const isMyComment = true;
-  const isCommentDeleting = false;
-  console.log(post);
-
-  const isOriginalPost = post?.repost?.originalPost == null;
   useEffect(() => {
     if (authUser) {
-      // 查找源帖子 ID（如果是转发的帖子）
+      // Find the original post ID (if it's a repost)
       const originalPostId = post?.repost?.originalPost || post?._id;
 
-      // 检查当前用户是否在转发列表中
+      // Check if the current user is in the list of users who reposted this post
       const isReposted = authUser.repostedPosts.includes(originalPostId);
       setIsRepostedByAuthUser(isReposted);
     } else {
-      setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
+      setIsRepostedByAuthUser(false); // If there's no authenticated user, set the repost status to false by default
     }
   }, [authUser, post]);
-
-  const radioRef = useRef(null);
 
   const handleTextareaClick = () => {
     setShowNav(true);
@@ -92,11 +97,15 @@ const CommentPage = () => {
         `/api/comments/${username}/status/${postId}/comments`
       );
       const data = await res.json();
+      console.log('data2', data);
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       return data;
     },
   });
 
+  const CommentUsername = comments?.map((comment) => comment?.user?.username);
+
+  //Post Mutations
   const {
     commentPostSimple,
     isCommenting,
@@ -110,17 +119,21 @@ const CommentPage = () => {
     isDeleting,
   } = usePostMutations(postId);
 
-  const isLiked = post ? post.likes.includes(authUser._id) : false;
-  const isMarked = post ? post.bookmarks.includes(authUser._id) : false;
+  //Comment Mutations
+  const { replyComment, isReplying } = useCommentMutations();
 
+  //Post:Delete
   const handleDeletePost = () => {
     if (isDeleting) return;
     deletePost;
   };
-  const handleCommentSubmit = (e) => {
+
+  //Post:CommentPost
+  const handlePostCommentSubmit = (e) => {
     e.preventDefault();
+    console.log(1);
     if (commentPostSimple.isLoading) return;
-    commentPostSimple.mutate({ text: comment });
+    commentPostSimple({ text: replyToPost });
     setComment('');
     const modal = document.getElementById('comments_modal' + postId);
     if (modal) {
@@ -128,15 +141,19 @@ const CommentPage = () => {
     }
   };
 
+  //Post: LikePost
   const handleLikePost = () => {
     if (isLiking) return;
     likePost();
   };
+
+  //Post: Bookmark Post
   const handleBookmarkingPost = () => {
     if (isBookmarking) return;
     bookmarkPost();
   };
 
+  //Post: Repost Post
   const handleRepost = () => {
     if (isReposting) return;
 
@@ -148,7 +165,19 @@ const CommentPage = () => {
     return;
   };
 
-  const formattedPostDate = post ? formatPostDate(post.createdAt) : '';
+  //Comment: ReplyComment
+  const handlePostReplyComment = (e) => {
+    e.preventDefault();
+    if (isReplying) return;
+
+    replyComment({ commentId, text: comment });
+    setComment('');
+
+    const modal = document.getElementById(`comments_modal_${commentId}`);
+    if (modal) {
+      modal.close();
+    }
+  };
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full  '>
@@ -179,18 +208,18 @@ const CommentPage = () => {
             </div>
           </div>
         </div>
-        <div>
-          <div>
-            <div className='flex gap-2 items-start py-1 px-4 s justify-center hover:bg-slate-200 dark:hover:bg-inherit'>
+        <div className=''>
+          <div className='post  hover:bg-slate-200   dark:hover:bg-inherit'>
+            <div className='  flex flex-col w-full items-start py-1 px-4 justify-center  '>
               {isPostLoading && <PostSkeleton />}
               {!isPostLoading && !post && (
                 <p className='text-center text-lg mt-4'>Post not found</p>
               )}
 
               {!isPostLoading && post && (
-                <div className='flex flex-col flex-1 '>
-                  <div className='flex flex-col gap-2 items-center justify-between '>
-                    <div className='flex  gap-4 '>
+                <div className='flex flex-col w-full'>
+                  <div className='flex flex-col gap-2 items-center justify-between  '>
+                    <div className='flex  gap-4  w-full '>
                       <div className=' flex flex-col items-center '>
                         <div className='avatar'>
                           {/* Avatar */}
@@ -220,7 +249,7 @@ const CommentPage = () => {
                             </Link>
                           )}
                         </div>
-                        <div className='w-0.5 bg-slate-700 h-full mt-1'></div>
+                        <div className='w-0.5 dark:bg-slate-700  bg-gray-400  h-full mt-1'></div>
                       </div>
 
                       <div className='flex flex-col  w-full gap-2 '>
@@ -329,7 +358,7 @@ const CommentPage = () => {
                           <dialog
                             id={`comments_modal${post?._id}`}
                             className='modal border-none outline-none'>
-                            <div className='modal-box rounded border bg-gray-100 dark:bg-secondary  border-gray-600'>
+                            <div className='modal-box rounded border bg-gray-100 dark:bg-[#15202B]  border-gray-600'>
                               <h3 className='font-bold text-lg mb-4'>
                                 COMMENTS
                               </h3>
@@ -370,17 +399,23 @@ const CommentPage = () => {
                                 ))}
                               </div>
                               <form
-                                className='flex gap-2 items-center mt-4 border-t border-gray-300  dark:border-gray-800  pt-2'
-                                onSubmit={handleCommentSubmit}>
+                                className='flex gap-2 items-center mt-4 border-t border-gray-300  dark:bg-[#15202B]  pt-2'
+                                onSubmit={(e) =>
+                                  handlePostCommentSubmit(e, commentId)
+                                }>
                                 <textarea
-                                  className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-secondary border-gray-100  dark:border-gray-800'
+                                  className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B] border-gray-100  dark:border-secondary'
                                   placeholder='Add a comment...'
-                                  value={comment}
-                                  onChange={(e) => setComment(e.target.value)}
+                                  value={replyToPost}
+                                  onChange={(e) =>
+                                    setReplyToPost(e.target.value)
+                                  }
                                 />
                                 <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
-                                  {commentPostSimple.isCommenting ? (
-                                    <LoadingSpinner size='md' />
+                                  {handlePostCommentSubmit.isCommenting ? (
+                                    <span className=' flex  gap-1 items-center disabled'>
+                                      Posting <LoadingSpinner size='md' />
+                                    </span>
                                   ) : (
                                     'Post'
                                   )}
@@ -505,7 +540,9 @@ const CommentPage = () => {
                 </div>
               )}
             </div>
+          </div>
 
+          <div className='px-4'>
             {/* Comment section */}
             {isCommentsLoading ? (
               <>
@@ -519,84 +556,86 @@ const CommentPage = () => {
               />
             )}
           </div>
+        </div>
 
-          {/* CREATE COMMENT */}
-          <div className='transition-all duration-1000 ease-in-out'>
-            <div
-              className={` hidden md:flex px-16  justify-start items-center text-slate-500 transition-opacity duration-300 ease-in-out ${
-                showNav ? 'opacity-100' : 'opacity-0'
-              }`}>
-              Replying to
-              <p className='text-sky-500'> @{post?.user.username}</p>
-            </div>
-
-            <div className='hidden md:flex items-start gap-4 border-b border-gray-200 dark:border-gray-700 mb-2 px-4'>
-              <div className='avatar flex px-2.5'>
-                <div className='w-12 h-12 rounded-full'>
-                  <img
-                    src={authUser?.profileImg || '/avatar-placeholder.png'}
-                    alt='Profile'
-                    className='transition-all duration-300 ease-in-out'
-                  />
-                </div>
-              </div>
-              <form
-                className={`flex gap-2 w-full ${
-                  showNav ? 'flex-col' : 'flex-row'
-                }`}
-                onSubmit={handleCommentSubmit}>
-                <textarea
-                  className='group textarea w-full p-0 text-2xl resize-none border-none focus:outline-none bg-inherit'
-                  placeholder='Post your reply'
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  onClick={handleTextareaClick}
-                />
-
-                <div className='flex flex-row justify-between'>
-                  <div
-                    className={`flex justify-between py-2 transition-all duration-1000 ease-in-out ${
-                      showNav
-                        ? 'flex-row opacity-100 max-h-full'
-                        : 'flex-row-reverse opacity-0 max-h-0'
-                    }`}>
-                    <div className='nav flex gap-1 items-center'>
-                      <CiImageOn className='fill-primary w-6 h-6 cursor-pointer transition-all duration-1000 ease-in-out' />
-                      <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer transition-all duration-1000 ease-in-out' />
-                    </div>
-                    <input type='file' hidden accept='image/*' />
-                  </div>
-                  <button
-                    disabled={commentPostSimple.isLoading}
-                    className='btn btn-primary rounded-full btn-sm text-white px-4'>
-                    {commentPostSimple.isLoading ? 'Replying' : 'Reply'}
-                  </button>
-                </div>
-              </form>
-            </div>
+        {/* CREATE COMMENT */}
+        <div className='transition-all duration-1000 ease-in-out'>
+          <div
+            className={` hidden md:flex px-16  justify-start items-center text-slate-500 transition-opacity duration-300 ease-in-out ${
+              showNav ? 'opacity-100' : 'opacity-0'
+            }`}>
+            Replying to
+            <p className='text-sky-500'>
+              @{post?.user.username}, {CommentUsername}
+            </p>
           </div>
 
-          {/* SubComment sections */}
-          {/* POST COMMENT */}
-          {isCommentsLoading && (
-            <>
-              <CommentSkeleton />
-              <CommentSkeleton />
-              <CommentSkeleton />
-            </>
-          )}
+          <div className='hidden md:flex items-start gap-4 border-b border-gray-200 dark:border-gray-700 mb-2 px-4'>
+            <div className='avatar flex'>
+              <div className='w-12 h-12 rounded-full'>
+                <img
+                  src={authUser?.profileImg || '/avatar-placeholder.png'}
+                  alt='Profile'
+                  className='transition-all duration-300 ease-in-out'
+                />
+              </div>
+            </div>
+            <form
+              className={`flex gap-2 w-full ${
+                showNav ? 'flex-col' : 'flex-row'
+              }`}
+              onSubmit={handlePostReplyComment}>
+              <textarea
+                className='group textarea w-full p-0 text-2xl resize-none border-none focus:outline-none bg-inherit'
+                placeholder='Post your reply'
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                onClick={handleTextareaClick}
+              />
 
-          {!isCommentsLoading &&
-            postComment?.replies.map((reply) => {
-              return (
+              <div className='flex flex-row justify-between'>
                 <div
-                  key={reply._id}
-                  className='md:px-2.5 border-b-2  border-gray-700 hover:bg-slate-200 dark:hover:bg-inherit'>
-                  <RenderSubComments postComment={reply} />
+                  className={`flex justify-between py-2 transition-all duration-1000 ease-in-out ${
+                    showNav
+                      ? 'flex-row opacity-100 max-h-full'
+                      : 'flex-row-reverse opacity-0 max-h-0'
+                  }`}>
+                  <div className='nav flex gap-1 items-center'>
+                    <CiImageOn className='fill-primary w-6 h-6 cursor-pointer transition-all duration-1000 ease-in-out' />
+                    <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer transition-all duration-1000 ease-in-out' />
+                  </div>
+                  <input type='file' hidden accept='image/*' />
                 </div>
-              );
-            })}
+                <button
+                  disabled={isReplying}
+                  className='btn btn-primary rounded-full btn-sm text-white px-4'>
+                  {isReplying ? 'Replying' : 'Reply'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
+
+        {/* SubComment sections */}
+        {/* POST COMMENT */}
+        {isCommentsLoading && (
+          <>
+            <CommentSkeleton />
+            <CommentSkeleton />
+            <CommentSkeleton />
+          </>
+        )}
+
+        {!isCommentsLoading &&
+          postComment?.replies.map((reply) => {
+            return (
+              <div
+                key={reply._id}
+                className=' border-b-2  border-gray-200 dark:border-gary-700 hover:bg-slate-200 dark:hover:bg-inherit'>
+                <RenderSubComments postComment={reply} />
+              </div>
+            );
+          })}
       </div>
     </div>
   );

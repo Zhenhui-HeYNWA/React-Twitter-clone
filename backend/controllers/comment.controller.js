@@ -138,3 +138,42 @@ export const replyToComment = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+//Delete comment
+export const deleteComment = async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    // 查找评论
+    const comment = await Comment.findById(req.params.id);
+    if (!comment) {
+      return res.status(404).json({ message: 'Comment not found!' });
+    }
+
+    // 验证用户是否有权删除评论
+    if (comment.user._id.toString() !== userId.toString()) {
+      return res
+        .status(401)
+        .json({ message: 'You have no right to delete this comment' });
+    }
+
+    // 如果评论有父级评论，更新父级评论的replies字段
+    if (comment.parentId) {
+      const parentComment = await Comment.findById(comment.parentId);
+      if (parentComment) {
+        parentComment.replies = parentComment.replies.filter(
+          (replyId) => replyId.toString() !== comment._id.toString()
+        );
+        await parentComment.save();
+      }
+    }
+
+    // 删除评论
+    await Comment.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
