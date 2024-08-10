@@ -123,7 +123,6 @@ const RenderComments = ({ comment }) => {
                               <span className='text-base text-gray-500'>·</span>
                               <span className='text-base text-gray-500 flex gap-1'>
                                 {structuredComment?.createdAt}
-                                {structuredComment?._id}
                               </span>
                             </div>
                             {isMyStructuredComment && (
@@ -159,22 +158,21 @@ const RenderComments = ({ comment }) => {
                           <div className='flex flex-row items-center justify-between   '>
                             <div
                               className='flex gap-1 items-center cursor-pointer group'
-                              // onClick={() =>
-                              //   document
-                              //     .getElementById(
-                              //       'replyComments_modal' +
-                              //         structuredComment?._id
-                              //     )
-                              //     .showModal()
-                              // }
-                            >
+                              onClick={() =>
+                                document
+                                  .getElementById(
+                                    'replyComments_modal' +
+                                      structuredComment?._id
+                                  )
+                                  .showModal()
+                              }>
                               <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
                               <span className='text-sm text-slate-500 group-hover:text-sky-400'>
                                 {structuredComment?.replies.length}
                               </span>
                             </div>
 
-                            {/* <dialog
+                            <dialog
                               id={`replyComments_modal${structuredComment?._id}`}
                               className='modal  outline-none '>
                               <div className='modal-box rounded border border-gray-400 bg-gray-100 dark:bg-[#15202B]'>
@@ -250,7 +248,7 @@ const RenderComments = ({ comment }) => {
                               <form method='dialog' className='modal-backdrop'>
                                 <button className='outline-none'>close</button>
                               </form>
-                            </dialog> */}
+                            </dialog>
                             <div className='flex items-center group cursor-pointer gap-1'>
                               <BiRepost
                                 className={`w-6 h-6 text-slate-500 group-hover:text-green-500`}
@@ -318,7 +316,7 @@ const RenderComments = ({ comment }) => {
 
                   <Link to={`/profile/${comment?.user.username}`}>
                     <div className='text-gray-500 flex text-base'>
-                      @{comment?.user.fullName} {comment._id}
+                      @{comment?.user.fullName}
                     </div>
                   </Link>
                 </div>
