@@ -283,7 +283,8 @@ const RenderComments = ({ comment }) => {
           })}
 
         {/* 下方评论内容 */}
-        {comment && (
+        {comment && isLoading && <CommentSkeleton />}
+        {comment && !isLoading && (
           <div className='flex flex-col gap-2 items-start relative mt-1'>
             <div className=' flex flex-row  w-full'>
               <div className=' flex flex-row gap-3  items-center   w-full'>
