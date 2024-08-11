@@ -122,42 +122,6 @@ export const deletePost = async (req, res) => {
   }
 };
 
-//To Fix
-// export const commentOnPost = async (req, res) => {
-//   try {
-//     const { text } = req.body;
-//     const postId = req.params.id;
-//     const userId = req.user._id;
-
-//     if (!text) {
-//       return res.status(400).json({ error: 'Text field is required' });
-//     }
-
-//     const post = await Post.findById(postId);
-//     if (!post) {
-//       return res.status(404).json({ message: 'Post not found' });
-//     }
-
-//     const comment = { user: userId, text };
-
-//     post.comments.push(comment);
-//     await post.save();
-
-//     // Populate user information in the comments
-//     await post.populate({
-//       path: 'comments.user',
-//       select: 'fullName username profileImg', // Only select necessary fields
-//     });
-
-//     const updatedComments = post.comments;
-
-//     res.status(200).json(updatedComments);
-//   } catch (error) {
-//     console.log('Error in commentOnPost controller:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };
-
 export const likeUnlikePost = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -398,8 +362,12 @@ export const getAllPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate({ path: 'user', select: '-password' })
       .populate({
-        path: 'comments.user',
-        select: '-password',
+        path: 'comments',
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: 'user',
+          select: '-password',
+        },
       });
 
     if (posts.length === 0) {
@@ -425,8 +393,12 @@ export const getLikedPosts = async (req, res) => {
     const likedPosts = await Post.find({ _id: { $in: user.likedPosts } })
       .populate({ path: 'user', select: '-password' })
       .populate({
-        path: 'comments.user',
-        select: '-password',
+        path: 'comments',
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: 'user',
+          select: '-password',
+        },
       });
 
     res.status(200).json(likedPosts);
@@ -454,8 +426,11 @@ export const getFollowingPosts = async (req, res) => {
       })
 
       .populate({
-        path: 'comments.user',
-        select: '-password',
+        path: 'comments',
+        match: {
+          isDeleted: { $ne: true },
+        },
+        populate: { path: 'user', select: '-password' },
       });
     res.status(200).json(followingPosts);
   } catch (error) {
@@ -483,8 +458,9 @@ export const getUserPosts = async (req, res) => {
         select: '-password',
       })
       .populate({
-        path: 'comments.user',
-        select: '-password',
+        path: 'comments',
+        match: { isDeleted: { $ne: true } },
+        populate: { path: 'user', select: '-password' },
       })
       .populate({
         path: 'repost',
@@ -520,8 +496,9 @@ export const getBookmarkPost = async (req, res) => {
     const bookmarks = await Post.find({ _id: { $in: user.bookmarks } })
       .populate({ path: 'user', select: '-password' })
       .populate({
-        path: 'comments.user',
-        select: '-password',
+        path: 'comments',
+        match: { isDeleted: { $ne: true } },
+        populate: { path: 'user', select: '-password' },
       });
 
     res.status(200).json(bookmarks);
@@ -535,9 +512,22 @@ export const getSinglePost = async (req, res) => {
   const { id: postId } = req.params;
 
   try {
-    const post = await Post.findById(postId).populate('user', '-password'); // populate post user without password
+    // Find the post and populate the user and comments
+    const post = await Post.findById(postId)
+      .populate('user', '-password') // populate post user without password
+      .populate({
+        path: 'comments',
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: 'user',
+          select: 'fullName username profileImg',
+        },
+      });
 
     if (!post) return res.status(404).json({ error: 'Post not found' });
+
+    // Filter out comments with isDeleted: true
+    post.comments = post.comments.filter((comment) => !comment.isDeleted);
 
     res.status(200).json(post);
   } catch (error) {
@@ -545,54 +535,3 @@ export const getSinglePost = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-//To Fix
-// export const getPostComments = async (req, res) => {
-//   const { id: postId } = req.params;
-
-//   try {
-//     const post = await Post.findById(postId)
-//       .select('comments') // select only comments field
-//       .populate({
-//         path: 'comments.user',
-//         select: '-password', // populate user without password
-//       });
-
-//     if (!post) return res.status(404).json({ error: 'Post not found' });
-
-//     res.status(200).json(post.comments);
-//   } catch (error) {
-//     console.log('Error in getPostComments controller:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// };
-
-//To Fix
-// export const getSingleComment = async (req, res) => {
-//   const { postId, username, commentId } = req.params;
-
-//   try {
-//     // Assuming you are using Mongoose and the comments are stored in a Post schema
-//     const post = await Post.findOne(
-//       { _id: postId, 'comments._id': commentId },
-//       { 'comments.$': 1 }
-//     ).populate({
-//       path: 'comments.user',
-//       select: '-password', // populate user without password
-//     });
-
-//     if (!post || !post.comments || post.comments.length === 0) {
-//       return res.status(404).json({ message: 'Comment not found' });
-//     }
-
-//     const comment = post.comments[0];
-
-//     // You can add additional checks here, such as verifying the username if necessary
-//     // For example, you might want to check if the comment's author matches the provided username
-
-//     return res.status(200).json(comment);
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).json({ message: 'Server error' });
-//   }
-// };

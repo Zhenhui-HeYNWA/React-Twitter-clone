@@ -5,7 +5,6 @@ import { FaArrowLeft, FaLink } from 'react-icons/fa';
 import { MdEdit } from 'react-icons/md';
 import { IoCalendarOutline } from 'react-icons/io5';
 
-import { POSTS } from '../../utils/db/dummy';
 import ProfileHeaderSkeleton from '../../components/skeletons/ProfileHeaderSkeleton';
 import EditProfileModal from './EditProfileModal';
 import Posts from '../../components/common/Posts';
@@ -14,6 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { formatMemberSinceDate } from '../../utils/date';
 import useFollow from '../../hooks/useFollow';
 import useUpdateProfile from '../../hooks/useUpdateProfile';
+import CommentSections from '../../components/common/CommentSections';
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);
@@ -23,6 +23,7 @@ const ProfilePage = () => {
 
   const coverImgRef = useRef(null);
   const profileImgRef = useRef(null);
+  const scrollingRef = useRef(false);
 
   const { username } = useParams();
 
@@ -75,11 +76,17 @@ const ProfilePage = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsCoverTheButton(scrollPosition > 300);
+      if (!scrollingRef.current) {
+        scrollingRef.current = true;
+        requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY;
+          setIsCoverTheButton(scrollPosition > 300);
+          scrollingRef.current = false;
+        });
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -111,7 +118,7 @@ const ProfilePage = () => {
                     <div className='flex flex-col '>
                       <p className='font-bold text-lg'>{user?.fullName}</p>
                       <span className='text-sm text-slate-500'>
-                        {POSTS?.length} posts
+                        {user.userPosts?.length} posts
                       </span>
                     </div>
                   </div>
@@ -287,15 +294,31 @@ const ProfilePage = () => {
               </div>
               <div className='flex w-full border-b border-gray-700 mt-4'>
                 <div
-                  className='flex justify-center flex-1 p-3  transition duration-300 relative cursor-pointer'
+                  className={`flex justify-center flex-1 p-3 ${
+                    feedType === 'posts' ? 'text-black' : 'text-slate-500'
+                  }  transition duration-300 relative cursor-pointer`}
                   onClick={() => setFeedType('posts')}>
                   Posts
                   {feedType === 'posts' && (
                     <div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
                   )}
                 </div>
+
                 <div
-                  className='flex justify-center flex-1 p-3 text-slate-500  transition duration-300 relative cursor-pointer'
+                  className={`flex justify-center flex-1 p-3 ${
+                    feedType === 'replies' ? 'text-black' : 'text-slate-500'
+                  }  transition duration-300 relative cursor-pointer`}
+                  onClick={() => setFeedType('replies')}>
+                  Replies
+                  {feedType === 'replies' && (
+                    <div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
+                  )}
+                </div>
+
+                <div
+                  className={`flex justify-center flex-1 p-3 ${
+                    feedType === 'likes' ? 'text-black' : 'text-slate-500'
+                  }  transition duration-300 relative cursor-pointer`}
                   onClick={() => setFeedType('likes')}>
                   Likes
                   {feedType === 'likes' && (
@@ -303,7 +326,9 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div
-                  className='flex justify-center flex-1 p-3 text-slate-500  transition duration-300 relative cursor-pointer'
+                  className={`flex justify-center flex-1 p-3 ${
+                    feedType === 'bookmarks' ? 'text-black' : 'text-slate-500'
+                  }  transition duration-300 relative cursor-pointer`}
                   onClick={() => setFeedType('bookmarks')}>
                   Bookmarks
                   {feedType === 'bookmarks' && (
@@ -313,8 +338,15 @@ const ProfilePage = () => {
               </div>
             </>
           )}
-
-          <Posts feedType={feedType} username={username} userId={user?._id} />
+          {feedType === 'replies' ? (
+            <CommentSections
+              feedType={feedType}
+              username={username}
+              userId={user?._id}></CommentSections>
+          ) : (
+            <Posts feedType={feedType} username={username} userId={user?._id} />
+          )}
+          {/* <Posts feedType={feedType} username={username} userId={user?._id} /> */}
         </div>
       </div>
     </>

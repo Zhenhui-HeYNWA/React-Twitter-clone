@@ -17,9 +17,10 @@ router.get('/profile/:username', protectRoute, getUserProfile);
 router.get('/suggested', protectRoute, getSuggestedUser);
 router.get('/follower/:username', protectRoute, getFollowersUser);
 router.get('/following/:username', protectRoute, getFollowingUser);
+router.get('/search', protectRoute, getSearchUser);
 router.post('/follow/:id', protectRoute, followUnfollowUser);
 router.post('/update', protectRoute, updateUser);
-router.get('/search', protectRoute, getSearchUser);
+
 router.post('/check-user', getMentionedUsers);
 
 export default router;

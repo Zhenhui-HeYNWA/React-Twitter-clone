@@ -69,6 +69,8 @@ const CommentPage = () => {
     },
   });
 
+  console.log(postComment);
+
   useEffect(() => {
     if (authUser) {
       // Find the original post ID (if it's a repost)
@@ -104,7 +106,7 @@ const CommentPage = () => {
   });
 
   const CommentUsername = comments?.map((comment) => comment?.user?.username);
-
+  console.log(comments);
   //Post Mutations
   const {
     commentPostSimple,
@@ -178,6 +180,7 @@ const CommentPage = () => {
       modal.close();
     }
   };
+  console.log(CommentUsername);
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full  '>

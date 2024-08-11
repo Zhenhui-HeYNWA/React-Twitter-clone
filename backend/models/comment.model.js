@@ -14,7 +14,7 @@ const commentSchema = new mongoose.Schema(
     postId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Post',
-      required: true, // 确保每个评论都与一个帖子相关联
+      required: true,
     },
     parentId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -27,6 +27,7 @@ const commentSchema = new mongoose.Schema(
         ref: 'Comment',
       },
     ],
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -156,6 +156,7 @@ const SinglePost = () => {
   };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
+  
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
@@ -353,6 +354,7 @@ const SinglePost = () => {
                           </span>
                           <span className='text-gray-700 text-sm'>
                             @{comment.user?.username}
+                            {comment?.isDeleted}
                           </span>
                         </div>
                         <div className='text-sm'>{comment?.text}</div>

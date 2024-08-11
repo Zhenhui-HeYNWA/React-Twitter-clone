@@ -30,6 +30,8 @@ const RenderSubComments = ({ postComment }) => {
     if (isCommentDeleting) return;
     deleteComment({ commentId });
   };
+  const isDeleted = postComment?.isDeleted;
+  console.log(isDeleted);
   return (
     <div className=' flex flex-col flex-1 justify-center py-2  '>
       <div className='flex flex-col gap-2 justify-between px-4 '>
@@ -44,7 +46,6 @@ const RenderSubComments = ({ postComment }) => {
                   src={
                     postComment?.user.profileImg || '/avatar-placeholder.png'
                   }
-                  alt=''
                 />
               </Link>
               {/* <div className='absolute left-[calc(50%)] top-[3rem] w-0.5 bg-gray-300 h-[calc(100%+2rem)]'></div> */}
@@ -98,7 +99,7 @@ const RenderSubComments = ({ postComment }) => {
               <div className='flex gap-1 items-center cursor-pointer group'>
                 <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
                 <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                  0
+                  {postComment?.replies.length}
                 </span>{' '}
               </div>
 

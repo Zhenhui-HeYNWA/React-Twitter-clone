@@ -9,8 +9,8 @@ export const getPostComments = async (req, res) => {
   try {
     const post = await Post.findById(postId).populate({
       path: 'comments',
-      //Get only Top level comments
-      match: { parentId: null },
+      // Get only Top level comments
+      match: { parentId: null, isDeleted: { $ne: true } }, // Filter out deleted comments
       populate: {
         path: 'user',
         select: '-password',
@@ -20,19 +20,19 @@ export const getPostComments = async (req, res) => {
       },
     });
 
-    if (!post)
+    if (!post) {
       return res.status(404).json({
         error: 'Post not found',
       });
+    }
 
     res.status(200).json(post.comments);
   } catch (error) {
-    console.log('Error in getPost Comments controller', error);
+    console.log('Error in getPostComments controller', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-// Get single Comment
 // Get single Comment
 export const getSingleComment = async (req, res) => {
   const { commentId } = req.params;
@@ -77,7 +77,35 @@ export const getSingleComment = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+//Get user Replies
+export const getUserReplies = async (req, res) => {
+  const { userId } = req.params;
 
+  try {
+    // Find all comments made by the user where isDeleted is not true
+    const userReplies = await Comment.find({
+      user: userId,
+      isDeleted: { $ne: true },
+    })
+      .populate({
+        path: 'user',
+        select: '-password', // Populate the user details for each comment, excluding the password
+      })
+      .populate({
+        path: 'replies',
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: 'user',
+          select: '-password', // Populate the user details for each reply, excluding the password
+        },
+      });
+
+    res.status(200).json(userReplies);
+  } catch (error) {
+    console.log('Error in getUserReplies controller:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 //Post comment on post
 export const commentOnPost = async (req, res) => {
   try {
@@ -144,20 +172,20 @@ export const deleteComment = async (req, res) => {
   const userId = req.user._id;
 
   try {
-    // 查找评论
+    // Find the comment to be deleted
     const comment = await Comment.findById(req.params.id);
     if (!comment) {
       return res.status(404).json({ message: 'Comment not found!' });
     }
 
-    // 验证用户是否有权删除评论
+    // Verify that the user has permission to delete the comment
     if (comment.user._id.toString() !== userId.toString()) {
       return res
         .status(401)
-        .json({ message: 'You have no right to delete this comment' });
+        .json({ message: 'You do not have permission to delete this comment' });
     }
 
-    // 如果评论有父级评论，更新父级评论的replies字段
+    // If the comment has a parent comment, update the parent comment's replies field
     if (comment.parentId) {
       const parentComment = await Comment.findById(comment.parentId);
       if (parentComment) {
@@ -168,10 +196,14 @@ export const deleteComment = async (req, res) => {
       }
     }
 
-    // 删除评论
-    await Comment.findByIdAndDelete(req.params.id);
+    // Mark the comment as deleted
+    comment.isDeleted = true;
+    await comment.save();
 
-    res.status(200).json({ message: 'Comment deleted successfully' });
+    res.status(200).json({
+      message:
+        'Comment successfully marked as deleted, child comments retained',
+    });
   } catch (error) {
     console.error('Error deleting comment:', error);
     res.status(500).json({ error: 'Internal server error' });
