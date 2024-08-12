@@ -84,7 +84,7 @@ const CommentFunction = ({ postComment }) => {
           <dialog
             id={`ReplyComments_modal${postComment?._id}`}
             className='modal  outline-none '>
-            <div className='modal-box rounded-xl border border-gray-400 bg-gray-100 dark:bg-[#15202B]'>
+            <div className='modal-box rounded-xl border  bg-gray-100 border-gray-400 dark:bg-[#15202B]'>
               <div className='flex flex-row gap-2 max-h-60 overflow-auto   '>
                 <div className='flex flex-col items-center '>
                   <div className='h-10 w-10 rounded-full'>

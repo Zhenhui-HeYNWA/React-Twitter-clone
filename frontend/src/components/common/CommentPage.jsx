@@ -653,7 +653,7 @@ const CommentPage = () => {
             return (
               <div
                 key={reply._id}
-                className=' border-b-2  border-gray-200 dark:border-gary-700 hover:bg-slate-200 dark:hover:bg-inherit'>
+                className=' border-b  border-gray-200 dark:border-gray-700 hover:bg-slate-200 dark:hover:bg-inherit'>
                 <RenderSubComments postComment={reply} />
               </div>
             );
