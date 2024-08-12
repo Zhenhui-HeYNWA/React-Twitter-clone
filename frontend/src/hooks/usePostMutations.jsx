@@ -134,6 +134,7 @@ const usePostMutations = (postId) => {
     },
   });
 
+  // TODO: fix refetch
   const { mutate: commentPostAdvanced, isPending: isPostCommenting } =
     useMutation({
       mutationFn: async ({ postId, text }) => {
@@ -148,21 +149,22 @@ const usePostMutations = (postId) => {
 
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Something went wrong');
-          return { comments: data, postId };
+          return { comment: data, postId };
         } catch (error) {
           throw new Error(error.message);
         }
       },
-      onSuccess: ({ comments, postId }) => {
+      onSuccess: ({ comment, postId }) => {
         toast.success('Comment posted successfully');
 
-        // 更新缓存中的评论数据，包括完整的用户信息
+        // 更新缓存中的评论数据，而不是整个帖子
         queryClient.setQueryData(['posts'], (oldData) => {
-          return oldData.map((p) => {
-            if (p._id === postId) {
-              return { ...p, comments };
+          return oldData.map((post) => {
+            if (post._id === postId) {
+              // 只更新 comments 部分
+              return { ...post, comments: [...post.comments, comment] };
             }
-            return p;
+            return post;
           });
         });
       },
@@ -171,9 +173,6 @@ const usePostMutations = (postId) => {
       },
     });
 
-
-
-    
   const { mutate: repostPost, isPending: isReposting } = useMutation({
     mutationFn: async ({ actionType }) => {
       try {

@@ -51,6 +51,7 @@ const ProfilePage = () => {
       }
     },
   });
+  console.log(user?._id);
 
   const { isUpdateProfile, updateProfile } = useUpdateProfile();
   const isMyProfile = authUser._id === user?._id;
@@ -295,7 +296,9 @@ const ProfilePage = () => {
               <div className='flex w-full border-b border-gray-700 mt-4'>
                 <div
                   className={`flex justify-center flex-1 p-3 ${
-                    feedType === 'posts' ? 'text-black' : 'text-slate-500'
+                    feedType === 'posts'
+                      ? 'text-black  font-bold dark:text-white'
+                      : 'text-slate-500'
                   }  transition duration-300 relative cursor-pointer`}
                   onClick={() => setFeedType('posts')}>
                   Posts
@@ -306,7 +309,9 @@ const ProfilePage = () => {
 
                 <div
                   className={`flex justify-center flex-1 p-3 ${
-                    feedType === 'replies' ? 'text-black' : 'text-slate-500'
+                    feedType === 'replies'
+                      ? 'text-black  font-bold dark:text-white'
+                      : 'text-slate-500'
                   }  transition duration-300 relative cursor-pointer`}
                   onClick={() => setFeedType('replies')}>
                   Replies
@@ -317,7 +322,9 @@ const ProfilePage = () => {
 
                 <div
                   className={`flex justify-center flex-1 p-3 ${
-                    feedType === 'likes' ? 'text-black' : 'text-slate-500'
+                    feedType === 'likes'
+                      ? 'text-black  font-bold dark:text-white'
+                      : 'text-slate-500'
                   }  transition duration-300 relative cursor-pointer`}
                   onClick={() => setFeedType('likes')}>
                   Likes
@@ -327,7 +334,9 @@ const ProfilePage = () => {
                 </div>
                 <div
                   className={`flex justify-center flex-1 p-3 ${
-                    feedType === 'bookmarks' ? 'text-black' : 'text-slate-500'
+                    feedType === 'bookmarks'
+                      ? 'text-black  font-bold dark:text-white'
+                      : 'text-slate-500'
                   }  transition duration-300 relative cursor-pointer`}
                   onClick={() => setFeedType('bookmarks')}>
                   Bookmarks

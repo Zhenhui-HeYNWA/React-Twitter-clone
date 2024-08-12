@@ -53,7 +53,7 @@ const Post = ({ post, posts }) => {
   };
 
   // Inside your Post component:
-  const { data: comments, isLoading: isLoadingComments } = useQuery({
+  const { data: comments } = useQuery({
     queryKey: ['comments', postId],
     queryFn: () => fetchComments(postId),
   });
@@ -326,7 +326,7 @@ const Post = ({ post, posts }) => {
                 <dialog
                   id={`comments_modal${post._id}`}
                   className='modal border-none outline-none'>
-                  <div className='modal-box rounded border bg-gray-100 dark:bg-secondary  border-gray-600'>
+                  <div className='modal-box rounded-xl border bg-gray-100 dark:bg-[#15202B]  border-gray-400'>
                     <h3 className='font-bold text-lg mb-4'>COMMENTS</h3>
                     <div className='flex flex-col gap-3 max-h-60 overflow-auto'>
                       {post?.comments?.length === 0 && (
@@ -367,7 +367,7 @@ const Post = ({ post, posts }) => {
                       className='flex gap-2 items-center mt-4 border-t border-gray-300  dark:border-gray-800  pt-2'
                       onSubmit={handlePostComment}>
                       <textarea
-                        className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-secondary border-gray-100  dark:border-gray-800'
+                        className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B]  border-gray-100  dark:border-gray-800'
                         placeholder='Add a comment...'
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}

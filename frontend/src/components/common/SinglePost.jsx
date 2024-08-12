@@ -4,12 +4,11 @@ import {
   FaArrowLeft,
   FaBookmark,
   FaRegBookmark,
-  FaRegComment,
   FaRegHeart,
   FaTrash,
 } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
-import { formatDateTime, formatPostDate } from '../../utils/date';
+import { formatDateTime } from '../../utils/date';
 import { useEffect, useRef, useState } from 'react';
 import PostSkeleton from '../skeletons/PostSkeleton';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
@@ -18,6 +17,7 @@ import { CiImageOn } from 'react-icons/ci';
 import { BsEmojiSmileFill } from 'react-icons/bs';
 import usePostMutations from '../../hooks/usePostMutations';
 import LoadingSpinner from './LoadingSpinner';
+import RenderSubComments from './RenderSubComments';
 
 const SinglePost = () => {
   const { data: authUser } = useQuery({
@@ -156,7 +156,6 @@ const SinglePost = () => {
   };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
-  
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
@@ -550,77 +549,81 @@ const SinglePost = () => {
             </>
           ) : (
             comments.map((comment) => {
-              const formattedHours = formatPostDate(comment?.createdAt);
               return (
                 <div
-                  key={comment._id}
+                  key={comment?._id}
                   className='border-b border-gray-200 dark:border-gray-700 px-2 pt-2'>
-                  <Link
-                    to={`/${postId}/comment/${comment.user.username}/${comment._id}`}>
-                    <div className='flex gap-2 flex-col items-start'>
-                      <div className='px-2 py-1 flex gap-2'>
-                        <div className='avatar'>
-                          <div className='w-12 h-12 rounded-full'>
-                            <img
-                              src={
-                                comment.user?.profileImg ||
-                                '/avatar-placeholder.png'
-                              }
-                              alt='Comment User Avatar'
-                            />
-                          </div>
-                        </div>
-                        <div className='flex flex-col'>
-                          <div className='flex items-center gap-1'>
-                            <span className='font-bold text-base'>
-                              {comment.user?.fullName}
-                            </span>
-                            <span className='text-gray-700 text-sm'>
-                              @{comment.user?.username}
-                            </span>
-                            <span className='text-gray-700 text-sm'>·</span>
-                            <span className='text-gray-700 text-sm'>
-                              {formattedHours}
-                            </span>
-                          </div>
-                          <div className='text-base'>{comment?.text}</div>
-                        </div>
-                      </div>
-                    </div>
-                    {/* comment like section */}
-                    <div className='flex justify-between my-1 px-12'>
-                      <div className='flex gap-4 items-center w-2/3 justify-between'>
-                        <div className='flex gap-1 items-center cursor-pointer group'>
-                          <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
-                          <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                            {comment?.replies.length}
-                          </span>
-                        </div>
-                        <div className='flex gap-1 items-center group cursor-pointer'>
-                          <BiRepost className='w-6 h-6 text-slate-500 group-hover:text-green-500' />
-                          <span className='text-sm text-slate-500 group-hover:text-green-500'>
-                            0
-                          </span>
-                        </div>
-                        <div className='flex gap-1 items-center group cursor-pointer'>
-                          <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
-                          {/* <span
-                      className={`text-sm group-hover:text-pink-500 ${
-                        isLiked ? 'text-pink-500' : 'text-slate-500'
-                      }`}>
-                      {post.likes.length}
-                    </span> */}
-                          <span className='text-sm text-slate-500 group-hover:text-pink-500'>
-                            0
-                          </span>
-                        </div>
-                      </div>
-                      <div className='flex w-1/3 justify-end gap-2 group items-center'>
-                        <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:text-sky-400' />
-                      </div>
-                    </div>
-                  </Link>
+                  <RenderSubComments postComment={comment} />
                 </div>
+                // <div
+                //   key={comment._id}
+                //   className='border-b border-gray-200 dark:border-gray-700 px-2 pt-2'>
+                //   <Link
+                //     to={`/${postId}/comment/${comment.user.username}/${comment._id}`}>
+                //     <div className='flex gap-2 flex-col items-start'>
+                //       <div className='px-2 py-1 flex gap-2'>
+                //         <div className='avatar'>
+                //           <div className='w-12 h-12 rounded-full'>
+                //             <img
+                //               src={
+                //                 comment.user?.profileImg ||
+                //                 '/avatar-placeholder.png'
+                //               }
+                //               alt='Comment User Avatar'
+                //             />
+                //           </div>
+                //         </div>
+                //         <div className='flex flex-col'>
+                //           <div className='flex items-center gap-1'>
+                //             <span className='font-bold text-base'>
+                //               {comment.user?.fullName}
+                //             </span>
+                //             <span className='text-gray-700 text-sm'>
+                //               @{comment.user?.username}
+                //             </span>
+                //             <span className='text-gray-700 text-sm'>·</span>
+                //             <span className='text-gray-700 text-sm'>
+                //               {formattedHours}
+                //             </span>
+                //           </div>
+                //           <div className='text-base'>{comment?.text}</div>
+                //         </div>
+                //       </div>
+                //     </div>
+                //     {/* comment like section */}
+                //     <div className='flex justify-between my-1 px-12'>
+                //       <div className='flex gap-4 items-center w-2/3 justify-between'>
+                //         <div className='flex gap-1 items-center cursor-pointer group'>
+                //           <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
+                //           <span className='text-sm text-slate-500 group-hover:text-sky-400'>
+                //             {comment?.replies.length}
+                //           </span>
+                //         </div>
+                //         <div className='flex gap-1 items-center group cursor-pointer'>
+                //           <BiRepost className='w-6 h-6 text-slate-500 group-hover:text-green-500' />
+                //           <span className='text-sm text-slate-500 group-hover:text-green-500'>
+                //             0
+                //           </span>
+                //         </div>
+                //         <div className='flex gap-1 items-center group cursor-pointer'>
+                //           <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
+                //           {/* <span
+                //       className={`text-sm group-hover:text-pink-500 ${
+                //         isLiked ? 'text-pink-500' : 'text-slate-500'
+                //       }`}>
+                //       {post.likes.length}
+                //     </span> */}
+                //           <span className='text-sm text-slate-500 group-hover:text-pink-500'>
+                //             0
+                //           </span>
+                //         </div>
+                //       </div>
+                //       <div className='flex w-1/3 justify-end gap-2 group items-center'>
+                //         <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:text-sky-400' />
+                //       </div>
+                //     </div>
+                //   </Link>
+                // </div>
               );
             })
           )}

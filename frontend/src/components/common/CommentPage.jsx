@@ -7,7 +7,7 @@ import {
   FaRegHeart,
   FaTrash,
 } from 'react-icons/fa';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import usePostMutations from '../../hooks/usePostMutations';
 import { formatPostDate } from '../../utils/date';
 import { BiComment, BiRepost } from 'react-icons/bi';
@@ -35,6 +35,7 @@ const CommentPage = () => {
   const { username, postId, commentId } = useParams();
 
   const radioRef = useRef(null);
+  const navigate = useNavigate();
 
   // Fetch post data
   const { data: post, isLoading: isPostLoading } = useQuery({
@@ -56,7 +57,7 @@ const CommentPage = () => {
 
   const formattedPostDate = post ? formatPostDate(post.createdAt) : '';
 
-  const { data: postComment } = useQuery({
+  const { data: postComment, isLoading: isPostCommentLoading } = useQuery({
     queryKey: ['comment', commentId],
     queryFn: async () => {
       const res = await fetch(
@@ -104,10 +105,17 @@ const CommentPage = () => {
       return data;
     },
   });
+  function getUniqueCommentUsernames({ arr }) {
+    return arr?.filter(
+      (CommentUsername, index) => arr.indexOf(CommentUsername) === index
+    );
+  }
 
-  const CommentUsername = comments?.map((comment) => comment?.user?.username);
-  console.log(comments);
-  //Post Mutations
+  const CommentUsername = getUniqueCommentUsernames({
+    arr: comments?.map((comment) => comment?.user?.username),
+  });
+  console.log(CommentUsername);
+
   const {
     commentPostSimple,
     isCommenting,
@@ -133,14 +141,21 @@ const CommentPage = () => {
   //Post:CommentPost
   const handlePostCommentSubmit = (e) => {
     e.preventDefault();
-    console.log(1);
+
     if (commentPostSimple.isLoading) return;
-    commentPostSimple({ text: replyToPost });
-    setComment('');
-    const modal = document.getElementById('comments_modal' + postId);
-    if (modal) {
-      modal.close();
-    }
+    commentPostSimple(
+      { text: replyToPost },
+      {
+        onSuccess: () => {
+          setComment('');
+          const modal = document.getElementById('comments_modal' + postId);
+          if (modal) {
+            modal.close();
+          }
+          navigate(`/${post?.user.username}/status/${post?._id}`);
+        },
+      }
+    );
   };
 
   //Post: LikePost
@@ -183,7 +198,7 @@ const CommentPage = () => {
   console.log(CommentUsername);
 
   return (
-    <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full  '>
+    <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full   '>
       <div className='flex flex-col  '>
         {!isOriginalPost && !isAuthUserRepost && (
           <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
@@ -326,15 +341,16 @@ const CommentPage = () => {
                           {isOriginalPost && post.img && (
                             <img
                               src={post.img}
-                              className='h-80 object-cover rounded-lg border border-gray-700 mt-2'
+                              className='h-80  object-center rounded-lg border border-gray-700 mt-2'
                               alt=''
                             />
                           )}
                           {!isOriginalPost && post.repost.originalImg && (
                             <img
                               src={post.repost.originalImg}
-                              className='h-80 object-fit rounded-lg border border-gray-700 mt-2'
+                              className='h-80  object-cover  rounded-lg border border-gray-700 mt-2'
                               alt=''
+                              style={{ maxWidth: '100%' }}
                             />
                           )}
                         </div>
@@ -350,11 +366,10 @@ const CommentPage = () => {
                             {isCommenting && <LoadingSpinner size='sm' />}
                             {!isCommenting && (
                               <>
-                                {' '}
                                 <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
                                 <span className='text-sm text-slate-500 group-hover:text-sky-400'>
                                   {comments?.length}
-                                </span>{' '}
+                                </span>
                               </>
                             )}
                           </div>
@@ -376,7 +391,7 @@ const CommentPage = () => {
                                     key={comment?._id}
                                     className='flex gap-2 items-start'>
                                     <div className='avatar'>
-                                      <div className='w-8 rounded-full'>
+                                      <div className='w-8 h-8 rounded-full'>
                                         <img
                                           src={
                                             comment.user?.profileImg ||
@@ -547,7 +562,7 @@ const CommentPage = () => {
 
           <div className='px-4'>
             {/* Comment section */}
-            {isCommentsLoading ? (
+            {isPostCommentLoading ? (
               <>
                 <SingleCommentSkeleton />
                 <CommentSkeleton />
@@ -568,9 +583,13 @@ const CommentPage = () => {
               showNav ? 'opacity-100' : 'opacity-0'
             }`}>
             Replying to
-            <p className='text-sky-500'>
-              @{post?.user.username}, {CommentUsername}
-            </p>
+            {CommentUsername?.map((name, index) => {
+              return (
+                <p className='text-sky-500 ml-1' key={index}>
+                  @{name}
+                </p>
+              );
+            })}
           </div>
 
           <div className='hidden md:flex items-start gap-4 border-b border-gray-200 dark:border-gray-700 mb-2 px-4'>

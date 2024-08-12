@@ -1,22 +1,24 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './LoadingSpinner';
-import { FaRegBookmark, FaRegHeart, FaTrash } from 'react-icons/fa';
+import { FaTrash } from 'react-icons/fa';
 import { BiBookmark, BiComment, BiLike, BiRepost } from 'react-icons/bi';
-import CommentSkeleton from '../skeletons/CommentSkeleton';
+
 import { formatDateTime, formatPostDate } from '../../utils/date';
 import { useEffect, useState } from 'react';
 import useCommentMutations from '../../hooks/useCommentMutations';
+import CommentFunction from './CommentFunction';
 
 const RenderComments = ({ comment }) => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
 
-  const [isLoading, setIsLoading] = useState(true);
+  // // const [isLoading, setIsLoading] = useState(true);
+  // console.log(isLoading);
   const [structuredComments, setStructuredComments] = useState([]);
   const [replyToComment, setReplyToComment] = useState('');
-  console.log(replyToComment);
+
   const { replyComment, isReplying, deleteComment, isCommentDeleting } =
     useCommentMutations();
   console.log(comment?._id);
@@ -33,7 +35,6 @@ const RenderComments = ({ comment }) => {
 
   const isSubCommentAvailable =
     comment?.parentId && comment.parentId.user !== undefined;
-  console.log(isSubCommentAvailable);
 
   function getParentCommentsIterative(comment) {
     const result = [];
@@ -58,9 +59,6 @@ const RenderComments = ({ comment }) => {
     if (isSubComment) {
       const structured = getParentCommentsIterative(comment);
       setStructuredComments(structured);
-      setIsLoading(false);
-    } else {
-      setIsLoading(false);
     }
   }, [comment, isSubComment]);
 
@@ -86,9 +84,7 @@ const RenderComments = ({ comment }) => {
   return (
     <>
       <div className='w-full'>
-        {isLoading && <CommentSkeleton />}
         {isSubComment &&
-          !isLoading &&
           structuredComments?.map((structuredComment) => {
             const isMyStructuredComment =
               authUser._id === structuredComment?.user?._id;
@@ -126,7 +122,6 @@ const RenderComments = ({ comment }) => {
                                   alt=''
                                 />
                               </Link>
-                              {/* <div className='absolute left-[calc(50%)] top-[3rem] w-0.5 bg-gray-300 h-[calc(100%+2rem)]'></div> */}
                             </div>
                             <div
                               className='  w-0.5 h-full mt-0.5
@@ -186,132 +181,7 @@ const RenderComments = ({ comment }) => {
                             </div>
 
                             {/* comment functions section*/}
-                            <div className='flex flex-row items-center justify-between   '>
-                              <div
-                                className='flex gap-1 items-center cursor-pointer group'
-                                onClick={() =>
-                                  document
-                                    .getElementById(
-                                      'replyComments_modal' +
-                                        structuredComment?._id
-                                    )
-                                    .showModal()
-                                }>
-                                <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
-                                <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                                  {structuredComment?.replies.length}
-                                </span>
-                              </div>
-
-                              <dialog
-                                id={`replyComments_modal${structuredComment?._id}`}
-                                className='modal  outline-none '>
-                                <div className='modal-box rounded border border-gray-400 bg-gray-100 dark:bg-[#15202B]'>
-                                  <div className='flex flex-row gap-2 max-h-60 overflow-auto   '>
-                                    <div className='flex flex-col items-center '>
-                                      <div className='h-10 w-10 rounded-full'>
-                                        <img
-                                          src={
-                                            structuredComment?.user.profileImg
-                                          }
-                                          alt=''
-                                        />
-                                      </div>
-                                      <div className='  w-0.5 h-full  mt-0.5 dark:bg-slate-700  bg-gray-400 '></div>
-                                    </div>
-
-                                    <div className=' flex flex-row items-center'>
-                                      <div className=' flex flex-col  justify-start '>
-                                        <div className=' flex flex-row gap-2'>
-                                          <div className=' font-bold'>
-                                            {structuredComment?.user.fullName}
-                                          </div>
-                                          <div className='text-gray-500'>
-                                            @{structuredComment?.user.username}
-                                          </div>
-                                          <div className='text-gray-500'>·</div>
-                                          <div className='text-gray-500'>
-                                            {structuredComment?.createdAt}
-                                          </div>
-                                        </div>
-                                        <div className='text-base '>
-                                          @{authUser.username}
-                                        </div>
-                                        <div className='mt-2 text-gray-500'>
-                                          Replying to{' '}
-                                          <span className='text-sky-600'>
-                                            @{structuredComment?.user.username}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <form
-                                    className='flex flex-row gap-2 mt-1 items-center dark:bg-[#15202B] justify-between '
-                                    onSubmit={(e) =>
-                                      handleReplyComment(
-                                        e,
-                                        structuredComment?._id
-                                      )
-                                    }>
-                                    <div className='flex flex-row gap-2 '>
-                                      {' '}
-                                      <div className='h-10 w-10 rounded-full overflow-auto '>
-                                        <img src={authUser.profileImg} alt='' />
-                                      </div>
-                                      <textarea
-                                        className='textarea items-center p-0 w-2/3 h-2 bg-gray-100 dark:bg-[#15202B]   rounded text-md resize-none  focus:outline-none '
-                                        placeholder='Post your reply'
-                                        value={replyToComment}
-                                        onChange={(e) =>
-                                          setReplyToComment(e.target.value)
-                                        }
-                                      />
-                                    </div>
-
-                                    <button className='btn justify-end btn-primary rounded-full btn-sm text-white px-4'>
-                                      {isReplying ? (
-                                        <span className=' flex  gap-1 items-center disabled'>
-                                          Replying <LoadingSpinner size='md' />
-                                        </span>
-                                      ) : (
-                                        'Reply'
-                                      )}
-                                    </button>
-                                  </form>
-                                </div>
-                                <form
-                                  method='dialog'
-                                  className='modal-backdrop'>
-                                  <button className='outline-none'>
-                                    close
-                                  </button>
-                                </form>
-                              </dialog>
-                              <div className='flex items-center group cursor-pointer gap-1'>
-                                <BiRepost
-                                  className={`w-6 h-6 text-slate-500 group-hover:text-green-500`}
-                                />
-                                <span
-                                  className='text-sm group-hover:text-green-500 
-                        text-slate-500'>
-                                  0
-                                </span>
-                              </div>
-                              {/* like post  */}
-                              <div className='flex gap-1 items-center group cursor-pointer'>
-                                <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
-                                <span
-                                  className={`text-sm group-hover:text-pink-500 
-                        text-slate-500`}>
-                                  0
-                                </span>
-                              </div>
-                              {/* bookmark */}
-                              <div className='flex gap-2 group items-center'>
-                                <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
-                              </div>
-                            </div>
+                            <CommentFunction postComment={structuredComment} />
                           </div>
                         </div>
                       </div>
@@ -322,8 +192,8 @@ const RenderComments = ({ comment }) => {
             }
           })}
         {/* Comment Component */}
-        {comment && isLoading && <CommentSkeleton />}
-        {comment && !isLoading && (
+
+        {comment && (
           <div className='flex flex-col gap-2 items-start relative mt-1'>
             <div className=' flex flex-row  w-full'>
               <div className=' flex flex-row gap-3  items-center   w-full'>

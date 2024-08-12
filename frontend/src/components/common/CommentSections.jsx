@@ -3,52 +3,48 @@ import { useEffect } from 'react';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 import RenderSubComments from './RenderSubComments';
 
-const CommentSections = ({ feedType, username, userId }) => {
+const CommentSections = ({ userId }) => {
   const {
     data: replies,
     isLoading,
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ['replies'],
+    queryKey: ['replies', userId], // Include userId in the queryKey to make it unique per user
     queryFn: async () => {
-      try {
-        const res = await fetch(`/api/comments/${userId}/comment`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Something went wrong');
-
-        return data;
-      } catch (error) {
-        throw new Error(error);
-      }
+      const res = await fetch(`/api/comments/${userId}/comment`);
+      if (!res.ok) throw new Error('Something went wrong');
+      return res.json();
     },
   });
+
   useEffect(() => {
-    refetch();
-  }, [feedType, refetch, username]);
-  console.log(replies);
-  const comment = replies?.map((reply) => {
-    return reply;
-  });
-  console.log('123123', comment);
+    refetch(); // Refetch when userId changes
+  }, [refetch, userId]);
+
   return (
     <>
-      {isLoading && (
+      {(isLoading || isRefetching) && (
         <div className='flex flex-col'>
           <CommentSkeleton />
           <CommentSkeleton />
           <CommentSkeleton />
         </div>
       )}
-      <div>
-        {replies?.map((reply) => {
-          return (
-            <div key={reply?._id} className='border-b-2'>
-              <RenderSubComments postComment={reply} />
-            </div>
-          );
-        })}
-      </div>
+
+      {!isLoading && !isRefetching && replies?.length === 0 && (
+        <p className='text-center my-4'>No comments available.</p>
+      )}
+
+      {!isLoading &&
+        !isRefetching &&
+        replies?.map((reply) => (
+          <div
+            key={reply?._id}
+            className='border-b border-gray-200 dark:border-gray-700'>
+            <RenderSubComments postComment={reply} />
+          </div>
+        ))}
     </>
   );
 };

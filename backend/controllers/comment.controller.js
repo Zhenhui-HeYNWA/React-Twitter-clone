@@ -82,23 +82,39 @@ export const getUserReplies = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // Find all comments made by the user where isDeleted is not true
+    // 查找该用户的所有未删除的评论
     const userReplies = await Comment.find({
       user: userId,
       isDeleted: { $ne: true },
     })
       .populate({
         path: 'user',
-        select: '-password', // Populate the user details for each comment, excluding the password
+        select: '-password', // 填充每条评论的用户详细信息，但不包括密码
       })
       .populate({
         path: 'replies',
-        match: { isDeleted: { $ne: true } },
+        match: { isDeleted: { $ne: true } }, // 只填充未删除的子回复
         populate: {
           path: 'user',
-          select: '-password', // Populate the user details for each reply, excluding the password
+          select: '-password', // 填充每条回复的用户详细信息，但不包括密码
         },
       });
+
+    // 递归填充父评论
+    for (let reply of userReplies) {
+      let currentComment = reply;
+      while (currentComment.parentId) {
+        currentComment = await Comment.populate(currentComment, {
+          path: 'parentId',
+          populate: {
+            path: 'user',
+            select: 'fullName username profileImg',
+          },
+        });
+
+        currentComment = currentComment.parentId;
+      }
+    }
 
     res.status(200).json(userReplies);
   } catch (error) {
