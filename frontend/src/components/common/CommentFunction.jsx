@@ -96,10 +96,10 @@ const CommentFunction = ({ postComment }) => {
                 <div className=' flex flex-row items-center'>
                   <div className=' flex flex-col  justify-start '>
                     <div className=' flex flex-row gap-2'>
-                      <div className=' font-bold'>
+                      <div className=' font-bold truncate'>
                         {postComment?.user.fullName}
                       </div>
-                      <div className='text-gray-500'>
+                      <div className='text-gray-500 overflow-hidden'>
                         @{postComment?.user.username}
                       </div>
                       <div className='text-gray-500'>·</div>

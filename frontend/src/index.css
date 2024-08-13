@@ -35,6 +35,5 @@ textarea {
   resize: none;
 }
 .word-wrap {
-  word-break: break-word; /* 强制长单词换行 */
-  overflow-wrap: break-word; /* 兼容性属性，确保长单词在行尾换行 */
+  word-break: break-word;
 }

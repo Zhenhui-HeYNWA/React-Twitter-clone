@@ -269,14 +269,14 @@ const SinglePost = () => {
                   </div>
                 )}
               </div>
-              <div className='flex flex-col gap-3 overflow-hidden'>
+              <div className='flex flex-col gap-3 overflow-hidden mt-2'>
                 {isOriginalPost && (
-                  <span className='text-lg whitespace-pre-wrap'>
+                  <span className='text-lg whitespace-pre-wrap word-wrap'>
                     {highlightMentions(post.text)}
                   </span>
                 )}
                 {!isOriginalPost && (
-                  <span className='text-lg whitespace-pre-wrap'>
+                  <span className='text-lg whitespace-pre-wrap word-wrap'>
                     {highlightMentions(post.repost.originalText)}
                   </span>
                 )}

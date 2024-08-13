@@ -270,24 +270,24 @@ const CommentPage = () => {
 
                       <div className='flex flex-col  w-full gap-2 '>
                         <div className='flex  items-center justify-between '>
-                          <div className='flex flex-row items-center  justify-start gap-2 '>
+                          <div className='flex flex-row items-center  justify-start gap-1 '>
                             {/* fullName */}
                             {isOriginalPost && (
                               <Link
                                 to={`/profile/${post.user.username}`}
-                                className='font-bold'>
+                                className='font-bold truncate'>
                                 {post.user.fullName}
                               </Link>
                             )}
                             {!isOriginalPost && (
                               <Link
                                 to={`/profile/${post.repost.postOwner.username}`}
-                                className='font-bold'>
+                                className='font-bold truncate'>
                                 {post.repost.postOwner.fullName}
                               </Link>
                             )}
                             {/* username */}
-                            <span className='text-gray-700 flex gap-1 text-base'>
+                            <span className='text-gray-700 flex gap-1 text-base truncate'>
                               <Link
                                 to={`/profile/${
                                   isOriginalPost
@@ -323,12 +323,12 @@ const CommentPage = () => {
                         {/* post text */}
                         <div className='flex flex-col overflow-hidden  '>
                           {isOriginalPost && (
-                            <span className='text-lg whitespace-pre-wrap'>
+                            <span className='text-lg whitespace-pre-wrap word-wrap '>
                               {userHighlightMentions(post.text, post.user.name)}
                             </span>
                           )}
                           {!isOriginalPost && (
-                            <span className='text-lg whitespace-pre-wrap'>
+                            <span className='text-lg whitespace-pre-wrap word-wrap '>
                               {userHighlightMentions(
                                 post.repost.originalText,
                                 post.user.name
@@ -400,7 +400,7 @@ const CommentPage = () => {
                                     </div>
                                     <div className='flex flex-col'>
                                       <div className='flex items-center gap-1'>
-                                        <span className='font-bold'>
+                                        <span className='font-bold truncate'>
                                           {comment.user?.fullName}
                                         </span>
                                         <span className='text-gray-700 text-sm'>

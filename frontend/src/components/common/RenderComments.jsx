@@ -262,23 +262,27 @@ const RenderComments = ({ comment }) => {
                 </div>
                 <dialog
                   id={`replyComments_modal${comment?._id}`}
-                  className='modal  outline-none '>
+                  className='modal  outline-none  w-full '>
                   <div className='modal-box rounded border border-gray-400 bg-gray-100 dark:bg-[#15202B]'>
-                    <div className='flex flex-row gap-2 max-h-60 overflow-auto   '>
+                    <div className='flex flex-row gap-2 max-h-60 overflow-auto w-full  '>
                       <div className='flex flex-col items-center '>
                         <div className='h-10 w-10 rounded-full'>
-                          <img src={comment?.user.profileImg} alt='' />
+                          <img
+                            src={comment?.user.profileImg}
+                            alt=''
+                            className='h-10 w-10 rounded-full'
+                          />
                         </div>
-                        <div className='  w-0.5 h-full  mt-0.5 dark:bg-slate-700  bg-gray-400 '></div>
+                        <div className='  w-0.5 h-full  mt-0.5 dark:bg-slate-700  bg-gray-400  '></div>
                       </div>
 
-                      <div className=' flex flex-row items-center'>
-                        <div className=' flex flex-col  justify-start '>
-                          <div className=' flex flex-row gap-2'>
-                            <div className=' font-bold'>
+                      <div className='flex flex-row items-center w-full'>
+                        <div className='flex flex-col justify-between w-full'>
+                          <div className='flex flex-row gap-2 justify-start items-center w-full'>
+                            <div className='font-bold whitespace-nowrap'>
                               {comment?.user.fullName}
                             </div>
-                            <div className='text-gray-500'>
+                            <div className='text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px]'>
                               @{comment?.user.username}
                             </div>
                             <div className='text-gray-500'>·</div>
@@ -286,7 +290,7 @@ const RenderComments = ({ comment }) => {
                               {formatPostDate(comment?.createdAt)}
                             </div>
                           </div>
-                          <div className='text-base '>@{authUser.username}</div>
+                          <div className='text-base'>@{authUser.username}</div>
                           <div className='mt-2 text-gray-500'>
                             Replying to{' '}
                             <span className='text-sky-600'>

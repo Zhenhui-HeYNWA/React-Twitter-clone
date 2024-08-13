@@ -114,12 +114,12 @@ const RenderSubComments = ({ postComment }) => {
                         <div className='flex flex-row items-center justify-start gap-1'>
                           <Link
                             to={`/profile/${structuredComment?.user?.username}`}
-                            className='font-bold'>
+                            className='font-bold truncate'>
                             {structuredComment?.user?.fullName}
                           </Link>
 
                           {/* username */}
-                          <span className='text-gray-700 flex gap-1 text-base'>
+                          <span className='text-gray-700 flex gap-1 text-base truncate'>
                             <Link
                               to={`/profile/${structuredComment?.user?.username}`}>
                               @{structuredComment?.user?.username}
@@ -187,14 +187,16 @@ const RenderSubComments = ({ postComment }) => {
           <div className='flex flex-col w-full gap-1'>
             <div className='flex items-center justify-between '>
               <div className='flex flex-row items-center justify-start gap-1'>
-                <Link
-                  to={`/profile/${postComment?.user.username}`}
-                  className='font-bold'>
-                  {postComment?.user.fullName}
-                </Link>
+                <span className='truncate'>
+                  <Link
+                    to={`/profile/${postComment?.user.username}`}
+                    className='font-bold '>
+                    {postComment?.user.fullName}
+                  </Link>
+                </span>
 
                 {/* username */}
-                <span className='text-gray-700 flex gap-1 text-base'>
+                <span className='text-gray-700 flex gap-1 text-base truncate'>
                   <Link to={`/profile/${postComment?.user.username}`}>
                     @{postComment?.user.username}
                   </Link>

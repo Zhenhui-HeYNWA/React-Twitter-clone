@@ -267,12 +267,12 @@ const Post = ({ post, posts }) => {
                 </span>
               )}
             </div>
-            <div className='flex flex-col gap-3 overflow-hidden '>
+            <div className='flex flex-col gap-3 overflow-hidden  '>
               {isOriginalPost && (
                 <Link
                   className='nav-link'
                   to={`/${authUser.username}/status/${post._id}`}>
-                  <span className=' text-lg whitespace-pre-wrap word-wrap max-w-md'>
+                  <span className=' text-lg whitespace-pre-wrap word-wrap '>
                     {highlightMentions(post.text)}
                   </span>
                 </Link>
