@@ -267,12 +267,12 @@ const Post = ({ post, posts }) => {
                 </span>
               )}
             </div>
-            <div className='flex flex-col gap-3 overflow-hidden'>
+            <div className='flex flex-col gap-3 overflow-hidden '>
               {isOriginalPost && (
                 <Link
                   className='nav-link'
                   to={`/${authUser.username}/status/${post._id}`}>
-                  <span className='text-lg whitespace-pre-wrap'>
+                  <span className=' text-lg whitespace-pre-wrap word-wrap max-w-md'>
                     {highlightMentions(post.text)}
                   </span>
                 </Link>
@@ -281,7 +281,7 @@ const Post = ({ post, posts }) => {
                 <Link
                   className='nav-link'
                   to={`/${authUser.username}/status/${post._id}`}>
-                  <span className='text-lg whitespace-pre-wrap'>
+                  <span className='text-lg whitespace-pre-wrap word-wrap '>
                     {highlightMentions(post.repost.originalText)}
                   </span>
                 </Link>

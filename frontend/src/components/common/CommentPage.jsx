@@ -199,33 +199,17 @@ const CommentPage = () => {
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full '>
-      <div className='flex flex-col  '>
-        {!isOriginalPost && !isAuthUserRepost && (
-          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-            {' '}
-            <BiRepost className='w-4 h-4  text-slate-500' />
-            {post.user.username} reposted
-          </span>
-        )}
-
-        {!isOriginalPost && isAuthUserRepost && (
-          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-            {' '}
-            <BiRepost className='w-4 h-4  text-slate-500' />
-            You reposted
-          </span>
-        )}
-
-        <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
-          <div className='flex gap-10 px-4 py-1 items-center  '>
-            <Link to='/'>
-              <FaArrowLeft className='w-4 h-4' />
-            </Link>
-            <div className='flex flex-col'>
-              <p className='font-bold text-lg'>Post</p>
-            </div>
+      <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
+        <div className='flex gap-10 px-4 py-1 items-center  '>
+          <Link to='/'>
+            <FaArrowLeft className='w-4 h-4' />
+          </Link>
+          <div className='flex flex-col'>
+            <p className='font-bold text-lg'>Post</p>
           </div>
         </div>
+      </div>
+      <div className='flex flex-col  '>
         <div className=''>
           <div className='post  hover:bg-slate-200   dark:hover:bg-inherit'>
             <div className='  flex flex-col w-full items-start py-1 px-4 justify-center  '>
@@ -233,7 +217,21 @@ const CommentPage = () => {
               {!isPostLoading && !post && (
                 <p className='text-center text-lg mt-4'>Post not found</p>
               )}
+              {!isOriginalPost && !isAuthUserRepost && (
+                <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
+                  {' '}
+                  <BiRepost className='w-4 h-4  text-slate-500' />
+                  {post.user.username} reposted
+                </span>
+              )}
 
+              {!isOriginalPost && isAuthUserRepost && (
+                <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
+                  {' '}
+                  <BiRepost className='w-4 h-4  text-slate-500' />
+                  You reposted
+                </span>
+              )}
               {!isPostLoading && post && (
                 <div className='flex flex-col w-full'>
                   <div className='flex flex-col gap-2 items-center justify-between  '>

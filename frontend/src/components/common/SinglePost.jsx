@@ -160,6 +160,16 @@ const SinglePost = () => {
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
       <div className='flex flex-col '>
+        <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
+          <div className='flex gap-10  py-1 items-center'>
+            <Link to='/'>
+              <FaArrowLeft className='w-4 h-4' />
+            </Link>
+            <div className='flex flex-col'>
+              <p className='font-bold text-lg'>Post</p>
+            </div>
+          </div>
+        </div>
         {!isOriginalPost && !isAuthUserRepost && (
           <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
             {' '}
@@ -175,17 +185,6 @@ const SinglePost = () => {
             You reposted
           </span>
         )}
-
-        <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
-          <div className='flex gap-10  py-1 items-center'>
-            <Link to='/'>
-              <FaArrowLeft className='w-4 h-4' />
-            </Link>
-            <div className='flex flex-col'>
-              <p className='font-bold text-lg'>Post</p>
-            </div>
-          </div>
-        </div>
 
         <div className='flex gap-2 items-start py-2 px-4 border-b border-gray-200 dark:border-gray-700 justify-center'>
           {isPostLoading && <PostSkeleton />}
