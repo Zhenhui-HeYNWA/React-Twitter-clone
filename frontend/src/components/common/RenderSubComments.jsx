@@ -154,7 +154,7 @@ const RenderSubComments = ({ postComment }) => {
                       <div
                         className='flex flex-col overflow-hidden'
                         onClick={handleNavigate}>
-                        <span className='text-lg'>
+                        <span className='text-lg whitespace-pre-wrap'>
                           {structuredComment?.text}
                         </span>
                       </div>
@@ -224,7 +224,9 @@ const RenderSubComments = ({ postComment }) => {
             <div
               className='flex flex-col overflow-hidden'
               onClick={handleNavigate}>
-              <span className='text-lg'>{postComment?.text}</span>
+              <span className='text-lg whitespace-pre-wrap'>
+                {postComment?.text}
+              </span>
             </div>
 
             {/* comment functions section*/}

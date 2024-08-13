@@ -175,7 +175,7 @@ const RenderComments = ({ comment }) => {
 
                             {/* comment text section */}
                             <div className='flex flex-col overflow-hidden '>
-                              <span className='text-lg'>
+                              <span className='text-lg whitespace-pre-wrap'>
                                 {structuredComment?.text}
                               </span>
                             </div>
@@ -243,7 +243,9 @@ const RenderComments = ({ comment }) => {
 
             {/* Comment text section */}
             <div className='flex flex-col gap-y-2 w-full'>
-              <div className='my-1 text-lg'>{comment?.text}</div>
+              <div className='my-1 text-lg whitespace-pre-wrap'>
+                {comment?.text}
+              </div>
               <div className='text-gray-500'>
                 {formatDateTime(comment?.createdAt)}
               </div>

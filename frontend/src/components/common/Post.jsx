@@ -226,7 +226,7 @@ const Post = ({ post, posts }) => {
               {isOriginalPost && (
                 <Link
                   to={`/profile/${post.user.username}`}
-                  className='font-bold'>
+                  className='font-bold truncate'>
                   {post.user.fullName}
                 </Link>
               )}
@@ -238,7 +238,7 @@ const Post = ({ post, posts }) => {
                 </Link>
               )}
 
-              <span className='text-gray-700 flex gap-1 text-sm'>
+              <span className='text-gray-700 flex gap-1 text-sm  truncate'>
                 <Link
                   to={`/profile/${
                     isOriginalPost
@@ -246,9 +246,11 @@ const Post = ({ post, posts }) => {
                       : post.repost.postOwner.username
                   }`}>
                   @
-                  {isOriginalPost
-                    ? post.user.username
-                    : post.repost.postOwner.username}
+                  {isOriginalPost ? (
+                    <span className='truncate'>{post.user.username}</span>
+                  ) : (
+                    post.repost.postOwner.username
+                  )}
                 </Link>
                 <span>·</span>
                 <span>{formattedDate}</span>
@@ -270,7 +272,7 @@ const Post = ({ post, posts }) => {
                 <Link
                   className='nav-link'
                   to={`/${authUser.username}/status/${post._id}`}>
-                  <span className='text-lg'>
+                  <span className='text-lg whitespace-pre-wrap'>
                     {highlightMentions(post.text)}
                   </span>
                 </Link>
@@ -279,7 +281,7 @@ const Post = ({ post, posts }) => {
                 <Link
                   className='nav-link'
                   to={`/${authUser.username}/status/${post._id}`}>
-                  <span className='text-lg'>
+                  <span className='text-lg whitespace-pre-wrap'>
                     {highlightMentions(post.repost.originalText)}
                   </span>
                 </Link>
@@ -291,7 +293,7 @@ const Post = ({ post, posts }) => {
                   to={`/${authUser.username}/status/${post._id}`}>
                   <img
                     src={post.img}
-                    className='h-80 object-cover rounded-lg border border-gray-700 mt-2'
+                    className='h-full object-cover rounded-lg border border-gray-700 mt-2 w-full'
                     alt=''
                   />
                 </Link>
@@ -302,7 +304,7 @@ const Post = ({ post, posts }) => {
                   to={`/${authUser.username}/status/${post._id}`}>
                   <img
                     src={post.repost.originalImg}
-                    className='h-80 object-cover rounded-lg border border-gray-700 mt-2'
+                    className='h-full object-cover rounded-lg border border-gray-700 mt-2 w-full'
                     alt=''
                   />
                 </Link>
@@ -354,7 +356,7 @@ const Post = ({ post, posts }) => {
                               <span className='font-bold'>
                                 {comment?.user?.fullName}
                               </span>
-                              <span className='text-gray-700 text-sm'>
+                              <span className='text-gray-700 text-sm '>
                                 @{comment?.user?.username}
                               </span>
                             </div>

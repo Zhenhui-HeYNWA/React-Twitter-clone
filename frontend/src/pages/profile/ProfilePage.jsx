@@ -110,11 +110,11 @@ const ProfilePage = () => {
         <div className='flex flex-col h-full  '>
           {!isLoading && !isRefetching && user && (
             <>
-              <div className='sticky top-0   z-10 w-full   backdrop-blur-xl px-4 py-2 '>
+              <div className='sticky top-0   z-10 w-full   backdrop-blur-xl px-4 py-1'>
                 <div className=' mx-auto flex items-center  justify-between '>
-                  <div className='flex  flex-row items-center gap-10'>
+                  <div className='flex  flex-row items-center gap-10 '>
                     <Link to='/'>
-                      <FaArrowLeft className='w-4 h-4' />
+                      <FaArrowLeft className='w-4 h-4 ' />
                     </Link>
                     <div className='flex flex-col '>
                       <p className='font-bold text-lg'>{user?.fullName}</p>
@@ -126,7 +126,7 @@ const ProfilePage = () => {
                   <div>
                     {!isMyProfile && isCoverTheButton && (
                       <button
-                        className='btn btn-outline rounded-full btn-sm'
+                        className='btn btn-outline rounded-full btn-sm '
                         onClick={() => follow(user?._id)}>
                         {isPending && 'Loading...'}
                         {!isPending && amIFollowing && 'Following'}
@@ -143,7 +143,7 @@ const ProfilePage = () => {
               <div className='relative group/cover'>
                 <img
                   src={coverImg || user?.coverImg || '/cover.png'}
-                  className='h-52 w-full object-cover'
+                  className=' w-full object-cover'
                   alt='cover image'
                 />
                 {isMyProfile && (
@@ -169,14 +169,15 @@ const ProfilePage = () => {
                   onChange={(e) => handleImgChange(e, 'profileImg')}
                 />
                 {/* USER AVATAR */}
-                <div className='avatar absolute -bottom-16 left-4'>
-                  <div className='w-32 rounded-full relative group/avatar'>
+                <div className='avatar absolute -bottom-16 left-4  '>
+                  <div className='w-24 sm:w-28 md:w-40   rounded-full  object-contain relative group/avatar border-4 dark:border-[#15202B]'>
                     <img
                       src={
                         profileImg ||
                         user?.profileImg ||
                         '/avatar-placeholder.png'
                       }
+                      className='w-full h-full rounded-full object-cover'
                     />
                     {isMyProfile && (
                       <div className='absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer'>
@@ -189,12 +190,12 @@ const ProfilePage = () => {
                   </div>
                 </div>
               </div>
-              <div className='flex justify-end px-4 mt-5'>
+              <div className='flex justify-end px-4 mt-5 items-center '>
                 {isMyProfile && <EditProfileModal authUser={authUser} />}
 
                 {!isMyProfile && (
                   <button
-                    className='btn btn-outline rounded-full btn-sm'
+                    className='flex justify-center items-center btn btn-outline rounded-full btn-sm bg-gray-200 text-black px-4 py-2'
                     onClick={() => follow(user?._id)}>
                     {isPending && 'Loading...'}
                     {!isPending && amIFollowing && 'Following'}
@@ -233,7 +234,6 @@ const ProfilePage = () => {
                           target='_blank'
                           rel='noreferrer'
                           className='text-sm text-blue-500 hover:underline'>
-                          {/* Updated this after recording the video. I forgot to update this while recording, sorry, thx. */}
                           {user?.link}
                         </a>
                       </>

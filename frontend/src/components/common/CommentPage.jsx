@@ -198,7 +198,7 @@ const CommentPage = () => {
   console.log(CommentUsername);
 
   return (
-    <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full   '>
+    <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full '>
       <div className='flex flex-col  '>
         {!isOriginalPost && !isAuthUserRepost && (
           <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
@@ -325,12 +325,12 @@ const CommentPage = () => {
                         {/* post text */}
                         <div className='flex flex-col overflow-hidden  '>
                           {isOriginalPost && (
-                            <span className='text-lg'>
+                            <span className='text-lg whitespace-pre-wrap'>
                               {userHighlightMentions(post.text, post.user.name)}
                             </span>
                           )}
                           {!isOriginalPost && (
-                            <span className='text-lg'>
+                            <span className='text-lg whitespace-pre-wrap'>
                               {userHighlightMentions(
                                 post.repost.originalText,
                                 post.user.name
@@ -341,14 +341,14 @@ const CommentPage = () => {
                           {isOriginalPost && post.img && (
                             <img
                               src={post.img}
-                              className='h-80  object-center rounded-lg border border-gray-700 mt-2'
+                              className='h-full  object-cover rounded-lg border border-gray-700 mt-2'
                               alt=''
                             />
                           )}
                           {!isOriginalPost && post.repost.originalImg && (
                             <img
                               src={post.repost.originalImg}
-                              className='h-80  object-cover  rounded-lg border border-gray-700 mt-2'
+                              className='h-full  object-cover  rounded-lg border border-gray-700 mt-2'
                               alt=''
                               style={{ maxWidth: '100%' }}
                             />
@@ -592,7 +592,7 @@ const CommentPage = () => {
             })}
           </div>
 
-          <div className='hidden md:flex items-start gap-4 border-b border-gray-200 dark:border-gray-700 mb-2 px-4'>
+          <div className='hidden md:flex items-start gap-4 border-b border-gray-200 dark:border-gray-700  px-4'>
             <div className='avatar flex'>
               <div className='w-12 h-12 rounded-full'>
                 <img

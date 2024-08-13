@@ -272,12 +272,12 @@ const SinglePost = () => {
               </div>
               <div className='flex flex-col gap-3 overflow-hidden'>
                 {isOriginalPost && (
-                  <span className='text-lg'>
+                  <span className='text-lg whitespace-pre-wrap'>
                     {highlightMentions(post.text)}
                   </span>
                 )}
                 {!isOriginalPost && (
-                  <span className='text-lg'>
+                  <span className='text-lg whitespace-pre-wrap'>
                     {highlightMentions(post.repost.originalText)}
                   </span>
                 )}
@@ -285,14 +285,14 @@ const SinglePost = () => {
                 {isOriginalPost && post.img && (
                   <img
                     src={post.img}
-                    className='h-80 object-fit rounded-lg border border-gray-700 mt-2'
+                    className='h-full object-cover object-center rounded-lg border border-gray-700 mt-2 w-[40rem]'
                     alt=''
                   />
                 )}
                 {!isOriginalPost && post.repost.originalImg && (
                   <img
                     src={post.repost.originalImg}
-                    className='h-80 object-fit rounded-lg border border-gray-700 mt-2'
+                    className='h-full object-cover object-center rounded-lg border border-gray-700 mt-2 w-[40rem]'
                     alt=''
                   />
                 )}
