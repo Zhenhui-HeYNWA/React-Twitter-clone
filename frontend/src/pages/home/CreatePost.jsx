@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import Picker from '@emoji-mart/react';
 import data from '@emoji-mart/data';
 import { Mention } from 'primereact/mention';
-import '/Users/herbert/Desktop/React-Twitter-clone/frontend/src/pages/home/CreatePost.css';
+import './CreatePost.css';
 import { useTheme } from '../../components/context/ThemeProvider';
 
 const CreatePost = () => {
