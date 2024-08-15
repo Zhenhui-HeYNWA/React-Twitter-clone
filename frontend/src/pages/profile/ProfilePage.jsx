@@ -51,29 +51,51 @@ const ProfilePage = () => {
       }
     },
   });
-  console.log(user?._id);
+
+  const isMyProfile = authUser?._id === user?._id;
+
+  const { data: getFollowersIKnow, refetch: refetchFollowersIKnow } = useQuery({
+    queryKey: ['CommentUserFollower', username],
+    queryFn: async () => {
+      try {
+        const res = await fetch(`/api/users/follower/${username}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+
+        // 计算 commonFollowers
+        if (!authUser?.followings) return [];
+        return data.filter((follower) =>
+          authUser.followings.includes(follower._id)
+        );
+      } catch (error) {
+        throw new Error(error);
+      }
+    },
+    enabled: !isMyProfile,
+  });
 
   const { isUpdateProfile, updateProfile } = useUpdateProfile();
-  const isMyProfile = authUser._id === user?._id;
 
   const joinDate = formatMemberSinceDate(user?.createdAt);
 
-  const amIFollowing = authUser?.followings.includes(user?._id);
+  const amIFollowing = authUser?.followings?.includes(user?._id);
 
   const handleImgChange = (e, state) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        state === 'coverImg' && setCoverImg(reader.result);
-        state === 'profileImg' && setProfileImg(reader.result);
+        if (state === 'coverImg') setCoverImg(reader.result);
+        if (state === 'profileImg') setProfileImg(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
+
   useEffect(() => {
     refetch();
-  }, [username, refetch]);
+    refetchFollowersIKnow();
+  }, [username, refetch, refetchFollowersIKnow]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -93,7 +115,7 @@ const ProfilePage = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-  console.log(isCoverTheButton);
+
   useEffect(() => {
     refetch();
   }, [username, refetch]);
@@ -244,54 +266,46 @@ const ProfilePage = () => {
                     <span className='text-sm text-slate-500'>{joinDate}</span>
                   </div>
                 </div>
-                <div className='flex gap-2'>
-                  <Link
-                    to={`/follow/${user.username}`}
-                    className='flex items-center justify-between gap-4'>
+                <Link to={`/follow/${user.username}`}>
+                  <div className='flex gap-2'>
                     <div className='flex gap-1 items-center'>
                       <span className='font-bold text-sm'>
                         {user?.followings.length}
                       </span>
                       <span className='text-slate-500 text-sm'>Following</span>
                     </div>
-                  </Link>
 
-                  <Link
-                    to={`/follow/${user.username}`}
-                    className='flex items-center justify-between gap-4'>
                     <div className='flex gap-1 items-center'>
                       <span className='font-bold text-sm'>
                         {user?.followers.length}
                       </span>
                       <span className='text-slate-500 text-sm'>Followers</span>
                     </div>
-                  </Link>
-                </div>
-
-                <div className=' flex flex-row  items-center justify-start  gap-x-2 '>
-                  <div className='isolate flex -space-x-2 '>
-                    <img
-                      className='relative z-30 inline-block h-6 w-6 rounded-full  '
-                      src={user?.profileImg}
-                      alt=''
-                    />
-                    <img
-                      className='relative z-20 inline-block h-6 w-6 rounded-full '
-                      src={user?.profileImg}
-                      alt=''
-                    />
-
-                    <img
-                      className='relative z-0 inline-block h-6 w-6 rounded-full '
-                      src={user?.profileImg}
-                      alt=''
-                    />
                   </div>
-                  <div className='text-slate-500 text-sm'>
-                    Followed by Anfield Edition,The Anfield Talk,and David
-                    Ornstein
+                </Link>
+                {!isMyProfile && getFollowersIKnow?.length > 0 && (
+                  <div className='flex flex-row items-center justify-start gap-x-2'>
+                    <div className='isolate flex -space-x-2'>
+                      {getFollowersIKnow.slice(0, 3).map((follower, index) => (
+                        <img
+                          key={index}
+                          className={`relative inline-block h-6 w-6 rounded-full z-${
+                            30 - index * 10
+                          }`}
+                          src={follower.profileImg}
+                          alt={follower.username}
+                        />
+                      ))}
+                    </div>
+                    <div className='text-slate-500 text-sm'>
+                      Followed by {getFollowersIKnow[0]?.username}
+                      {getFollowersIKnow.length > 1 &&
+                        `, ${getFollowersIKnow[1]?.username}`}
+                      {getFollowersIKnow.length > 2 &&
+                        `, and ${getFollowersIKnow.length - 2} others`}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               <div className='flex w-full border-b border-gray-700 mt-4'>
                 <div
@@ -332,18 +346,21 @@ const ProfilePage = () => {
                     <div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary' />
                   )}
                 </div>
-                <div
-                  className={`flex justify-center flex-1 p-3 ${
-                    feedType === 'bookmarks'
-                      ? 'text-black  font-bold dark:text-white'
-                      : 'text-slate-500'
-                  }  transition duration-300 relative cursor-pointer`}
-                  onClick={() => setFeedType('bookmarks')}>
-                  Bookmarks
-                  {feedType === 'bookmarks' && (
-                    <div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary' />
-                  )}
-                </div>
+
+                {isMyProfile && (
+                  <div
+                    className={`flex justify-center flex-1 p-3 ${
+                      feedType === 'bookmarks'
+                        ? 'text-black  font-bold dark:text-white'
+                        : 'text-slate-500'
+                    }  transition duration-300 relative cursor-pointer`}
+                    onClick={() => setFeedType('bookmarks')}>
+                    Bookmarks
+                    {feedType === 'bookmarks' && (
+                      <div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary' />
+                    )}
+                  </div>
+                )}
               </div>
             </>
           )}

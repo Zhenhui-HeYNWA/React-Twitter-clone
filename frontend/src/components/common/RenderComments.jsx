@@ -277,20 +277,29 @@ const RenderComments = ({ comment }) => {
                       </div>
 
                       <div className='flex flex-row items-center w-full'>
-                        <div className='flex flex-col justify-between w-full'>
-                          <div className='flex flex-row gap-2 justify-start items-center w-full'>
-                            <div className='font-bold whitespace-nowrap'>
-                              {comment?.user.fullName}
-                            </div>
-                            <div className='text-gray-500 overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px]'>
-                              @{comment?.user.username}
-                            </div>
-                            <div className='text-gray-500'>·</div>
-                            <div className='text-gray-500'>
-                              {formatPostDate(comment?.createdAt)}
+                        <div className='flex flex-col justify-between'>
+                          <div className='flex flex-row justify-start items-center '>
+                            <div className='flex flex-row  gap-1 max-w-sm '>
+                              <span className='font-bold text-nowrap'>
+                                {comment?.user.fullName}
+                              </span>
+
+                              <span className='text-gray-500 truncate  max-w-24 md:max-w-52'>
+                                @{comment?.user.username}
+                              </span>
+
+                              <span className='text-gray-500 text-nowrap'>
+                                ·
+                              </span>
+
+                              <span className='text-gray-500 text-nowrap'>
+                                {formatPostDate(comment?.createdAt)}
+                              </span>
                             </div>
                           </div>
+
                           <div className='text-base'>@{authUser.username}</div>
+
                           <div className='mt-2 text-gray-500'>
                             Replying to{' '}
                             <span className='text-sky-600'>

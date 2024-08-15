@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { debounce } from 'lodash';
 
 import { FaSearch, FaUser } from 'react-icons/fa';
+import useFollow from '../../../hooks/useFollow';
+import LoadingSpinner from '../../../components/common/LoadingSpinner';
 
 const searchUsers = async (query) => {
   const res = await fetch(`/api/users/search?q=${query}`);
@@ -43,16 +45,16 @@ const SearchUser = ({ authUser }) => {
       debouncedSearch.cancel();
     };
   }, [query, debouncedSearch]);
-
+  const { follow, isPending } = useFollow();
   return (
-    <div className='search-user-container'>
+    <div className='search-user-container items-center'>
       <button
         className=''
         onClick={() => document.getElementById('my_modal_5').showModal()}>
         <FaSearch />
       </button>
-      <dialog id='my_modal_5' className='modal modal-middle sm:modal-middle'>
-        <div className='modal-box bg-gray-200 dark:bg-secondary pt-2'>
+      <dialog id='my_modal_5' className='modal modal-middle sm:modal-middle '>
+        <div className='modal-box bg-gray-200 dark:dark:bg-[#15202B] pt-4 items-center'>
           <div className='flex items-center justify-between mb-6 gap-3'>
             <form className='search-form flex-grow'>
               <label className='input input-sm flex items-center gap-2 bg-inherit outline-none w-full border-none dark:bg-slate-800'>
@@ -82,19 +84,20 @@ const SearchUser = ({ authUser }) => {
               </form>
             </div>
           </div>
-          <div className='search-results bg-gray-200 dark:bg-secondary overflow-y-auto max-h-64'>
+          <div className='search-results bg-gray-200 dark:bg-[#15202B]   overflow-y-auto max-h-64'>
             {isFetching ? (
               <div>Loading..</div>
             ) : users && users.length > 0 ? (
               users.map((user) => {
                 const isFollowing = authUser?.followings.includes(user._id);
+                const isNotMySelf = authUser._id === user._id;
 
                 return (
                   <Link
                     key={user._id}
                     to={`/profile/${user.username}`}
-                    className='search-result-item flex flex-row mb-4 w-full'>
-                    <div className='flex gap-2 items-center'>
+                    className='search-result-item flex flex-row mb-4 w-full justify-between items-center pr-4 '>
+                    <div className='flex gap-2 items-center '>
                       <div className='avatar'>
                         <div className='w-8 rounded-full'>
                           <img
@@ -118,6 +121,18 @@ const SearchUser = ({ authUser }) => {
                         )}
                       </div>
                     </div>
+                    {!isFollowing && !isNotMySelf && (
+                      <div>
+                        <button
+                          className='text-xs flex gap-2  items-center text-black  bg-white px-3 py-1 rounded-2xl border border-black dark:border-none '
+                          onClick={(e) => {
+                            e.preventDefault();
+                            follow(user._id);
+                          }}>
+                          {isPending ? <LoadingSpinner size='sm' /> : 'Follow'}
+                        </button>
+                      </div>
+                    )}
                   </Link>
                 );
               })

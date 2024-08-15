@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom';
 import FollowingSkeleton from '../skeletons/FollowingSkeleton';
 import useFollow from '../../hooks/useFollow';
 
-
 const FollowAndFollowing = ({ feedType, username }) => {
   const getPostEndPoint = () => {
     switch (feedType) {
       case 'following':
         return `/api/users/following/${username}`;
       case 'followers':
+        return `/api/users/follower/${username}`;
+      case 'FollowersUKnow':
         return `/api/users/follower/${username}`;
       default:
         return `/api/users/following/${username}`;
@@ -37,7 +38,15 @@ const FollowAndFollowing = ({ feedType, username }) => {
         const res = await fetch(FetchEndPoint);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return data;
+
+        if (feedType === 'FollowersUKnow' && authUser?.followings) {
+          const commonFollowers = data.filter((follower) =>
+            authUser.followings.includes(follower._id)
+          );
+          return commonFollowers;
+        } else {
+          return data;
+        }
       } catch (error) {
         throw new Error(error);
       }
@@ -131,7 +140,6 @@ const FollowAndFollowing = ({ feedType, username }) => {
             </div>
           );
         })}
-     
     </div>
   );
 };

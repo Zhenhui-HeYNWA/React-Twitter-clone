@@ -66,7 +66,8 @@ const MobileBar = () => {
         </Link>
         <Link
           to='/notifications'
-          className=' relative flex gap-2 items-center text-gray-800 dark:text-white'>
+          className=' relative flex gap-2 items-center text-gray-800 dark:text-white'
+          onClick={() => setHasUnread(false)}>
           <IoNotifications className='w-5 h-5' />
           {hasUnread && (
             <span className='bg-sky-600 rounded-full h-2 w-2 absolute top-0 left-3'></span>

@@ -10,10 +10,11 @@ import { useQuery } from '@tanstack/react-query';
 const FollowPage = () => {
   const [followType, setFollowType] = useState('following');
   const { username } = useParams();
-  
+
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
+  const isMyProfile = authUser?.username === username;
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen'>
@@ -21,13 +22,26 @@ const FollowPage = () => {
         <Link to='/'>
           <FaArrowLeft className='w-4 h-4' />
         </Link>
-        <p className='font-bold'>{username}</p>
+        <div className='flex flex-col items-center'>
+          <p className='font-bold'>{username}</p>
+        </div>
         <div className='dropdown items-center justify-center '>
           {' '}
           <SearchUser className='w-4 h-4' authUser={authUser} />
         </div>
       </div>
-      <div className='flex w-full border-b border-gray-200 dark:border-gray-700 pt-3 items-center '>
+      <div className='flex w-full border-b border-gray-200 dark:border-gray-700 pt-3 items-center  font-semibold'>
+        {!isMyProfile && (
+          <div
+            className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
+            onClick={() => setFollowType('FollowersUKnow')}>
+            Followers you know
+            {followType === 'FollowersUKnow' && (
+              <div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
+            )}
+          </div>
+        )}
+
         <div
           className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
           onClick={() => setFollowType('following')}>
