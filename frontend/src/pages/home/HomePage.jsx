@@ -7,7 +7,7 @@ import Posts from '../../components/common/Posts';
 const HomePage = () => {
   const [feedType, setFeedType] = useState('forYou');
   return (
-    <div className='flex-[4_4_0] mr-auto border-r  border-gray-200 dark:border-gray-700 min-h-screen'>
+    <div className='flex-[4_4_0] border-r  border-gray-200 dark:border-gray-700 min-h-screen'>
       {/*Header*/}
       <div className='flex w-full border-b border-gray-200 dark:border-gray-700'>
         <div
