@@ -220,52 +220,59 @@ const Post = ({ post, posts }) => {
               </Link>
             )}
           </div>
-          <div className='flex flex-col flex-1'>
-            <div className='flex gap-2 items-center '>
-              {/* fullName */}
-              {isOriginalPost && (
-                <Link
-                  to={`/profile/${post.user.username}`}
-                  className='font-bold truncate'>
-                  {post.user.fullName}
-                </Link>
-              )}
-              {!isOriginalPost && (
-                <Link
-                  to={`/profile/${post.repost.postOwner.username}`}
-                  className='font-bold'>
-                  {post.repost.postOwner.fullName}
-                </Link>
-              )}
+          <div className='flex flex-col flex-1 '>
+            <div className='flex   justify-between items-center w-full  '>
+              <div className='flex flex-row gap-1 items-center max-w-sm '>
+                {/* fullName */}
+                {isOriginalPost && (
+                  <Link to={`/profile/${post.user.username}`}>
+                    <span className=' font-bold text-nowrap'>
+                      {post.user.fullName}
+                    </span>
+                  </Link>
+                )}
+                {!isOriginalPost && (
+                  <Link to={`/profile/${post.repost.postOwner.username}`}>
+                    <span className=' font-bold text-nowrap'>
+                      {post.repost.postOwner.fullName}
+                    </span>
+                  </Link>
+                )}
 
-              <span className='text-gray-700 flex gap-1 text-sm  truncate'>
-                <Link
-                  to={`/profile/${
-                    isOriginalPost
-                      ? post.user.username
-                      : post.repost.postOwner.username
-                  }`}>
-                  @
-                  {isOriginalPost ? (
-                    <span className='truncate'>{post.user.username}</span>
-                  ) : (
-                    post.repost.postOwner.username
-                  )}
-                </Link>
-                <span>·</span>
-                <span>{formattedDate}</span>
-              </span>
-              {isMyPost && (
-                <span className='flex justify-end flex-1'>
-                  {!isDeleting && (
-                    <FaTrash
-                      className='cursor-pointer hover:text-red-500'
-                      onClick={handleDeletePost}
-                    />
-                  )}
-                  {isDeleting && <LoadingSpinner size='sm' />}
+                <span className='text-gray-700 flex gap-1 text-sm '>
+                  <span className='text-gray-500 truncate max-w-20 md:max-w-52'>
+                    <Link
+                      to={`/profile/${
+                        isOriginalPost
+                          ? post.user.username
+                          : post.repost.postOwner.username
+                      }`}>
+                      {isOriginalPost ? (
+                        <span>@{post.user.username}</span>
+                      ) : (
+                        <span>@{post.repost.postOwner.username}</span>
+                      )}
+                    </Link>
+                  </span>
+                  <span className='text-gray-500 text-nowrap'>·</span>
+                  <span className='text-gray-500 text-nowrap'>
+                    {formattedDate}
+                  </span>
                 </span>
-              )}
+              </div>
+              <div>
+                {isMyPost && (
+                  <span className='flex justify-end flex-1'>
+                    {!isDeleting && (
+                      <FaTrash
+                        className='cursor-pointer hover:text-red-500'
+                        onClick={handleDeletePost}
+                      />
+                    )}
+                    {isDeleting && <LoadingSpinner size='sm' />}
+                  </span>
+                )}
+              </div>
             </div>
             <div className='flex flex-col gap-3 overflow-hidden  '>
               {isOriginalPost && (

@@ -200,7 +200,7 @@ const CommentPage = () => {
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full '>
       <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
-        <div className='flex gap-10 px-4 py-1 items-center  '>
+        <div className='flex gap-10 px-4 pt-1 items-center  '>
           <Link to='/'>
             <FaArrowLeft className='w-4 h-4' />
           </Link>
@@ -268,8 +268,8 @@ const CommentPage = () => {
                         <div className='w-0.5 dark:bg-slate-700  bg-gray-400  h-full mt-1'></div>
                       </div>
 
-                      <div className='flex flex-col  w-full gap-2 '>
-                        <div className='flex  items-center justify-between '>
+                      <div className='flex flex-col  w-full gap-1  '>
+                        <div className='flex  items-center justify-between  w-full '>
                           <div className='flex flex-row items-center  justify-start gap-1 '>
                             {/* fullName */}
                             {isOriginalPost && (
@@ -282,12 +282,12 @@ const CommentPage = () => {
                             {!isOriginalPost && (
                               <Link
                                 to={`/profile/${post.repost.postOwner.username}`}
-                                className='font-bold truncate'>
+                                className='font-bold text-nowrap'>
                                 {post.repost.postOwner.fullName}
                               </Link>
                             )}
                             {/* username */}
-                            <span className='text-gray-700 flex gap-1 text-base truncate'>
+                            <span className='text-gray-700 text-base truncate max-w-20 md:max-w-52'>
                               <Link
                                 to={`/profile/${
                                   isOriginalPost
@@ -300,14 +300,16 @@ const CommentPage = () => {
                                   : post.repost.postOwner.username}
                               </Link>
                             </span>
-                            <span className='text-base  text-gray-700'>·</span>
-                            <span className='text-base  text-gray-700 flex gap-1'>
+                            <span className='text-base  text-gray-700 text-nowrap'>
+                              ·
+                            </span>
+                            <span className='text-base  text-gray-700  text-nowrap'>
                               {formattedPostDate}
                             </span>
                           </div>
-                          {/* delete post */}
-                          {isMyPost && (
-                            <div className=' flex justify-end items-center'>
+                          <div className=' flex justify-end items-center'>
+                            {/* delete post */}
+                            {isMyPost && (
                               <span className='flex justify-end flex-1'>
                                 {!isDeleting && (
                                   <FaTrash
@@ -317,8 +319,8 @@ const CommentPage = () => {
                                 )}
                                 {isDeleting && <LoadingSpinner size='sm' />}
                               </span>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                         {/* post text */}
                         <div className='flex flex-col overflow-hidden  '>

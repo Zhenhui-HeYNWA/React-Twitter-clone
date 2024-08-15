@@ -302,8 +302,8 @@ const SinglePost = () => {
             </div>
           )}
         </div>
-        <div className='flex justify-between my-1 px-14 border-b border-gray-200 dark:border-gray-700 py-2   '>
-          <div className='flex gap-4 items-center w-2/3 justify-between'>
+        <div className='flex justify-between my-1 px-5 md:px-14 border-b border-gray-200 dark:border-gray-700 py-2   '>
+          <div className='flex gap-4 items-center justify-between w-full'>
             <div
               className='flex gap-1 items-center cursor-pointer group'
               onClick={() =>
@@ -469,8 +469,19 @@ const SinglePost = () => {
                 {post?.likes.length}
               </span>
             </div>
+            <div
+              className=' gap-2 group items-center'
+              onClick={handleBookmarkingPost}>
+              {isBookmarking && <LoadingSpinner size='sm' />}
+              {!isMarked && !isBookmarking && (
+                <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+              )}
+              {isMarked && !isBookmarking && (
+                <FaBookmark className='w-4 h-4 cursor-pointer  ' />
+              )}
+            </div>
           </div>
-          <div
+          {/* <div
             className='flex w-1/3 justify-end gap-2 group items-center'
             onClick={handleBookmarkingPost}>
             {isBookmarking && <LoadingSpinner size='sm' />}
@@ -480,7 +491,7 @@ const SinglePost = () => {
             {isMarked && !isBookmarking && (
               <FaBookmark className='w-4 h-4 cursor-pointer  ' />
             )}
-          </div>
+          </div> */}
         </div>
 
         {/* CREATE COMMENT */}
