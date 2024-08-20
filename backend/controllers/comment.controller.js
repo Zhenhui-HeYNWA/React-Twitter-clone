@@ -1,6 +1,7 @@
 import Post from '../models/post.model.js';
 import User from '../models/user.model.js';
 import Comment from '../models/comment.model.js';
+import Notification from '../models/notification.model.js';
 
 //Get Post Top level comments
 export const getPostComments = async (req, res) => {
@@ -80,25 +81,35 @@ export const getSingleComment = async (req, res) => {
 //Get user Replies
 export const getUserReplies = async (req, res) => {
   const { userId } = req.params;
+  const { page = 1, limit = 10 } = req.query; // 解析分页参数
 
   try {
-    // 查找该用户的所有未删除的评论
     const userReplies = await Comment.find({
       user: userId,
       isDeleted: { $ne: true },
     })
       .populate({
         path: 'user',
-        select: '-password', // 填充每条评论的用户详细信息，但不包括密码
+        select: 'username fullName profileImg',
+      })
+      .populate({
+        path: 'postId',
+        populate: {
+          path: 'user',
+          select: 'username fullName profileImg',
+        },
       })
       .populate({
         path: 'replies',
-        match: { isDeleted: { $ne: true } }, // 只填充未删除的子回复
+        match: { isDeleted: { $ne: true } },
         populate: {
           path: 'user',
-          select: '-password', // 填充每条回复的用户详细信息，但不包括密码
+          select: 'username fullName profileImg',
         },
-      });
+      })
+      .sort({ createdAt: -1 }) // 按创建时间倒序排序
+      .skip((page - 1) * limit) // 跳过前面的评论
+      .limit(limit); // 限制返回的评论数量
 
     // 递归填充父评论
     for (let reply of userReplies) {
@@ -111,12 +122,22 @@ export const getUserReplies = async (req, res) => {
             select: 'fullName username profileImg',
           },
         });
-
         currentComment = currentComment.parentId;
       }
     }
 
-    res.status(200).json(userReplies);
+    const totalReplies = await Comment.countDocuments({
+      user: userId,
+      isDeleted: { $ne: true },
+    });
+
+    const totalPages = Math.ceil(totalReplies / limit);
+
+    res.status(200).json({
+      replies: userReplies,
+      currentPage: parseInt(page), // 确保当前页正确返回
+      totalPages,
+    });
   } catch (error) {
     console.log('Error in getUserReplies controller:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -223,5 +244,64 @@ export const deleteComment = async (req, res) => {
   } catch (error) {
     console.error('Error deleting comment:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const likeUnlikeComment = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id: commentId } = req.params;
+
+    const comment = await Comment.findById(commentId);
+    if (!comment) {
+      return res.status(404).json({ error: 'Comment not found' });
+    }
+
+    // Check if the user has already liked the comment
+    const userLikedComment = await User.findOne({
+      _id: userId,
+      'likes.item': commentId,
+      'likes.onModel': 'Comment',
+    });
+
+    if (userLikedComment) {
+      // Unlike the comment
+      await Comment.updateOne({ _id: commentId }, { $pull: { likes: userId } });
+
+      // Remove from user's likes array
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { likes: { item: commentId, onModel: 'Comment' } } }
+      );
+
+      const updatedComment = await Comment.findById(commentId);
+      return res.status(200).json({
+        message: 'Comment unliked successfully',
+        likes: updatedComment.likes,
+      });
+    } else {
+      // Like the comment
+      comment.likes.push(userId);
+      await User.updateOne(
+        { _id: userId },
+        { $push: { likes: { item: commentId, onModel: 'Comment' } } }
+      );
+      await comment.save();
+
+      const notification = new Notification({
+        from: userId,
+        to: comment.user,
+        type: 'likes',
+      });
+      await notification.save();
+
+      return res.status(200).json({
+        message: 'Comment liked successfully',
+        likes: comment.likes,
+      });
+    }
+  } catch (error) {
+    console.log('Error in likeUnlikeComment controller:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };

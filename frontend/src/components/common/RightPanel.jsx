@@ -5,8 +5,12 @@ import { Link } from 'react-router-dom';
 
 import LoadingSpinner from './LoadingSpinner';
 import RightPanelSkeleton from '../skeletons/RightPanelSkeleton';
+import SearchUser from '../../pages/auth/searchUser/SearchUser';
 
 const RightPanel = () => {
+  const { data: authUser } = useQuery({
+    queryKey: ['authUser'],
+  });
   const { data: suggestedUsers, isLoading } = useQuery({
     queryKey: ['suggestedUsers'],
     queryFn: async () => {
@@ -28,6 +32,10 @@ const RightPanel = () => {
 
   return (
     <div className=' hidden lg:block my-4 mx-2 '>
+      {/* <div className='dropdown items-center justify-center sticky top-0 z-10 '>
+        {' '}
+        <SearchUser className='w-4 h-4' authUser={authUser} />
+      </div> */}
       <div className='dark:bg-[#15202B] p-4 rounded-md sticky top-2'>
         <p className='font-bold'>Who to follow</p>
         <div className='flex flex-col gap-4'>

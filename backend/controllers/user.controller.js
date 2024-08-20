@@ -4,6 +4,8 @@ import { v2 as cloudinary } from 'cloudinary';
 //models
 import User from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
+import Post from '../models/post.model.js';
+import Comment from '../models/comment.model.js';
 
 export const getUserProfile = async (req, res) => {
   const { username } = req.params;
@@ -17,6 +19,61 @@ export const getUserProfile = async (req, res) => {
   } catch (error) {
     console.log('Error in getUserProfile:', error.message);
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const getUserLiked = async (req, res) => {
+  try {
+    const username = req.params.username;
+
+    // Find the user by username
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Separate liked posts and comments based on `onModel`
+    const likedPosts = [];
+    const likedComments = [];
+
+    user.likes.forEach((like) => {
+      if (like.onModel === 'Post') {
+        likedPosts.push(like.item);
+      } else if (like.onModel === 'Comment') {
+        likedComments.push(like.item);
+      }
+    });
+
+    // Fetch the liked posts
+    const posts = await Post.find({ _id: { $in: likedPosts } })
+      .populate({ path: 'user', select: '-password' })
+      .populate({
+        path: 'comments',
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: 'user',
+          select: '-password',
+        },
+      });
+
+    // Fetch the liked comments
+    const comments = await Comment.find({ _id: { $in: likedComments } })
+      .populate({ path: 'user', select: '-password' })
+      .populate({
+        path: 'postId',
+        populate: {
+          path: 'user',
+          select: '-password',
+        },
+      });
+
+    // Combine liked posts and comments into one array
+    const likedItems = [...posts, ...comments];
+
+    res.status(200).json(likedItems);
+  } catch (error) {
+    console.log('Error in getUserLiked controller:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };
 

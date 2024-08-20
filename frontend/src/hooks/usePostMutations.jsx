@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
 const usePostMutations = (postId) => {
+  console.log(postId);
   const queryClient = useQueryClient();
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
@@ -17,8 +18,8 @@ const usePostMutations = (postId) => {
         throw new Error(error);
       }
     },
-    onSuccess: ({ data, actionType }) => {
-      toast.success(`Post ${actionType} successfully`);
+    onSuccess: ({ data }) => {
+      toast.success(`Post delete successfully`);
       queryClient.setQueryData(['post', postId], data); // Directly update post data
       queryClient.invalidateQueries(['posts']);
     },
@@ -35,18 +36,19 @@ const usePostMutations = (postId) => {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return data;
+        return data.likes; // Ensure you return only the likes array
       } catch (error) {
         throw new Error(error.message);
       }
     },
     onSuccess: (updatedLikes) => {
+      console.log(updatedLikes);
       // Update the 'posts' query data
       queryClient.setQueryData(['posts'], (oldData) => {
         if (oldData) {
           return oldData.map((p) => {
             if (p._id === postId) {
-              return { ...p, likes: updatedLikes };
+              return { ...p, likes: updatedLikes }; // Ensure likes is an array
             }
             return p;
           });
@@ -59,7 +61,7 @@ const usePostMutations = (postId) => {
       // Update the specific 'post' query data
       queryClient.setQueryData(['post', postId], (oldPost) => {
         if (oldPost) {
-          return { ...oldPost, likes: updatedLikes };
+          return { ...oldPost, likes: updatedLikes || [] }; // Ensure likes is an array
         }
         return oldPost;
       });
@@ -149,36 +151,54 @@ const usePostMutations = (postId) => {
 
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Something went wrong');
-          return { comment: data, postId };
+          return { comment: data.comments, postId };
         } catch (error) {
           throw new Error(error.message);
         }
       },
-      onSuccess: ({ comment, postId }) => {
+      onSuccess: (updateComment, { postId }) => {
         toast.success('Comment posted successfully');
 
-        // 更新缓存中的评论数据，而不是整个帖子
         queryClient.setQueryData(['posts'], (oldData) => {
+          if (!oldData) return oldData;
+
           return oldData.map((post) => {
             if (post._id === postId) {
-              // 只更新 comments 部分
-              return { ...post, comments: [...post.comments, comment] };
+              return {
+                ...post,
+                comments: [...post.comments, updateComment.comment], // Add the new comment to the existing comments array
+              };
             }
             return post;
           });
         });
+
+        queryClient.setQueryData(['post', postId], (oldPost) => {
+          if (oldPost) {
+            return {
+              ...oldPost,
+              comments: [...(oldPost.comments || []), updateComment.comment], // Append the new comment to the existing comments array
+            };
+          }
+          return oldPost;
+        });
       },
       onError: (error) => {
+        console.log(error.message);
         toast.error(error.message);
       },
     });
-
   const { mutate: repostPost, isPending: isReposting } = useMutation({
     mutationFn: async ({ actionType }) => {
       try {
         const res = await fetch(`/api/posts/repost/${postId}`, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ actionType }), // Send actionType to the server
         });
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
         return { data, actionType };
@@ -189,8 +209,24 @@ const usePostMutations = (postId) => {
     onSuccess: ({ actionType }) => {
       toast.success(`Post ${actionType} successfully`);
 
-      // Ensure that the queryKey is consistent with the one used in useQuery
-      queryClient.invalidateQueries(['post', postId]); // Invalidate post query
+      // Update authUser's repostedPosts
+      queryClient.setQueryData(['authUser'], (oldData) => {
+        if (!oldData) return oldData;
+
+        const updatedRepostedPosts =
+          actionType === 'repost'
+            ? [...oldData.repostedPosts, postId] // Add repost
+            : oldData.repostedPosts.filter((id) => id !== postId); // Remove repost
+
+        return {
+          ...oldData,
+          repostedPosts: updatedRepostedPosts,
+        };
+      });
+
+      // Refresh post and authUser data
+      queryClient.invalidateQueries(['post', postId]);
+      queryClient.invalidateQueries(['authUser']);
     },
     onError: (error) => {
       toast.error(error.message);

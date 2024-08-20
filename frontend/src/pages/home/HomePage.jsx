@@ -9,7 +9,7 @@ const HomePage = () => {
   return (
     <div className='flex-[4_4_0] border-r  border-gray-200 dark:border-gray-700 min-h-screen'>
       {/*Header*/}
-      <div className='flex w-full border-b border-gray-200 dark:border-gray-700'>
+      <div className='flex w-full border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10 bg-gray-200 dark:bg-[#15202b]'>
         <div
           className={
             'flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-[#15202B] transition duration-300 cursor-pointer relative'

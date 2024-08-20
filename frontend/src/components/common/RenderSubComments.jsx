@@ -8,17 +8,16 @@ import useCommentMutations from '../../hooks/useCommentMutations';
 import { useEffect, useState } from 'react';
 import CommentFunction from './CommentFunction';
 
-const RenderSubComments = ({ postComment }) => {
+const RenderSubComments = ({ postComment, id }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
   const [structuredComments, setStructuredComments] = useState([]);
 
   const isMyComment = authUser._id === postComment?.user._id;
   const isSubComment = postComment?.user._id !== null;
-  console.log('postComment', postComment);
-  console.log('structuredComments', structuredComments);
+
   const hasParentComment =
-    postComment?.parentId && postComment.parentId.user !== undefined;
+    postComment?.parentId && postComment.parentId.user !== null;
 
   console.log(hasParentComment);
   const navigate = useNavigate();
@@ -44,7 +43,7 @@ const RenderSubComments = ({ postComment }) => {
 
     return result.reverse();
   }
-
+  console.log(structuredComments.map((item) => item._id));
   useEffect(() => {
     if (isSubComment) {
       const structured = getParentCommentsIterative(postComment);
@@ -65,19 +64,19 @@ const RenderSubComments = ({ postComment }) => {
     if (isCommentDeleting) return;
     deleteComment({ commentId });
   };
-  const isDeleted = postComment?.isDeleted;
-  console.log(isDeleted);
+
   return (
-    <div className=' flex flex-col flex-1 justify-center py-2  '>
+    <div
+      className='border-b  border-gray-200 dark:border-gray-700 flex flex-col flex-1 justify-center py-2 '
+      key={id}>
       <div className='flex flex-col gap-1 justify-between px-4 '>
         {hasParentComment &&
-          structuredComments.map((structuredComment) => {
+          structuredComments.map((structuredComment, index) => {
             const isStructuredCommentDeleted =
               structuredComment.isDeleted === true;
             if (isStructuredCommentDeleted) {
               return (
-                <div key={structuredComment._id}>
-                  {' '}
+                <div key={structuredComment._id + '-deleted-' + index}>
                   <div className='flex flex-col gap-2 items-start mt-1 relative h-20  '>
                     <div className='bg-gray-200 rounded-md p-3 '>
                       This comment has been deleted by author.
@@ -88,84 +87,80 @@ const RenderSubComments = ({ postComment }) => {
               );
             }
             return (
-              <>
-                <div key={structuredComment._id}>
-                  <div className='flex gap-4'>
-                    <div className='flex flex-col items-center'>
-                      <div className='avatar'>
-                        {/* Avatar */}
+              <div key={structuredComment._id + '-structured-' + index}>
+                <div className='flex gap-4'>
+                  <div className='flex flex-col items-center'>
+                    <div className='avatar'>
+                      {/* Avatar */}
+                      <Link
+                        to={`/profile/${structuredComment?.user?.username}`}
+                        className='w-12 h-12 rounded-full overflow-hidden block'>
+                        <img
+                          src={
+                            structuredComment?.user?.profileImg ||
+                            '/avatar-placeholder.png'
+                          }
+                          alt='Profile'
+                        />
+                      </Link>
+                    </div>
+                    <div className='w-0.5 dark:bg-slate-700  bg-gray-400  h-full mt-1 '></div>
+                  </div>
+
+                  <div className='flex flex-col w-full gap-1'>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex flex-row items-center justify-start gap-1'>
                         <Link
                           to={`/profile/${structuredComment?.user?.username}`}
-                          className='w-12 h-12 rounded-full overflow-hidden block'>
-                          <img
-                            src={
-                              structuredComment?.user?.profileImg ||
-                              '/avatar-placeholder.png'
-                            }
-                            alt='Profile'
-                          />
+                          className='font-bold truncate'>
+                          {structuredComment?.user?.fullName}
                         </Link>
-                      </div>
-                      <div className='w-0.5 dark:bg-slate-700  bg-gray-400  h-full mt-1 '></div>
-                    </div>
 
-                    <div className='flex flex-col w-full gap-1'>
-                      <div className='flex items-center justify-between'>
-                        <div className='flex flex-row items-center justify-start gap-1'>
+                        {/* username */}
+                        <span className='text-gray-700 flex gap-1 text-base truncate'>
                           <Link
-                            to={`/profile/${structuredComment?.user?.username}`}
-                            className='font-bold truncate'>
-                            {structuredComment?.user?.fullName}
+                            to={`/profile/${structuredComment?.user?.username}`}>
+                            @{structuredComment?.user?.username}
                           </Link>
-
-                          {/* username */}
-                          <span className='text-gray-700 flex gap-1 text-base truncate'>
-                            <Link
-                              to={`/profile/${structuredComment?.user?.username}`}>
-                              @{structuredComment?.user?.username}
-                            </Link>
-                          </span>
-                          <span className='text-base text-gray-700'>·</span>
-                          <span className='text-base text-gray-700 flex gap-1'>
-                            {structuredComment?.createdAt}
-                          </span>
-                        </div>
-                        {isMyComment && (
-                          <div className='flex justify-end items-center'>
-                            <span className='flex justify-end flex-1'>
-                              {!isCommentDeleting && (
-                                <FaTrash
-                                  className='cursor-pointer hover:text-red-500'
-                                  onClick={() =>
-                                    handleDeleteComment(structuredComment?._id)
-                                  }
-                                />
-                              )}
-
-                              {isCommentDeleting && (
-                                <LoadingSpinner size='sm' />
-                              )}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* comment text section */}
-                      <div
-                        className='flex flex-col overflow-hidden'
-                        onClick={handleNavigate}>
-                        <span className='text-lg whitespace-pre-wrap'>
-                          {structuredComment?.text}
+                        </span>
+                        <span className='text-base text-gray-700'>·</span>
+                        <span className='text-base text-gray-700 flex gap-1'>
+                          {structuredComment?.createdAt}
                         </span>
                       </div>
+                      {isMyComment && (
+                        <div className='flex justify-end items-center'>
+                          <span className='flex justify-end flex-1'>
+                            {!isCommentDeleting && (
+                              <FaTrash
+                                className='cursor-pointer hover:text-red-500'
+                                onClick={() =>
+                                  handleDeleteComment(structuredComment?._id)
+                                }
+                              />
+                            )}
 
-                      {/* comment functions section */}
-
-                      <CommentFunction postComment={structuredComment} />
+                            {isCommentDeleting && <LoadingSpinner size='sm' />}
+                          </span>
+                        </div>
+                      )}
                     </div>
+
+                    {/* comment text section */}
+                    <div
+                      className='flex flex-col overflow-hidden'
+                      onClick={handleNavigate}>
+                      <span className='text-lg whitespace-pre-wrap'>
+                        {structuredComment?.text}
+                      </span>
+                    </div>
+
+                    {/* comment functions section */}
+
+                    <CommentFunction postComment={structuredComment} />
                   </div>
                 </div>
-              </>
+              </div>
             );
           })}
         <div className='flex gap-4'>
@@ -221,7 +216,7 @@ const RenderSubComments = ({ postComment }) => {
                 </div>
               )}
             </div>
-
+            {!hasParentComment && <span>Replying to ß</span>}
             {/* comment text section */}
             <div
               className='flex flex-col overflow-hidden'

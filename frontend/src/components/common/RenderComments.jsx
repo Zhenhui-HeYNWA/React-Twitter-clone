@@ -249,6 +249,7 @@ const RenderComments = ({ comment }) => {
               <div className='text-gray-500'>
                 {formatDateTime(comment?.createdAt)}
               </div>
+
               <div className='flex flex-row gap-5 items-center justify-between border-y-2  dark:border-gray-700 py-4'>
                 <div
                   className='flex flex-row gap-2 items-center text-slate-500 hover:text-sky-400 cursor-pointer'
@@ -301,7 +302,7 @@ const RenderComments = ({ comment }) => {
                           <div className='text-base'>@{authUser.username}</div>
 
                           <div className='mt-2 text-gray-500'>
-                            Replying to{' '}
+                            Replying to
                             <span className='text-sky-600'>
                               @{comment?.user.username}
                             </span>

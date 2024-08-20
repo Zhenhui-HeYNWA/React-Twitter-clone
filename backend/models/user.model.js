@@ -51,11 +51,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
-    likedPosts: [
+    likes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post',
-        default: [],
+        item: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          refPath: 'likes.onModel',
+        },
+        onModel: {
+          type: String,
+          required: true,
+          enum: ['Post', 'Comment'],
+        },
       },
     ],
     bookmarks: [

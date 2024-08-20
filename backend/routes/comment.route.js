@@ -6,13 +6,15 @@ import {
   getSingleComment,
   getPostComments,
   deleteComment,
-  getUserReplies
+  getUserReplies,
+  likeUnlikeComment,
 } from '../controllers/comment.controller.js';
 const router = express.Router();
 
 router.post('/comment/:id/reply', protectRoute, replyToComment);
 router.post('/comment/:id', protectRoute, commentOnPost);
-router.get('/:userId/comment',protectRoute,getUserReplies)
+router.post('/likes/:id', protectRoute, likeUnlikeComment);
+router.get('/:userId/comment', protectRoute, getUserReplies);
 router.get('/:postId/comment/:username/:commentId', getSingleComment);
 router.get('/:username/status/:id/comments', protectRoute, getPostComments);
 router.delete('/:id', protectRoute, deleteComment);

@@ -13,11 +13,10 @@ import { useEffect, useRef, useState } from 'react';
 import PostSkeleton from '../skeletons/PostSkeleton';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 
-import { CiImageOn } from 'react-icons/ci';
-import { BsEmojiSmileFill } from 'react-icons/bs';
 import usePostMutations from '../../hooks/usePostMutations';
 import LoadingSpinner from './LoadingSpinner';
 import RenderSubComments from './RenderSubComments';
+import CreateCommentForm from './CreateCommentForm';
 
 const SinglePost = () => {
   const { data: authUser } = useQuery({
@@ -101,20 +100,23 @@ const SinglePost = () => {
     if (isDeleting) return;
     deletePost;
   };
+
   const handleCommentSubmit = (e) => {
     e.preventDefault();
-    if (commentPostSimple.isLoading) return;
-    commentPostSimple.mutate({ text: comment });
+    console.log(1);
+    if (isCommenting) return;
+    commentPostSimple({ postId: postId, text: comment });
     setComment('');
+
     const modal = document.getElementById('comments_modal' + postId);
     if (modal) {
       modal.close();
     }
   };
 
-  const handleLikePost = () => {
+  const handleLikePost = (postId) => {
     if (isLiking) return;
-    likePost();
+    likePost(postId);
   };
   const handleBookmarkingPost = () => {
     if (isBookmarking) return;
@@ -137,18 +139,21 @@ const SinglePost = () => {
     const regex = /@\w+/g; // Regex to find mentions in the text
     return text.split(regex).map((part, index) => {
       const match = text.match(regex)?.[index];
+      console.log(match);
+      const username = match?.substring(1);
+      console.log(username);
       if (match) {
         return (
-          <Link
-            key={post.user._id + index}
-            to={`/profile/${post.user.username}`}>
+          <>
             <span>
               {part}
-              <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
-                {match}
-              </span>
+              <Link key={index} to={`/profile/${username}`}>
+                <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
+                  {match}
+                </span>
+              </Link>
             </span>
-          </Link>
+          </>
         );
       }
       return part;
@@ -481,75 +486,15 @@ const SinglePost = () => {
               )}
             </div>
           </div>
-          {/* <div
-            className='flex w-1/3 justify-end gap-2 group items-center'
-            onClick={handleBookmarkingPost}>
-            {isBookmarking && <LoadingSpinner size='sm' />}
-            {!isMarked && !isBookmarking && (
-              <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
-            )}
-            {isMarked && !isBookmarking && (
-              <FaBookmark className='w-4 h-4 cursor-pointer  ' />
-            )}
-          </div> */}
         </div>
 
         {/* CREATE COMMENT */}
-        <div className='transition-all duration-1000 ease-in-out'>
-          <div
-            className={`px-16  hidden md:flex justify-start items-center text-slate-500 transition-opacity duration-300 ease-in-out ${
-              showNav ? 'opacity-100' : 'opacity-0'
-            }`}>
-            Replying to
-            <p className='text-sky-500'> @{post?.user.username}</p>
-          </div>
 
-          <div className='hidden md:flex items-start gap-4 border-b border-gray-200 dark:border-gray-700 p-4'>
-            <div className='avatar flex'>
-              <div className='w-12 h-12 rounded-full'>
-                <img
-                  src={authUser?.profileImg || '/avatar-placeholder.png'}
-                  alt='Profile'
-                  className='transition-all duration-300 ease-in-out'
-                />
-              </div>
-            </div>
-
-            <form
-              className={`flex gap-2 w-full  ${
-                showNav ? 'flex-col' : 'flex-row'
-              }`}
-              onSubmit={handleCommentSubmit}>
-              <textarea
-                className='group textarea w-full p-0 text-2xl resize-none border-none focus:outline-none bg-inherit'
-                placeholder='Post your reply'
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                onClick={handleTextareaClick}
-              />
-
-              <div className='flex flex-row justify-between p-2'>
-                <div
-                  className={`flex justify-between py-2 transition-all duration-1000 ease-in-out ${
-                    showNav
-                      ? 'flex-row opacity-100 max-h-full'
-                      : 'flex-row-reverse opacity-0 max-h-0'
-                  }`}>
-                  <div className='nav flex gap-1 items-center'>
-                    <CiImageOn className='fill-primary w-6 h-6 cursor-pointer transition-all duration-1000 ease-in-out' />
-                    <BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer transition-all duration-1000 ease-in-out' />
-                  </div>
-                  <input type='file' hidden accept='image/*' />
-                </div>
-                <button
-                  disabled={commentPostSimple.isLoading}
-                  className='btn btn-primary rounded-full btn-sm text-white px-4'>
-                  {commentPostSimple.isLoading ? 'Replying' : 'Reply'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CreateCommentForm
+          post={post}
+          authUser={authUser}
+          type={'ReplyToPost'}
+        />
         {/* POST COMMENT */}
         <div className=''>
           {isCommentsLoading ? (
@@ -565,75 +510,6 @@ const SinglePost = () => {
                   className='border-b border-gray-200 dark:border-gray-700 px-2 pt-2'>
                   <RenderSubComments postComment={comment} />
                 </div>
-                // <div
-                //   key={comment._id}
-                //   className='border-b border-gray-200 dark:border-gray-700 px-2 pt-2'>
-                //   <Link
-                //     to={`/${postId}/comment/${comment.user.username}/${comment._id}`}>
-                //     <div className='flex gap-2 flex-col items-start'>
-                //       <div className='px-2 py-1 flex gap-2'>
-                //         <div className='avatar'>
-                //           <div className='w-12 h-12 rounded-full'>
-                //             <img
-                //               src={
-                //                 comment.user?.profileImg ||
-                //                 '/avatar-placeholder.png'
-                //               }
-                //               alt='Comment User Avatar'
-                //             />
-                //           </div>
-                //         </div>
-                //         <div className='flex flex-col'>
-                //           <div className='flex items-center gap-1'>
-                //             <span className='font-bold text-base'>
-                //               {comment.user?.fullName}
-                //             </span>
-                //             <span className='text-gray-700 text-sm'>
-                //               @{comment.user?.username}
-                //             </span>
-                //             <span className='text-gray-700 text-sm'>·</span>
-                //             <span className='text-gray-700 text-sm'>
-                //               {formattedHours}
-                //             </span>
-                //           </div>
-                //           <div className='text-base'>{comment?.text}</div>
-                //         </div>
-                //       </div>
-                //     </div>
-                //     {/* comment like section */}
-                //     <div className='flex justify-between my-1 px-12'>
-                //       <div className='flex gap-4 items-center w-2/3 justify-between'>
-                //         <div className='flex gap-1 items-center cursor-pointer group'>
-                //           <FaRegComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
-                //           <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                //             {comment?.replies.length}
-                //           </span>
-                //         </div>
-                //         <div className='flex gap-1 items-center group cursor-pointer'>
-                //           <BiRepost className='w-6 h-6 text-slate-500 group-hover:text-green-500' />
-                //           <span className='text-sm text-slate-500 group-hover:text-green-500'>
-                //             0
-                //           </span>
-                //         </div>
-                //         <div className='flex gap-1 items-center group cursor-pointer'>
-                //           <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
-                //           {/* <span
-                //       className={`text-sm group-hover:text-pink-500 ${
-                //         isLiked ? 'text-pink-500' : 'text-slate-500'
-                //       }`}>
-                //       {post.likes.length}
-                //     </span> */}
-                //           <span className='text-sm text-slate-500 group-hover:text-pink-500'>
-                //             0
-                //           </span>
-                //         </div>
-                //       </div>
-                //       <div className='flex w-1/3 justify-end gap-2 group items-center'>
-                //         <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:text-sky-400' />
-                //       </div>
-                //     </div>
-                //   </Link>
-                // </div>
               );
             })
           )}

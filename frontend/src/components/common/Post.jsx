@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
-import { FaRegHeart, FaTrash, FaRegBookmark, FaBookmark } from 'react-icons/fa';
-import { BiRepost, BiComment } from 'react-icons/bi';
+import { Link, useNavigate } from 'react-router-dom';
+import { FaTrash } from 'react-icons/fa';
+import { BiRepost } from 'react-icons/bi';
 
 import LoadingSpinner from './LoadingSpinner';
 import { formatPostDate } from '../../utils/date';
 import usePostMutations from '../../hooks/usePostMutations';
+import PostFunctions from './PostFunctions';
 
 // Function to check the existence of mentioned users
 const fetchMentionedUsersExistence = async (usernames) => {
@@ -23,7 +24,8 @@ const fetchMentionedUsersExistence = async (usernames) => {
 
 // Post component
 const Post = ({ post, posts }) => {
-  const [comment, setComment] = useState(''); // State to store comment input
+  const navigate = useNavigate();
+
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
   const [mentionedUsersExistence, setMentionedUsersExistence] = useState({}); // State to store the existence of mentioned users
   const { data: authUser } = useQuery({ queryKey: ['authUser'] }); // Fetch the current authenticated user's data
@@ -73,25 +75,13 @@ const Post = ({ post, posts }) => {
     }
   }, [post.text, post.repost.originalText]);
 
-  const isLiked = post.likes.includes(authUser._id); // Check if the post is liked by the authenticated user
   const isAuthUserRepost = post.user._id === authUser._id; // Check if the repost was made by the authenticated user
-  const isMarked = post.bookmarks.includes(authUser._id); // Check if the post is bookmarked by the authenticated user
+
   const isMyPost = authUser._id === post.user._id; // Check if the post belongs to the authenticated user
   const formattedDate = formatPostDate(post.createdAt); // Format the post creation date
 
   // Hook to handle post mutations like delete, like, bookmark, and repost
-  const {
-    commentPostAdvanced,
-    isPostCommenting,
-    likePost,
-    isLiking,
-    deletePost,
-    isDeleting,
-    bookmarkPost,
-    isBookmarking,
-    repostPost,
-    isReposting,
-  } = usePostMutations(postId);
+  const { deletePost, isDeleting } = usePostMutations(postId);
 
   // Handle post deletion
   const handleDeletePost = () => {
@@ -103,55 +93,14 @@ const Post = ({ post, posts }) => {
     });
   };
 
-  // Handle comment submission
-  const handlePostComment = (e) => {
-    e.preventDefault();
-    if (isPostCommenting) return;
-    commentPostAdvanced(
-      { postId: postId, text: comment },
-      {
-        onSuccess: () => {
-          setComment(''); // Clear the comment input after successful submission
-
-          const modal = document.getElementById('comments_modal' + post._id);
-          if (modal) {
-            modal.close();
-          }
-        },
-      }
-    );
-  };
-
-  // Handle bookmarking the post
-  const handleBookmarkPost = () => {
-    if (isBookmarking) return;
-    bookmarkPost();
-  };
-
-  // Handle liking the post
-  const handleLikePost = () => {
-    if (isLiking) return;
-    likePost();
-  };
-
-  // Handle reposting the post
-  const handleRepost = () => {
-    if (isReposting) return;
-
-    if (isRepostedByAuthUser) {
-      repostPost({ actionType: 'remove' });
-      return;
-    }
-    repostPost({ actionType: 'repost' });
-    return;
-  };
-
   // Highlight mentions in the post text
   const highlightMentions = (text) => {
     const regex = /@\w+/g;
     const handleClick = (e, path) => {
       e.stopPropagation();
-      window.location.href = path;
+      console.log(e);
+      console.log(path);
+      navigate(path);
     };
 
     return text.split(regex).reduce((acc, part, index) => {
@@ -160,13 +109,13 @@ const Post = ({ post, posts }) => {
       }
 
       const match = text.match(regex)[index - 1];
-      const username = match.substring(1);
+      const mentionedUsername = match.substring(1);
 
       acc.push(
         <span
           key={post._id + index}
           className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'
-          onClick={(e) => handleClick(e, `/profile/${username}`)}
+          onClick={(e) => handleClick(e, `/profile/${mentionedUsername}`)}
           style={{ cursor: 'pointer' }}>
           {match}
         </span>,
@@ -194,7 +143,7 @@ const Post = ({ post, posts }) => {
             You reposted
           </span>
         )}
-        <div className='flex gap-2 items-start py-2 px-4 border-b border-gray-200 dark:border-gray-700 justify-center'>
+        <div className='flex gap-4 items-start py-2 border-b border-gray-200 dark:border-gray-700 justify-center px-2 '>
           <div className='avatar'>
             {/* Avatar */}
             {isOriginalPost && (
@@ -220,7 +169,7 @@ const Post = ({ post, posts }) => {
               </Link>
             )}
           </div>
-          <div className='flex flex-col flex-1 '>
+          <div className='flex flex-col flex-1  '>
             <div className='flex   justify-between items-center w-full  '>
               <div className='flex flex-row gap-1 items-center max-w-sm '>
                 {/* fullName */}
@@ -276,225 +225,63 @@ const Post = ({ post, posts }) => {
             </div>
             <div className='flex flex-col gap-3 overflow-hidden  '>
               {isOriginalPost && (
-                <Link
+                <span
                   className='nav-link'
-                  to={`/${authUser.username}/status/${post._id}`}>
+                  onClick={() =>
+                    navigate(`/${authUser.username}/status/${post._id}`)
+                  }>
                   <span className=' text-lg whitespace-pre-wrap word-wrap '>
                     {highlightMentions(post.text)}
                   </span>
-                </Link>
+                </span>
               )}
               {!isOriginalPost && (
-                <Link
+                <span
                   className='nav-link'
-                  to={`/${authUser.username}/status/${post._id}`}>
+                  onClick={() =>
+                    navigate(`/${authUser.username}/status/${post._id}`)
+                  }>
                   <span className='text-lg whitespace-pre-wrap word-wrap '>
                     {highlightMentions(post.repost.originalText)}
                   </span>
-                </Link>
+                </span>
               )}
 
               {isOriginalPost && post.img && (
-                <Link
+                <span
                   className='nav-link'
-                  to={`/${authUser.username}/status/${post._id}`}>
+                  onClick={() =>
+                    navigate(`/${authUser.username}/status/${post._id}`)
+                  }>
                   <img
                     src={post.img}
                     className='h-full object-cover rounded-lg border border-gray-700 mt-2 w-full'
                     alt=''
                   />
-                </Link>
+                </span>
               )}
+
               {!isOriginalPost && post.repost.originalImg && (
-                <Link
+                <span
                   className='nav-link'
-                  to={`/${authUser.username}/status/${post._id}`}>
+                  onClick={() =>
+                    navigate(`/${authUser.username}/status/${post._id}`)
+                  }>
                   <img
                     src={post.repost.originalImg}
                     className='h-full object-cover rounded-lg border border-gray-700 mt-2 w-full'
                     alt=''
                   />
-                </Link>
+                </span>
               )}
             </div>
-            <div className='flex justify-between mt-3'>
-              <div className='flex gap-4 items-center w-2/3 justify-between'>
-                <div
-                  className='flex gap-1 items-center cursor-pointer group'
-                  onClick={() =>
-                    document
-                      .getElementById('comments_modal' + post._id)
-                      .showModal()
-                  }>
-                  <BiComment className='w-5 h-5  text-slate-500 group-hover:text-sky-400' />
-                  <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                    {post.comments.length}
-                  </span>
-                </div>
-                {/* We're using Modal Component from DaisyUI */}
-                <dialog
-                  id={`comments_modal${post._id}`}
-                  className='modal border-none outline-none'>
-                  <div className='modal-box rounded-xl border bg-gray-100 dark:bg-[#15202B]  border-gray-400'>
-                    <h3 className='font-bold text-lg mb-4'>COMMENTS</h3>
-                    <div className='flex flex-col gap-3 max-h-60 overflow-auto'>
-                      {post?.comments?.length === 0 && (
-                        <p className='text-sm text-slate-500'>
-                          No comments yet 🤔 Be the first one 😉
-                        </p>
-                      )}
 
-                      {comments?.map((comment) => (
-                        <div
-                          key={comment?._id}
-                          className='flex gap-2 items-start'>
-                          <div className='avatar'>
-                            <div className='w-8 rounded-full'>
-                              <img
-                                src={
-                                  comment.user.profileImg ||
-                                  '/avatar-placeholder.png'
-                                }
-                              />
-                            </div>
-                          </div>
-                          <div className='flex flex-col'>
-                            <div className='flex items-center gap-1'>
-                              <span className='font-bold'>
-                                {comment?.user?.fullName}
-                              </span>
-                              <span className='text-gray-700 text-sm '>
-                                @{comment?.user?.username}
-                              </span>
-                            </div>
-                            <div className='text-sm'>{comment?.text}</div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <form
-                      className='flex gap-2 items-center mt-4 border-t border-gray-300  dark:border-gray-800  pt-2'
-                      onSubmit={handlePostComment}>
-                      <textarea
-                        className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B]  border-gray-100  dark:border-gray-800'
-                        placeholder='Add a comment...'
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                      />
-                      <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
-                        {isPostCommenting ? (
-                          <LoadingSpinner size='md' />
-                        ) : (
-                          'Post'
-                        )}
-                      </button>
-                    </form>
-                  </div>
-                  <form method='dialog' className='modal-backdrop'>
-                    <button className='outline-none'>close</button>
-                  </form>
-                </dialog>
-
-                <div className='dropdown dropdown-top'>
-                  <div
-                    tabIndex={0}
-                    role={`${isRepostedByAuthUser ? 'button' : ''}`}
-                    className={`flex gap-1 items-center group cursor-pointer  
-                    
-                        btn rounded-none  btn-ghost btn-xs  p-0 border-none hover:bg-inherit
-                    
-                     `}
-                    onClick={!isRepostedByAuthUser ? handleRepost : undefined}>
-                    {isRepostedByAuthUser ? (
-                      <ul
-                        tabIndex={0}
-                        className='dropdown-content menu bg-gray-100 dark:bg-secondary  border-gray-600 rounded-box z-[1] w-52 p-2 shadow  '>
-                        <li onClick={handleRepost}>
-                          <button className='text-red-500'>Undo repost</button>
-                        </li>
-                      </ul>
-                    ) : (
-                      ''
-                    )}
-
-                    {isReposting && <LoadingSpinner size='sm' />}
-
-                    {isOriginalPost && (
-                      <>
-                        {!isReposting && (
-                          <BiRepost
-                            className={`w-6 h-6 ${
-                              isRepostedByAuthUser
-                                ? ' text-green-500 group-hover:text-red-600'
-                                : ' text-slate-500 group-hover:text-green-500'
-                            }`}
-                          />
-                        )}
-                        <span
-                          className={`text-sm ${
-                            isRepostedByAuthUser
-                              ? ' text-green-500 group-hover:text-red-600'
-                              : ' text-slate-500 group-hover:text-green-500'
-                          }`}>
-                          {post.repostByNum}
-                        </span>
-                      </>
-                    )}
-                    {!isOriginalPost && (
-                      <>
-                        {!isReposting && (
-                          <BiRepost
-                            className={`w-6 h-6 ${
-                              isRepostedByAuthUser
-                                ? ' text-green-500 group-hover:text-red-600'
-                                : ' text-slate-500 group-hover:text-green-500'
-                            }`}
-                          />
-                        )}
-
-                        <span
-                          className={`text-sm ${
-                            isRepostedByAuthUser
-                              ? ' text-green-500 group-hover:text-red-600'
-                              : ' text-slate-500 group-hover:text-green-500'
-                          }`}>
-                          {post.repost.repostNum}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <div
-                  className='flex gap-1 items-center group cursor-pointer'
-                  onClick={handleLikePost}>
-                  {isLiking && <LoadingSpinner size='sm' />}
-                  {!isLiked && !isLiking && (
-                    <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
-                  )}
-                  {isLiked && !isLiking && (
-                    <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />
-                  )}
-
-                  <span
-                    className={`text-sm  group-hover:text-pink-500 ${
-                      isLiked ? 'text-pink-500' : 'text-slate-500'
-                    }`}>
-                    {post.likes.length}
-                  </span>
-                </div>
-              </div>
-              <div
-                className='flex w-1/3 justify-end gap-2 group items-center'
-                onClick={handleBookmarkPost}>
-                {isBookmarking && <LoadingSpinner size='sm' />}
-                {!isMarked && !isBookmarking && (
-                  <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
-                )}
-                {isMarked && !isBookmarking && (
-                  <FaBookmark className='w-4 h-4 cursor-pointer  ' />
-                )}
-              </div>
-            </div>
+            <PostFunctions
+              post={post}
+              comments={comments}
+              isRepostedByAuthUser={isRepostedByAuthUser}
+              isOriginalPost={isOriginalPost}
+            />
           </div>
         </div>
       </div>

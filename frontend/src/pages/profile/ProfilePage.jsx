@@ -165,7 +165,7 @@ const ProfilePage = () => {
               <div className='relative group/cover'>
                 <img
                   src={coverImg || user?.coverImg || '/cover.png'}
-                  className=' w-full object-cover'
+                  className='h-60 w-full object-cover'
                   alt='cover image'
                 />
                 {isMyProfile && (
@@ -298,11 +298,16 @@ const ProfilePage = () => {
                       ))}
                     </div>
                     <div className='text-slate-500 text-sm'>
-                      Followed by {getFollowersIKnow[0]?.username}
-                      {getFollowersIKnow.length > 1 &&
-                        `, ${getFollowersIKnow[1]?.username}`}
-                      {getFollowersIKnow.length > 2 &&
-                        `, and ${getFollowersIKnow.length - 2} others`}
+                      <Link
+                        className=' hover:underline'
+                        to={`/follow/${username}`}
+                        state={{ feedType: 'FollowersUKnow' }}>
+                        Followed by {getFollowersIKnow[0]?.username}
+                        {getFollowersIKnow.length > 1 &&
+                          `, ${getFollowersIKnow[1]?.username}`}
+                        {getFollowersIKnow.length > 2 &&
+                          `, and ${getFollowersIKnow.length - 2} others`}
+                      </Link>
                     </div>
                   </div>
                 )}
@@ -368,7 +373,8 @@ const ProfilePage = () => {
             <CommentSections
               feedType={feedType}
               username={username}
-              userId={user?._id}></CommentSections>
+              userId={user?._id}
+            />
           ) : (
             <Posts feedType={feedType} username={username} userId={user?._id} />
           )}

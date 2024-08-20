@@ -13,10 +13,12 @@ const CommentFunction = ({ postComment }) => {
   const [reply, setReplies] = useState('');
   const [structuredComments, setStructuredComments] = useState([]);
   const { replyComment, isReplying } = useCommentMutations();
-  console.log(postComment);
+
+  console.log('postComment', postComment);
   console.log(structuredComments);
   const isSubComment = postComment?.parentId !== null;
   console.log(isSubComment);
+
   function getParentCommentsIterative(postComment) {
     const result = [];
 
@@ -70,13 +72,12 @@ const CommentFunction = ({ postComment }) => {
             }>
             {isReplying && <LoadingSpinner size='sm' />}
             {!isReplying && (
-              <>
-                {' '}
+              <div className='flex items-center gap-1 w-12 '>
                 <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
                 <span className='text-sm text-slate-500 group-hover:text-sky-400'>
                   {postComment?.replies.length}
                 </span>
-              </>
+              </div>
             )}
           </div>
 
@@ -109,7 +110,7 @@ const CommentFunction = ({ postComment }) => {
                     </div>
                     <div className='text-base '>{postComment?.text}</div>
                     <div className='mt-2 text-gray-500'>
-                      Replying to{' '}
+                      Replying to
                       <span className='text-sky-600'>
                         @{postComment?.user.username}
                       </span>
@@ -149,18 +150,18 @@ const CommentFunction = ({ postComment }) => {
             </form>
           </dialog>
 
-          <div className='flex items-center group cursor-pointer gap-1'>
+          <div className='flex items-center group cursor-pointer gap-1 w-12 '>
             <BiRepost
               className={`w-6 h-6 text-slate-500 group-hover:text-green-500`}
             />
             <span
-              className='text-sm group-hover:text-green-500 
+              className='text-sm font-normal group-hover:text-green-500 
       text-slate-500'>
               0
             </span>
           </div>
           {/* like post  */}
-          <div className='flex gap-1 items-center group cursor-pointer'>
+          <div className='flex gap-1 items-center group cursor-pointer w-12 '>
             <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
             <span
               className={`text-sm group-hover:text-pink-500 

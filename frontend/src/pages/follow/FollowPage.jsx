@@ -1,5 +1,5 @@
-import { Link, useParams } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 import { FaArrowLeft } from 'react-icons/fa';
 
@@ -8,14 +8,20 @@ import SearchUser from '../auth/searchUser/SearchUser';
 import { useQuery } from '@tanstack/react-query';
 
 const FollowPage = () => {
-  const [followType, setFollowType] = useState('following');
   const { username } = useParams();
-
+  const location = useLocation();
+  const { feedType: initialFeedType } = location.state || {};
+  const [followType, setFollowType] = useState(initialFeedType || 'following');
+  console.log(initialFeedType);
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
   const isMyProfile = authUser?.username === username;
-
+  useEffect(() => {
+    if (initialFeedType) {
+      setFollowType(initialFeedType);
+    }
+  }, [initialFeedType]);
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen'>
       <div className='flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700'>

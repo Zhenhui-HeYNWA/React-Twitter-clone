@@ -1,30 +1,50 @@
-import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 import RenderSubComments from './RenderSubComments';
 
 const CommentSections = ({ userId }) => {
-  const {
-    data: replies,
-    isLoading,
-    refetch,
-    isRefetching,
-  } = useQuery({
-    queryKey: ['replies', userId], // Include userId in the queryKey to make it unique per user
-    queryFn: async () => {
-      const res = await fetch(`/api/comments/${userId}/comment`);
-      if (!res.ok) throw new Error('Something went wrong');
-      return res.json();
-    },
-  });
+  const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =
+    useInfiniteQuery({
+      queryKey: ['replies', userId],
+      queryFn: async ({ pageParam = 1 }) => {
+        const res = await fetch(
+          `/api/comments/${userId}/comment?page=${pageParam}&limit=10`
+        );
+        if (!res.ok) throw new Error('Something went wrong');
+        return res.json();
+      },
+      getNextPageParam: (lastPage) => {
+        return lastPage.currentPage < lastPage.totalPages
+          ? lastPage.currentPage + 1
+          : false;
+      },
+    });
 
-  useEffect(() => {
-    refetch(); // Refetch when userId changes
-  }, [refetch, userId]);
+  if (isLoading) {
+    return (
+      <div className='flex flex-col'>
+        <CommentSkeleton />
+        <CommentSkeleton />
+        <CommentSkeleton />
+      </div>
+    );
+  }
+
+  if (data?.pages[0]?.replies.length === 0) {
+    return <p className='text-center my-4'>No comments available.</p>;
+  }
 
   return (
     <>
-      {(isLoading || isRefetching) && (
+      {data.pages.map((page) =>
+        page.replies.map((reply) => (
+          <div key={reply._id}>
+            <RenderSubComments postComment={reply} />
+          </div>
+        ))
+      )}
+
+      {isFetchingNextPage && (
         <div className='flex flex-col'>
           <CommentSkeleton />
           <CommentSkeleton />
@@ -32,19 +52,25 @@ const CommentSections = ({ userId }) => {
         </div>
       )}
 
-      {!isLoading && !isRefetching && replies?.length === 0 && (
-        <p className='text-center my-4'>No comments available.</p>
+      {hasNextPage && (
+        <div className='text-center my-4'>
+          <a
+            href='#'
+            onClick={(e) => {
+              e.preventDefault();
+              fetchNextPage();
+            }}
+            className='text-blue-500 hover:underline'>
+            Get more replies
+          </a>
+        </div>
       )}
 
-      {!isLoading &&
-        !isRefetching &&
-        replies?.map((reply) => (
-          <div
-            key={reply?._id}
-            className='border-b border-gray-200 dark:border-gray-700'>
-            <RenderSubComments postComment={reply} />
-          </div>
-        ))}
+      {!hasNextPage && (
+        <p className='text-center my-4 text-gray-500'>
+          No more replies available.
+        </p>
+      )}
     </>
   );
 };

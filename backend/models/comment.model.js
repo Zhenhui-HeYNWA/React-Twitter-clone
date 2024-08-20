@@ -27,8 +27,16 @@ const commentSchema = new mongoose.Schema(
         ref: 'Comment',
       },
     ],
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: [],
+      },
+    ],
     isDeleted: { type: Boolean, default: false },
   },
+
   { timestamps: true }
 );
 

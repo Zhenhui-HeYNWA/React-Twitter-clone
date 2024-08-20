@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import Post from './Post';
 import PostSkeleton from '../skeletons/PostSkeleton';
 
+import RenderSubComments from './RenderSubComments';
+
 const Posts = ({ feedType, username, userId }) => {
   const getPostEndPoint = () => {
     switch (feedType) {
@@ -14,7 +16,7 @@ const Posts = ({ feedType, username, userId }) => {
       case 'posts':
         return `/api/posts/user/${username}`;
       case 'likes':
-        return `/api/posts/likes/${userId}`;
+        return `/api/users/likes/${username}`;
       case 'bookmarks':
         return `/api/posts/bookmark/${userId}`;
       default:
@@ -23,8 +25,9 @@ const Posts = ({ feedType, username, userId }) => {
   };
 
   const POST_ENDPOINT = getPostEndPoint();
+
   const {
-    data: posts,
+    data: items,
     isLoading,
     refetch,
     isRefetching,
@@ -32,7 +35,9 @@ const Posts = ({ feedType, username, userId }) => {
     queryKey: ['posts'],
     queryFn: async () => {
       try {
+        console.log('Starting fetch to:', POST_ENDPOINT); // Log the endpoint
         const res = await fetch(POST_ENDPOINT);
+        console.log('Fetch response status:', res.status); // Log the response status
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
 
@@ -41,10 +46,14 @@ const Posts = ({ feedType, username, userId }) => {
         throw new Error(error);
       }
     },
+    onError: (error) => {
+      console.error('Error during useQuery:', error); // Log any errors during useQuery
+    },
   });
   useEffect(() => {
     refetch();
   }, [feedType, refetch, username]);
+
   return (
     <>
       {(isLoading || isRefetching) && (
@@ -54,14 +63,21 @@ const Posts = ({ feedType, username, userId }) => {
           <PostSkeleton />
         </div>
       )}
-      {!isLoading && !isRefetching && posts?.length === 0 && (
+      {!isLoading && !isRefetching && items?.length === 0 && (
         <p className='text-center my-4'>No posts in this tab. Switch 👻</p>
       )}
-      {!isLoading && !isRefetching && posts && (
+      {!isLoading && !isRefetching && items && (
         <div>
-          {posts.map((post) => (
-            <Post key={post._id} post={post} posts={posts} />
-          ))}
+          {items.map((item) => {
+            if (item.img || item.repost) {
+              // Assuming that only posts have these fields
+              return <Post key={item._id} post={item} posts={items} />;
+            } else if (item.postId) {
+              // Assuming that comments have a postId field
+              return <RenderSubComments key={item._id} postComment={item} />;
+            }
+            return null;
+          })}
         </div>
       )}
     </>
