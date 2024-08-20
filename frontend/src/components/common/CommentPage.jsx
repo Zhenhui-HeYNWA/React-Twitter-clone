@@ -15,7 +15,7 @@ import SingleCommentSkeleton from '../skeletons/SingleCommentSkeleton';
 
 import CreateCommentForm from './CreateCommentForm';
 import LoadingSpinner from './LoadingSpinner';
-import RenderComments from './renderComments';
+import RenderComments from './RenderComments';
 
 import PostFunctions from './PostFunctions';
 
