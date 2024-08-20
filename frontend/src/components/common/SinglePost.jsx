@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fa';
 import { Link, useParams } from 'react-router-dom';
 import { formatDateTime } from '../../utils/date';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PostSkeleton from '../skeletons/PostSkeleton';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 
@@ -36,7 +36,7 @@ const SinglePost = () => {
   });
 
   const [comment, setComment] = useState('');
-  const [showNav, setShowNav] = useState(false);
+
   const isMyPost = authUser._id === post?.user._id;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
@@ -57,15 +57,6 @@ const SinglePost = () => {
       setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
     }
   }, [authUser, post]);
-
-  const radioRef = useRef(null);
-
-  const handleTextareaClick = () => {
-    setShowNav(true);
-    if (radioRef.current) {
-      radioRef.current.checked = true; // Simulate click to open accordion
-    }
-  };
 
   // Fetch comments data
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
@@ -508,7 +499,7 @@ const SinglePost = () => {
                 <div
                   key={comment?._id}
                   className='border-b border-gray-200 dark:border-gray-700 px-2 pt-2'>
-                  <RenderSubComments postComment={comment} />
+                  <RenderSubComments postComment={comment} pageType={1} />
                 </div>
               );
             })

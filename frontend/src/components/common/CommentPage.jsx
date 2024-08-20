@@ -320,7 +320,7 @@ const CommentPage = () => {
               <div
                 key={reply._id}
                 className=' border-b  border-gray-200 dark:border-gray-700 hover:bg-slate-200 dark:hover:bg-inherit'>
-                <RenderSubComments postComment={reply} />
+                <RenderSubComments postComment={reply} pageType={'comment'} />
               </div>
             );
           })}

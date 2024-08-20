@@ -92,13 +92,7 @@ export const getUserReplies = async (req, res) => {
         path: 'user',
         select: 'username fullName profileImg',
       })
-      .populate({
-        path: 'postId',
-        populate: {
-          path: 'user',
-          select: 'username fullName profileImg',
-        },
-      })
+
       .populate({
         path: 'replies',
         match: { isDeleted: { $ne: true } },
@@ -107,6 +101,7 @@ export const getUserReplies = async (req, res) => {
           select: 'username fullName profileImg',
         },
       })
+
       .sort({ createdAt: -1 }) // 按创建时间倒序排序
       .skip((page - 1) * limit) // 跳过前面的评论
       .limit(limit); // 限制返回的评论数量
@@ -117,10 +112,15 @@ export const getUserReplies = async (req, res) => {
       while (currentComment.parentId) {
         currentComment = await Comment.populate(currentComment, {
           path: 'parentId',
-          populate: {
-            path: 'user',
-            select: 'fullName username profileImg',
-          },
+          populate: [
+            {
+              path: 'user',
+              select: 'fullName username profileImg',
+            },
+            {
+              path: 'likes', // Assuming 'likes' is a reference to another model
+            },
+          ],
         });
         currentComment = currentComment.parentId;
       }

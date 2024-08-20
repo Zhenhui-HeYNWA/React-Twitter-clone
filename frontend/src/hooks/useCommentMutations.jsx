@@ -57,11 +57,31 @@ const useCommentMutations = () => {
       toast.error(error.message || 'Failed to delete comment');
     },
   });
+
+  const { mutate: likeUnlikeComment, isPending: isLiking } = useMutation({
+    mutationFn: async (commentId) => {
+      try {
+        const res = await fetch(`/api/comments/likes/${commentId}`, {
+          method: 'POST',
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to like comment');
+        return data;
+      } catch (error) {
+        throw new Error(error.message || 'Something went wrong');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['comment']);
+    },
+  });
   return {
     replyComment,
     isReplying,
     deleteComment,
     isCommentDeleting,
+    likeUnlikeComment,
+    isLiking,
   };
 };
 

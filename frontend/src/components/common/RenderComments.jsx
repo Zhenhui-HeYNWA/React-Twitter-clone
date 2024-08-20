@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './LoadingSpinner';
-import { FaTrash } from 'react-icons/fa';
-import { BiBookmark, BiComment, BiLike, BiRepost } from 'react-icons/bi';
+import { FaRegHeart, FaTrash } from 'react-icons/fa';
+import { BiBookmark, BiComment, BiRepost } from 'react-icons/bi';
 
 import { formatDateTime, formatPostDate } from '../../utils/date';
 import { useEffect, useState } from 'react';
@@ -19,8 +19,14 @@ const RenderComments = ({ comment }) => {
   const [structuredComments, setStructuredComments] = useState([]);
   const [replyToComment, setReplyToComment] = useState('');
 
-  const { replyComment, isReplying, deleteComment, isCommentDeleting } =
-    useCommentMutations();
+  const {
+    replyComment,
+    isReplying,
+    likeUnlikeComment,
+    isLiking,
+    deleteComment,
+    isCommentDeleting,
+  } = useCommentMutations();
   console.log(comment?._id);
   console.log(comment?.parentId);
   console.log('This is comment', comment);
@@ -33,6 +39,9 @@ const RenderComments = ({ comment }) => {
   // '66b2c4a1f551c0189d6bbcfc', '66b55f4f2920466fd6ee5896'
   const isMyComment = authUser._id === comment?.user._id;
 
+  const commentLiked = authUser.likes.some(
+    (like) => like.onModel === 'Comment' && like.item === comment._id
+  );
   const isSubCommentAvailable =
     comment?.parentId && comment.parentId.user !== undefined;
 
@@ -48,6 +57,7 @@ const RenderComments = ({ comment }) => {
         replies: currentComment.parentId.replies,
         createdAt: formatPostDate(currentComment.parentId.createdAt),
         isDeleted: currentComment.parentId.isDeleted,
+        likes: currentComment.parentId.likes,
       });
       currentComment = currentComment.parentId;
     }
@@ -77,6 +87,11 @@ const RenderComments = ({ comment }) => {
     if (isCommentDeleting) return;
 
     deleteComment({ commentId });
+  };
+
+  const handleLikeUnlikeComment = (commentId) => {
+    if (isLiking) return;
+    likeUnlikeComment(commentId);
   };
 
   console.log('structuredComments', structuredComments);
@@ -347,9 +362,31 @@ const RenderComments = ({ comment }) => {
                   <span>0</span>
                 </div>
 
-                <div className='flex flex-row gap-2 items-center text-slate-500 hover:text-pink-500 cursor-pointer'>
-                  <BiLike size={20} />
-                  <span>0</span>
+                <div
+                  className='flex flex-row gap-2 items-center  cursor-pointer'
+                  onClick={() => handleLikeUnlikeComment(comment._id)}>
+                  {isLiking ? (
+                    <LoadingSpinner size='sm' />
+                  ) : (
+                    <>
+                      <FaRegHeart
+                        size={18}
+                        className={` ${
+                          commentLiked
+                            ? 'text-pink-500'
+                            : 'text-slate-500 group-hover:text-pink-500'
+                        }`}
+                      />
+                      <span
+                        className={`  ${
+                          commentLiked
+                            ? 'text-pink-500'
+                            : 'text-slate-500 group-hover:text-pink-500'
+                        }`}>
+                        {comment.likes.length}
+                      </span>
+                    </>
+                  )}
                 </div>
 
                 <div className='items-center text-slate-500 hover:text-black cursor-pointer'>

@@ -39,7 +39,7 @@ const CommentSections = ({ userId }) => {
       {data.pages.map((page) =>
         page.replies.map((reply) => (
           <div key={reply._id}>
-            <RenderSubComments postComment={reply} />
+            <RenderSubComments postComment={reply} pageType={'replies'}/>
           </div>
         ))
       )}

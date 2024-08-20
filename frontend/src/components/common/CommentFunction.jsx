@@ -10,14 +10,21 @@ const CommentFunction = ({ postComment }) => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
+
   const [reply, setReplies] = useState('');
   const [structuredComments, setStructuredComments] = useState([]);
-  const { replyComment, isReplying } = useCommentMutations();
+  const { replyComment, isReplying, likeUnlikeComment, isLiking } =
+    useCommentMutations();
 
   console.log('postComment', postComment);
   console.log(structuredComments);
   const isSubComment = postComment?.parentId !== null;
   console.log(isSubComment);
+
+  const commentLiked = authUser.likes.some(
+    (like) => like.onModel === 'Comment' && like.item === postComment._id
+  );
+  console.log(authUser);
 
   function getParentCommentsIterative(postComment) {
     const result = [];
@@ -58,6 +65,10 @@ const CommentFunction = ({ postComment }) => {
       modal.close();
     }
   };
+  const handleLikeUnlikeComment = (commentId) => {
+    if (isLiking) return;
+    likeUnlikeComment(commentId);
+  };
 
   return (
     <>
@@ -75,7 +86,7 @@ const CommentFunction = ({ postComment }) => {
               <div className='flex items-center gap-1 w-12 '>
                 <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
                 <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                  {postComment?.replies.length}
+                  {postComment?.replies?.length}
                 </span>
               </div>
             )}
@@ -89,7 +100,7 @@ const CommentFunction = ({ postComment }) => {
               <div className='flex flex-row gap-2 max-h-60 overflow-auto   '>
                 <div className='flex flex-col items-center '>
                   <div className='h-10 w-10 rounded-full'>
-                    <img src={postComment?.user.profileImg} alt='' />
+                    <img src={postComment?.user?.profileImg} alt='' />
                   </div>
                   <div className='  w-0.5 h-full  mt-0.5 dark:bg-slate-700  bg-gray-400 '></div>
                 </div>
@@ -98,10 +109,10 @@ const CommentFunction = ({ postComment }) => {
                   <div className=' flex flex-col  justify-start '>
                     <div className=' flex flex-row gap-2'>
                       <div className=' font-bold truncate'>
-                        {postComment?.user.fullName}
+                        {postComment?.user?.fullName}
                       </div>
                       <div className='text-gray-500 overflow-hidden'>
-                        @{postComment?.user.username}
+                        @{postComment?.user?.username}
                       </div>
                       <div className='text-gray-500'>·</div>
                       <div className='text-gray-500'>
@@ -112,7 +123,7 @@ const CommentFunction = ({ postComment }) => {
                     <div className='mt-2 text-gray-500'>
                       Replying to
                       <span className='text-sky-600'>
-                        @{postComment?.user.username}
+                        @{postComment?.user?.username}
                       </span>
                     </div>
                   </div>
@@ -160,14 +171,32 @@ const CommentFunction = ({ postComment }) => {
               0
             </span>
           </div>
+
           {/* like post  */}
-          <div className='flex gap-1 items-center group cursor-pointer w-12 '>
-            <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
-            <span
-              className={`text-sm group-hover:text-pink-500 
-      text-slate-500`}>
-              0
-            </span>
+          <div
+            className='flex gap-1 items-center group cursor-pointer w-12'
+            onClick={() => handleLikeUnlikeComment(postComment._id)}>
+            {isLiking ? (
+              <LoadingSpinner size='sm' />
+            ) : (
+              <>
+                <FaRegHeart
+                  className={`w-4 h-4 cursor-pointer ${
+                    commentLiked
+                      ? 'text-pink-500'
+                      : 'text-slate-500 group-hover:text-pink-500'
+                  }`}
+                />
+                <span
+                  className={`text-sm ${
+                    commentLiked
+                      ? 'text-pink-500'
+                      : 'text-slate-500 group-hover:text-pink-500'
+                  }`}>
+                  {postComment?.likes?.length}
+                </span>
+              </>
+            )}
           </div>
           {/* bookmark */}
           <div className='flex gap-2 group items-center'>
