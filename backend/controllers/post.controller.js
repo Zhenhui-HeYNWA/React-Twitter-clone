@@ -210,49 +210,34 @@ export const bookmarkUnBookmark = async (req, res) => {
     const { id: postId } = req.params;
 
     const post = await Post.findById(postId);
-    const user = await User.findById(userId);
 
-    if (!post || !user) {
-      return res.status(404).json({ error: 'Post or User not found' });
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Check if the post is already bookmarked by the user
-    const userBookmarkedPost = user.bookmarks.some(
-      (bookmark) =>
-        bookmark.item.toString() === postId.toString() &&
-        bookmark.onModel === 'Post'
-    );
+    const userBookmarkedPost = post.bookmarks.includes(userId);
 
     if (userBookmarkedPost) {
-      // Unbookmark post
+      // Unbookmark the post
+      await Post.updateOne({ _id: postId }, { $pull: { bookmarks: userId } });
       await User.updateOne(
         { _id: userId },
         { $pull: { bookmarks: { item: postId, onModel: 'Post' } } }
       );
-      await Post.updateOne(
-        { _id: postId },
-        { $pull: { bookmarks: { item: userId, onModel: 'User' } } }
-      );
-
-      const updatedBookmarks = user.bookmarks.filter(
-        (bookmark) => bookmark.item.toString() !== postId.toString()
-      );
-      res.status(200).json(updatedBookmarks);
     } else {
-      // Bookmark post
-      user.bookmarks.push({ item: postId, onModel: 'Post' });
+      // Bookmark the post
+      await Post.updateOne({ _id: postId }, { $push: { bookmarks: userId } });
       await User.updateOne(
         { _id: userId },
         { $push: { bookmarks: { item: postId, onModel: 'Post' } } }
       );
-      await post.updateOne({
-        $push: { bookmarks: { item: userId, onModel: 'User' } },
-      });
-
-      res.status(200).json(user.bookmarks);
     }
+
+    // Fetch the updated post to return the latest bookmarks array
+    const updatedPost = await Post.findById(postId);
+    res.status(200).json(updatedPost.bookmarks);
   } catch (error) {
-    console.log('Error in bookmarkUnBookmarkPost controller:', error);
+    console.log('Error in bookmarkUnBookmark controller:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

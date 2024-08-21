@@ -76,6 +76,60 @@ export const getUserLiked = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+export const getUserBookmarks = async (req, res) => {
+  try {
+    const username = req.params.username;
+
+    // Find the user by ID
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Separate bookmarked posts and comments based on `onModel`
+    const bookmarkedPosts = [];
+    const bookmarkedComments = [];
+
+    user.bookmarks.forEach((bookmark) => {
+      if (bookmark.onModel === 'Post') {
+        bookmarkedPosts.push(bookmark.item);
+      } else if (bookmark.onModel === 'Comment') {
+        bookmarkedComments.push(bookmark.item);
+      }
+    });
+
+    // Fetch the bookmarked posts
+    const posts = await Post.find({ _id: { $in: bookmarkedPosts } })
+      .populate({ path: 'user', select: '-password' })
+      .populate({
+        path: 'comments',
+        match: { isDeleted: { $ne: true } },
+        populate: {
+          path: 'user',
+          select: '-password',
+        },
+      });
+
+    // Fetch the bookmarked comments
+    const comments = await Comment.find({ _id: { $in: bookmarkedComments } })
+      .populate({ path: 'user', select: '-password' })
+      .populate({
+        path: 'postId',
+        populate: {
+          path: 'user',
+          select: '-password',
+        },
+      });
+
+    // Combine bookmarked posts and comments into one array
+    const bookmarkedItems = [...posts, ...comments];
+
+    res.status(200).json(bookmarkedItems);
+  } catch (error) {
+    console.log('Error in getUserBookmarks controller:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 
 export const followUnfollowUser = async (req, res) => {
   try {

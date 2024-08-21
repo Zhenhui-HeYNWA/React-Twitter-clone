@@ -10,9 +10,17 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
   const [comment, setComment] = useState('');
 
   const postId = post?._id;
-  const isOriginalPost = post.repost?.originalPost == null;
-  const isLiked = post.likes.includes(authUser._id); // Check if the post is liked by the authenticated user
-  const isMarked = post.bookmarks.includes(authUser._id); // Check if the post is bookmarked by the authenticated user
+  const isOriginalPost = post?.repost?.originalPost == null;
+  const isLiked = post?.likes.includes(authUser._id);
+
+  console.log(typeof post.bookmarks);
+
+  console.log(post.bookmarks.includes(authUser._id));
+
+  // Check if the post is liked by the authenticated user
+  const isMarked = post.bookmarks.includes(authUser._id);
+  console.log(isMarked);
+  // Check if the post is bookmarked by the authenticated user
   // Fetch the current authenticated user's data
   // Hook to handle post mutations like delete, like, bookmark, and repost
   const {

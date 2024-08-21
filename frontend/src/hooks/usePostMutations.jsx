@@ -79,31 +79,29 @@ const usePostMutations = (postId) => {
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
-        return data;
+        return data; // This should be an array of bookmarks
       } catch (error) {
         throw new Error(error.message);
       }
     },
     onSuccess: (updatedBookmarks) => {
-      // Update the 'posts' query data
+      console.log(updatedBookmarks);
       queryClient.setQueryData(['posts'], (oldData) => {
         if (oldData) {
           return oldData.map((p) => {
             if (p._id === postId) {
-              return { ...p, bookmarks: updatedBookmarks };
+              return { ...p, bookmarks: updatedBookmarks }; // Ensure this is an array
             }
             return p;
           });
         } else {
-          // Handle the case when oldData is undefined
           return [];
         }
       });
 
-      // Update the specific 'post' query data
       queryClient.setQueryData(['post', postId], (oldPost) => {
         if (oldPost) {
-          return { ...oldPost, bookmarks: updatedBookmarks };
+          return { ...oldPost, bookmarks: updatedBookmarks }; // Ensure this is an array
         }
         return oldPost;
       });

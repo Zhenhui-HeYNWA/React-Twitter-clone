@@ -236,7 +236,7 @@ const SinglePost = () => {
                       </Link>
                     )}
 
-                    <span className='text-gray-700 flex gap-1 text-sm'>
+                    <span className='text-gray-500 flex gap-1 text-sm'>
                       <Link
                         to={`/profile/${
                           isOriginalPost
@@ -292,7 +292,7 @@ const SinglePost = () => {
                   />
                 )}
               </div>
-              <div className='text-sm mt-2 text-gray-700 flex gap-1'>
+              <div className='text-sm mt-2 text-gray-500 flex gap-1'>
                 {formattedDate}
               </div>
             </div>

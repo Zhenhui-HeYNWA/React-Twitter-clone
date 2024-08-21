@@ -20,7 +20,7 @@ router.get('/all', protectRoute, getAllPosts);
 router.get('/following', protectRoute, getFollowingPosts);
 router.get('/likes/:id', protectRoute, getLikedPosts);
 router.get('/user/:username', protectRoute, getUserPosts);
-router.get('/bookmark/:id', protectRoute, getBookmarkPost);
+// router.get('/bookmark/:id', protectRoute, getBookmarkPost);
 router.get('/:username/status/:id', protectRoute, getSinglePost);
 
 // router.get('/:username/status/:id/comments', protectRoute, getPostComments);

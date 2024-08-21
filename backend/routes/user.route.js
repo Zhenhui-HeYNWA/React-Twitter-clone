@@ -11,6 +11,7 @@ import {
   getSearchUser,
   getMentionedUsers,
   getUserLiked,
+  getUserBookmarks,
 } from '../controllers/user.controller.js';
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.get('/follower/:username', protectRoute, getFollowersUser);
 router.get('/following/:username', protectRoute, getFollowingUser);
 router.get('/search', protectRoute, getSearchUser);
 router.get('/likes/:username', protectRoute, getUserLiked);
+router.get('/bookmarks/:username', protectRoute, getUserBookmarks);
 router.post('/follow/:id', protectRoute, followUnfollowUser);
 router.post('/update', protectRoute, updateUser);
 

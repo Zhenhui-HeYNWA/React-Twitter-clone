@@ -10,15 +10,23 @@ export const getPostComments = async (req, res) => {
   try {
     const post = await Post.findById(postId).populate({
       path: 'comments',
-      // Get only Top level comments
-      match: { parentId: null, isDeleted: { $ne: true } }, // Filter out deleted comments
-      populate: {
-        path: 'user',
-        select: '-password',
-      },
+      match: { parentId: null, isDeleted: { $ne: true } }, // Filter out top-level, non-deleted comments
       options: {
-        sort: { createdAt: -1 },
+        sort: { createdAt: -1 }, // Sort comments by creation date in descending order
       },
+      populate: [
+        {
+          path: 'user',
+          select: 'username fullName profileImg', // Populate the user field without the password
+        },
+        {
+          path: 'postId',
+          populate: {
+            path: 'user',
+            select: 'username fullName profileImg', // Populate the user information for the post
+          },
+        },
+      ],
     });
 
     if (!post) {
@@ -29,7 +37,7 @@ export const getPostComments = async (req, res) => {
 
     res.status(200).json(post.comments);
   } catch (error) {
-    console.log('Error in getPostComments controller', error);
+    console.log('Error in getPostComments controller:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -41,12 +49,22 @@ export const getSingleComment = async (req, res) => {
   try {
     const comment = await Comment.findById(commentId)
       .populate('user', '-password')
+
       .populate({
         path: 'replies',
-        populate: {
-          path: 'user',
-          select: '-password',
-        },
+        populate: [
+          {
+            path: 'user',
+            select: '-password',
+          },
+          {
+            path: 'postId',
+            populate: {
+              path: 'user',
+              select: 'username fullName profileImg',
+            },
+          },
+        ],
       })
       .populate({
         path: 'parentId',
@@ -96,6 +114,13 @@ export const getUserReplies = async (req, res) => {
       .populate({
         path: 'replies',
         match: { isDeleted: { $ne: true } },
+        populate: {
+          path: 'user',
+          select: 'username fullName profileImg',
+        },
+      })
+      .populate({
+        path: 'postId',
         populate: {
           path: 'user',
           select: 'username fullName profileImg',
@@ -342,10 +367,9 @@ export const bookmarkComment = async (req, res) => {
         { _id: userId },
         { $push: { bookmarks: { item: commentId, onModel: 'Comment' } } }
       );
-      await comment.save();
 
       return res.status(200).json({
-        message: 'Comment bookmark successfully',
+        message: 'Comment bookmarked successfully',
         bookmarks: comment.bookmarks,
       });
     }

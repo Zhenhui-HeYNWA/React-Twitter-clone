@@ -46,14 +46,14 @@ const RenderSubComments = ({ pageType, postComment }) => {
 
     return result.reverse();
   }
-  console.log(structuredComments.map((item) => item._id));
+  console.log('postComment', postComment);
   useEffect(() => {
     if (isSubComment) {
       const structured = getParentCommentsIterative(postComment);
       setStructuredComments(structured);
     }
   }, [postComment, isSubComment]);
-  console.log(postComment.postId);
+
   const handleNavigate = (id) => {
     navigate(
       `/${id}/comment/${postComment?.user?.username}/${postComment?._id}`
@@ -80,7 +80,7 @@ const RenderSubComments = ({ pageType, postComment }) => {
               return (
                 <div key={structuredComment._id + '-deleted-' + index}>
                   <div className='flex flex-col gap-2 items-start mt-1 relative h-20  '>
-                    <div className='bg-gray-200 rounded-md p-3 '>
+                    <div className='bg-gray-200 rounded-md p-3  dark:bg-[#1E2732]'>
                       This comment has been deleted by author.
                     </div>
                     <div className=' absolute bottom-0  left-6  w-0.5 h-1/3  dark:bg-slate-700  bg-gray-400 mt-2'></div>
@@ -220,8 +220,10 @@ const RenderSubComments = ({ pageType, postComment }) => {
             </div>
             {!hasParentComment && pageType == 'replies' && (
               <span>
-                Replying to
-                <Link className=' mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
+                Replying to{' '}
+                <Link
+                  className=' mention-highlight text-sky-500 hover:underline hover:text-sky-700'
+                  to={`/profile/${postComment?.postId?.user?.username}`}>
                   @{postComment?.postId?.user?.username}
                 </Link>
               </span>
@@ -229,7 +231,7 @@ const RenderSubComments = ({ pageType, postComment }) => {
             {/* comment text section */}
             <div
               className='flex flex-col overflow-hidden'
-              onClick={() => handleNavigate(postComment?.postId)}>
+              onClick={() => handleNavigate(postComment?.postId._id)}>
               <span className='text-lg whitespace-pre-wrap'>
                 {postComment?.text}
               </span>

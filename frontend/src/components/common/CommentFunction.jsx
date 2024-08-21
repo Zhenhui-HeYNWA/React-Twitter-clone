@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 import { BiComment, BiRepost } from 'react-icons/bi';
-import { FaRegBookmark, FaRegHeart } from 'react-icons/fa';
+import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
 import useCommentMutations from '../../hooks/useCommentMutations';
 import { formatPostDate } from '../../utils/date';
 import { useQuery } from '@tanstack/react-query';
@@ -13,8 +13,14 @@ const CommentFunction = ({ postComment }) => {
 
   const [reply, setReplies] = useState('');
   const [structuredComments, setStructuredComments] = useState([]);
-  const { replyComment, isReplying, likeUnlikeComment, isLiking } =
-    useCommentMutations();
+  const {
+    replyComment,
+    isReplying,
+    likeUnlikeComment,
+    isLiking,
+    bookmarkComment,
+    isMarking,
+  } = useCommentMutations();
 
   console.log('postComment', postComment);
   console.log(structuredComments);
@@ -24,7 +30,11 @@ const CommentFunction = ({ postComment }) => {
   const commentLiked = authUser.likes.some(
     (like) => like.onModel === 'Comment' && like.item === postComment._id
   );
-  console.log(authUser);
+  const markedComment = authUser.bookmarks.some(
+    (bookmark) =>
+      bookmark.onModel === 'Comment' && bookmark.item === postComment._id
+  );
+
 
   function getParentCommentsIterative(postComment) {
     const result = [];
@@ -70,6 +80,10 @@ const CommentFunction = ({ postComment }) => {
     likeUnlikeComment(commentId);
   };
 
+  const handleBookMarkComment = (commentId) => {
+    if (isMarking) return;
+    bookmarkComment(commentId);
+  };
   return (
     <>
       {postComment ? (
@@ -123,7 +137,7 @@ const CommentFunction = ({ postComment }) => {
                     <div className='mt-2 text-gray-500'>
                       Replying to
                       <span className='text-sky-600'>
-                        @{postComment?.user?.username}
+                        @{postComment?.user?.username} 
                       </span>
                     </div>
                   </div>
@@ -199,8 +213,16 @@ const CommentFunction = ({ postComment }) => {
             )}
           </div>
           {/* bookmark */}
-          <div className='flex gap-2 group items-center'>
-            <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+          <div
+            className='flex gap-2 group items-center'
+            onClick={() => handleBookMarkComment(postComment._id)}>
+            {isMarking && <LoadingSpinner size='sm' />}
+            {!isMarking && markedComment && (
+              <FaBookmark className='w-4 h-4 cursor-pointer ' />
+            )}
+            {!isMarking && !markedComment && (
+              <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+            )}
           </div>
         </div>
       ) : (

@@ -75,6 +75,25 @@ const useCommentMutations = () => {
       queryClient.invalidateQueries(['comment']);
     },
   });
+
+  const { mutate: bookmarkComment, isPending: isMarking } = useMutation({
+    mutationFn: async (commentId) => {
+      try {
+        const res = await fetch(`/api/comments/bookmarks/${commentId}`, {
+          method: 'POST',
+        });
+        const data = await res.json();
+        if (!res.ok)
+          throw new Error(data.error || 'Failed to bookmarked comment');
+        return data;
+      } catch (error) {
+        throw new Error(error.message || 'Something went wrong');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['comment']);
+    },
+  });
   return {
     replyComment,
     isReplying,
@@ -82,6 +101,8 @@ const useCommentMutations = () => {
     isCommentDeleting,
     likeUnlikeComment,
     isLiking,
+    bookmarkComment,
+    isMarking,
   };
 };
 

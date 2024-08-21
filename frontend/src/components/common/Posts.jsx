@@ -6,7 +6,7 @@ import PostSkeleton from '../skeletons/PostSkeleton';
 
 import RenderSubComments from './RenderSubComments';
 
-const Posts = ({ feedType, username, userId }) => {
+const Posts = ({ feedType, username }) => {
   const getPostEndPoint = () => {
     switch (feedType) {
       case 'forYou':
@@ -18,7 +18,7 @@ const Posts = ({ feedType, username, userId }) => {
       case 'likes':
         return `/api/users/likes/${username}`;
       case 'bookmarks':
-        return `/api/posts/bookmark/${userId}`;
+        return `/api/users/bookmarks/${username}`;
       default:
         return '/api/posts/all';
     }

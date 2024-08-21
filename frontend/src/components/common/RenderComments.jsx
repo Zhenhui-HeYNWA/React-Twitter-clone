@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './LoadingSpinner';
-import { FaRegHeart, FaTrash } from 'react-icons/fa';
-import { BiBookmark, BiComment, BiRepost } from 'react-icons/bi';
+import { FaBookmark, FaRegBookmark, FaRegHeart, FaTrash } from 'react-icons/fa';
+import { BiComment, BiRepost } from 'react-icons/bi';
 
 import { formatDateTime, formatPostDate } from '../../utils/date';
 import { useEffect, useState } from 'react';
@@ -26,6 +26,8 @@ const RenderComments = ({ comment }) => {
     isLiking,
     deleteComment,
     isCommentDeleting,
+    bookmarkComment,
+    isMarking,
   } = useCommentMutations();
   console.log(comment?._id);
   console.log(comment?.parentId);
@@ -42,6 +44,11 @@ const RenderComments = ({ comment }) => {
   const commentLiked = authUser.likes.some(
     (like) => like.onModel === 'Comment' && like.item === comment._id
   );
+  const markedComment = authUser.bookmarks.some(
+    (bookmark) =>
+      bookmark.onModel === 'Comment' && bookmark.item === comment._id
+  );
+
   const isSubCommentAvailable =
     comment?.parentId && comment.parentId.user !== undefined;
 
@@ -94,6 +101,10 @@ const RenderComments = ({ comment }) => {
     likeUnlikeComment(commentId);
   };
 
+  const handleBookMarkComment = (commentId) => {
+    if (isMarking) return;
+    bookmarkComment(commentId);
+  };
   console.log('structuredComments', structuredComments);
 
   return (
@@ -109,7 +120,7 @@ const RenderComments = ({ comment }) => {
               return (
                 <div key={structuredComment._id}>
                   <div className='flex flex-col gap-2 items-start mt-1 relative h-20  '>
-                    <div className='bg-gray-200 rounded-md p-3 '>
+                    <div className='bg-gray-200 rounded-md p-3  dark:bg-[#1E2732]'>
                       This comment has been deleted by author.
                     </div>
                     <div className=' absolute bottom-0  left-6  w-0.5 h-1/3  dark:bg-slate-700  bg-gray-400 mt-2'></div>
@@ -389,8 +400,16 @@ const RenderComments = ({ comment }) => {
                   )}
                 </div>
 
-                <div className='items-center text-slate-500 hover:text-black cursor-pointer'>
-                  <BiBookmark size={20} />
+                <div
+                  className='items-center text-slate-500 hover:text-black cursor-pointer group'
+                  onClick={() => handleBookMarkComment(comment._id)}>
+                  {isMarking && <LoadingSpinner size='sm' />}
+                  {!isMarking && markedComment && (
+                    <FaBookmark className='w-4 h-4 cursor-pointer text-white ' />
+                  )}
+                  {!isMarking && !markedComment && (
+                    <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+                  )}
                 </div>
               </div>
             </div>
