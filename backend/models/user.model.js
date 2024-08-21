@@ -67,9 +67,16 @@ const userSchema = new mongoose.Schema(
     ],
     bookmarks: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post',
-        default: [],
+        item: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: true,
+          refPath: 'bookmarks.onModel',
+        },
+        onModel: {
+          type: String,
+          required: true,
+          enum: ['Post', 'Comment'],
+        },
       },
     ],
     repostedPosts: [

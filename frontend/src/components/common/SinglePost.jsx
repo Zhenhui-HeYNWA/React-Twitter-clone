@@ -498,7 +498,7 @@ const SinglePost = () => {
               return (
                 <div
                   key={comment?._id}
-                  className='border-b border-gray-200 dark:border-gray-700 px-2 pt-2'>
+                  className='border-b border-gray-200 dark:border-gray-700  pt-2'>
                   <RenderSubComments postComment={comment} pageType={1} />
                 </div>
               );

@@ -143,7 +143,7 @@ const Post = ({ post, posts }) => {
             You reposted
           </span>
         )}
-        <div className='flex gap-4 items-start py-2 border-b border-gray-200 dark:border-gray-700 justify-center px-2 '>
+        <div className='flex gap-4 items-start py-2 border-b border-gray-200 dark:border-gray-700 justify-center px-4 '>
           <div className='avatar'>
             {/* Avatar */}
             {isOriginalPost && (
@@ -188,8 +188,8 @@ const Post = ({ post, posts }) => {
                   </Link>
                 )}
 
-                <span className='text-gray-700 flex gap-1 text-sm '>
-                  <span className='text-gray-500 truncate max-w-20 md:max-w-52'>
+                <span className='text-gray-700 flex gap-1 text-basic '>
+                  <span className='text-gray-500 truncate max-w-20 md:max-w-52 text-basic'>
                     <Link
                       to={`/profile/${
                         isOriginalPost

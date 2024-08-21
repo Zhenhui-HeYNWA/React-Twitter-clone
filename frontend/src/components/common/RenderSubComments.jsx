@@ -119,14 +119,14 @@ const RenderSubComments = ({ pageType, postComment }) => {
                         </Link>
 
                         {/* username */}
-                        <span className='text-gray-700 flex gap-1 text-base truncate'>
+                        <span className='text-gray-500 flex gap-1 text-base truncate'>
                           <Link
                             to={`/profile/${structuredComment?.user?.username}`}>
                             @{structuredComment?.user?.username}
                           </Link>
                         </span>
-                        <span className='text-base text-gray-700'>·</span>
-                        <span className='text-base text-gray-700 flex gap-1'>
+                        <span className='text-base text-gray-500'>·</span>
+                        <span className='text-base text-gray-500 flex gap-1'>
                           {structuredComment?.createdAt}
                         </span>
                       </div>
@@ -193,13 +193,13 @@ const RenderSubComments = ({ pageType, postComment }) => {
                 </span>
 
                 {/* username */}
-                <span className='text-gray-700 flex gap-1 text-base truncate'>
+                <span className='text-gray-500 flex gap-1 text-base truncate'>
                   <Link to={`/profile/${postComment?.user?.username}`}>
                     @{postComment?.user.username}
                   </Link>
                 </span>
-                <span className='text-base text-gray-700'>·</span>
-                <span className='text-base text-gray-700 flex gap-1'>
+                <span className='text-base text-gray-500'>·</span>
+                <span className='text-base text-gray-500 flex gap-1'>
                   {formattedPostDate}
                 </span>
               </div>

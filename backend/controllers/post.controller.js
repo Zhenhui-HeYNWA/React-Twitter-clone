@@ -216,25 +216,40 @@ export const bookmarkUnBookmark = async (req, res) => {
       return res.status(404).json({ error: 'Post or User not found' });
     }
 
-    const userBookmarkedPost = post.bookmarks.includes(userId);
+    // Check if the post is already bookmarked by the user
+    const userBookmarkedPost = user.bookmarks.some(
+      (bookmark) =>
+        bookmark.item.toString() === postId.toString() &&
+        bookmark.onModel === 'Post'
+    );
 
     if (userBookmarkedPost) {
-      //Unbookmark post
-      await Post.updateOne({ _id: postId }, { $pull: { bookmarks: userId } });
-      await User.updateOne({ _id: userId }, { $pull: { bookmarks: postId } });
+      // Unbookmark post
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { bookmarks: { item: postId, onModel: 'Post' } } }
+      );
+      await Post.updateOne(
+        { _id: postId },
+        { $pull: { bookmarks: { item: userId, onModel: 'User' } } }
+      );
 
-      const updatedBookmarks = post.bookmarks.filter(
-        (id) => id.toString() !== userId.toString()
+      const updatedBookmarks = user.bookmarks.filter(
+        (bookmark) => bookmark.item.toString() !== postId.toString()
       );
       res.status(200).json(updatedBookmarks);
     } else {
-      //BookMark post
-      post.bookmarks.push(userId);
-      await User.updateOne({ _id: userId }, { $push: { bookmarks: postId } });
-      await post.save();
+      // Bookmark post
+      user.bookmarks.push({ item: postId, onModel: 'Post' });
+      await User.updateOne(
+        { _id: userId },
+        { $push: { bookmarks: { item: postId, onModel: 'Post' } } }
+      );
+      await post.updateOne({
+        $push: { bookmarks: { item: userId, onModel: 'User' } },
+      });
 
-      const updatedBookmarks = post.bookmarks;
-      res.status(200).json(updatedBookmarks);
+      res.status(200).json(user.bookmarks);
     }
   } catch (error) {
     console.log('Error in bookmarkUnBookmarkPost controller:', error);
@@ -395,25 +410,33 @@ export const getLikedPosts = async (req, res) => {
   const userId = req.params.id;
 
   try {
+    // Find the user by ID
     const user = await User.findById(userId);
     if (!user) {
-      res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    const likedPosts = await Post.find({ _id: { $in: user.likedPosts } })
-      .populate({ path: 'user', select: '-password' })
+    // Extract liked posts from the user's likes array
+    const likedPostIds = user.likes
+      .filter((like) => like.onModel === 'Post') // Filter only likes on Posts
+      .map((like) => like.item);
+
+    // Fetch the liked posts and populate necessary fields
+    const likedPosts = await Post.find({ _id: { $in: likedPostIds } })
+      .populate({ path: 'user', select: 'username fullName profileImg' }) // Populate the user who created the post
       .populate({
         path: 'comments',
-        match: { isDeleted: { $ne: true } },
+        match: { isDeleted: { $ne: true } }, // Only include non-deleted comments
         populate: {
           path: 'user',
-          select: '-password',
+          select: 'username fullName profileImg', // Populate the user who made the comment
         },
       });
 
+    // Send the liked posts as a response
     res.status(200).json(likedPosts);
   } catch (error) {
-    console.log('Error in getLikedPosts controller:', error);
+    console.error('Error in getLikedPosts controller:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

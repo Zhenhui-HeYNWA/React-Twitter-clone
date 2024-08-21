@@ -305,3 +305,52 @@ export const likeUnlikeComment = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const bookmarkComment = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { id: commentId } = req.params;
+
+    const comment = await Comment.findById(commentId);
+    if (!comment) return res.status(404).json({ error: 'Comment not found' });
+    // Check if the user has already liked the comment
+    const userLikedComment = await User.findOne({
+      _id: userId,
+      'bookmarks.item': commentId,
+      'bookmarks.onModel': 'Comment',
+    });
+    if (userLikedComment) {
+      await Comment.updateOne(
+        { _id: commentId },
+        { $pull: { bookmarks: userId } }
+      );
+
+      // Remove from user's bookmarks array
+      await User.updateOne(
+        { _id: userId },
+        { $pull: { bookmarks: { item: commentId, onModel: 'Comment' } } }
+      );
+      const updatedComment = await Comment.findById(commentId);
+      return res.status(200).json({
+        message: 'Comment UnMark successfully',
+        bookmarks: updatedComment.bookmarks,
+      });
+    } else {
+      // Like the comment
+      comment.bookmarks.push(userId);
+      await User.updateOne(
+        { _id: userId },
+        { $push: { bookmarks: { item: commentId, onModel: 'Comment' } } }
+      );
+      await comment.save();
+
+      return res.status(200).json({
+        message: 'Comment bookmark successfully',
+        bookmarks: comment.bookmarks,
+      });
+    }
+  } catch (error) {
+    console.log('Error in bookmarksComment controller:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};

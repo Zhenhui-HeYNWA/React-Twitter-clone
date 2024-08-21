@@ -34,6 +34,13 @@ const commentSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    bookmarks:[
+      {
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User',
+        default:[]
+      }
+    ],
     isDeleted: { type: Boolean, default: false },
   },
 

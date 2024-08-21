@@ -60,7 +60,6 @@ export const getUnreadNotifications = async (req, res) => {
       read: false,
     });
     res.status(200).json({ unreadCount });
-    console.log({ to: userId, read: false });
   } catch (error) {
     console.log('Error in getUnreadNotificationsCount:', error);
     res.status(500).json({ error: 'Internal server error' });
