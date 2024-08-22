@@ -177,7 +177,11 @@ const CreatePost = () => {
                   />
                   <img
                     src={img}
-                    className='w-full h-full object-cover rounded-2xl'
+                    className={
+                      imgs.length > 1
+                        ? `w-full h-full object-cover rounded-2xl`
+                        : ` w-36 h-44 sm:w-64 sm:h-72 mx-auto  object-cover rounded-2xl`
+                    }
                     alt={`Preview ${index + 1}`}
                   />
                 </div>
