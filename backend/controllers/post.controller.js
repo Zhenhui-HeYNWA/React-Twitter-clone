@@ -6,28 +6,36 @@ import mongoose from 'mongoose';
 
 export const createPost = async (req, res) => {
   try {
-    const { text } = req.body;
-    console.log(text);
-    let { img } = req.body;
+    const { text, imgs } = req.body;
+
+    // let { img } = req.body;
     const userId = req.user._id.toString();
     const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    if (!text && !img) {
-      return res.status(400).json({ error: 'Post must have text or image' });
+    if (!text && (!imgs || imgs.length === 0)) {
+      return res.status(400).json({ error: 'Post must have text or images' });
     }
 
-    if (img) {
-      const uploadedResponse = await cloudinary.uploader.upload(img);
-      img = uploadedResponse.secure_url;
+    if (imgs && imgs.length > 9) {
+      return res
+        .status(400)
+        .json({ error: 'You can upload a maximum of 9 images' });
+    }
+    let uploadedImages = [];
+    if (imgs && imgs.length > 0) {
+      for (const img of imgs) {
+        const uploadedResponse = await cloudinary.uploader.upload(img);
+        uploadedImages.push(uploadedResponse.secure_url);
+      }
     }
 
     const newPost = new Post({
       user: userId,
       text,
-      img,
+      imgs: uploadedImages,
     });
     await newPost.save();
 
@@ -310,7 +318,7 @@ export const repostPost = async (req, res) => {
           profileImg: originalUser.profileImg,
         },
         originalText: originalPost.text,
-        originalImg: originalPost.img,
+        originalImgs: originalPost.imgs,
         repostUser: userId,
         repostNum: 1, // Initial repost count
       },

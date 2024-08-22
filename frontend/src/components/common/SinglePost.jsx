@@ -291,39 +291,69 @@ const SinglePost = () => {
                   </span>
                 )}
 
-                {isOriginalPost && post.img && (
-                  <>
-                    <img
-                      src={post.img}
-                      className='h-full object-cover object-center rounded-lg border border-gray-700 mt-2 w-[40rem]'
-                      alt=''
-                      onClick={() =>
-                        document.getElementById('my_modal_3').showModal()
-                      }
-                    />
-
-                    <dialog id='my_modal_3' className=' model'>
-                      <div className='modal-box h-full w-full'>
-                        <form method='dialog'>
-                          <button className='btn btn-sm btn-circle btn-ghost absolute right-2 top-2'>
-                            ✕
-                          </button>
-                        </form>
+                {isOriginalPost && post.imgs.length > 0 && (
+                  <div className='grid grid-cols-2 gap-2 mt-2'>
+                    {post.imgs.map((img, index) => (
+                      <>
                         <img
-                          src={post.img}
-                          className='h-full w-full object-fill   rounded-lg border border-gray-700 mt-2 '
+                          src={img}
+                          className='h-full object-cover object-center rounded-lg border border-gray-700  w-[40rem] '
                           alt=''
+                          key={index}
+                          onClick={() =>
+                            document.getElementById('my_modal_3').showModal()
+                          }
                         />
-                      </div>
-                    </dialog>
-                  </>
+
+                        <dialog id='my_modal_3' className=' model'>
+                          <div className='modal-box h-full w-full'>
+                            <form method='dialog'>
+                              <button className='btn btn-sm btn-circle btn-ghost absolute right-2 top-2'>
+                                ✕
+                              </button>
+                            </form>
+                            <img
+                              src={img}
+                              className='h-full w-full object-fill   rounded-lg border border-gray-700 mt-2 '
+                              alt=''
+                            />
+                          </div>
+                        </dialog>
+                      </>
+                    ))}
+                  </div>
                 )}
-                {!isOriginalPost && post.repost.originalImg && (
-                  <img
-                    src={post.repost.originalImg}
-                    className='h-full object-cover object-center rounded-lg border border-gray-700 mt-2 w-[40rem]'
-                    alt=''
-                  />
+                {!isOriginalPost && post.repost.originalImgs && (
+                  <div className='grid grid-cols-2 gap-2 mt-2'>
+                    {post.repost.originalImgs.map((img, index) => (
+                      <>
+                        <img
+                          src={img}
+                          className='h-full object-cover object-center rounded-lg border border-gray-700  w-[40rem] '
+                          alt=''
+                          key={index}
+                          onClick={() =>
+                            document.getElementById('my_modal_3').showModal()
+                          }
+                        />
+
+                        <dialog id='my_modal_3' className=' model'>
+                          <div className='modal-box h-full w-full'>
+                            <form method='dialog'>
+                              <button className='btn btn-sm btn-circle btn-ghost absolute right-2 top-2'>
+                                ✕
+                              </button>
+                            </form>
+                            <img
+                              src={img}
+                              className='h-full w-full object-fill   rounded-lg border border-gray-700 mt-2 '
+                              alt=''
+                            />
+                          </div>
+                        </dialog>
+                      </>
+                    ))}
+                  </div>
                 )}
               </div>
               <div className='text-sm mt-2 text-gray-500 flex gap-1'>

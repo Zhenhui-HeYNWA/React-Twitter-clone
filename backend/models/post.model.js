@@ -10,9 +10,11 @@ const postSchema = new mongoose.Schema(
     text: {
       type: String,
     },
-    img: {
-      type: String,
-    },
+    imgs: [
+      {
+        type: String,
+      },
+    ],
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -45,7 +47,7 @@ const postSchema = new mongoose.Schema(
         profileImg: { type: String },
       },
       originalText: { type: String },
-      originalImg: { type: String },
+      originalImgs: [{ type: String }],
       repostUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       repostNum: { type: Number, default: 0 },
     },
@@ -63,7 +65,7 @@ const postSchema = new mongoose.Schema(
         profileImg: { type: String },
       },
       originalText: { type: String },
-      originalImg: { type: String },
+      originalImgs: { type: String },
     },
   },
   { timestamps: true }

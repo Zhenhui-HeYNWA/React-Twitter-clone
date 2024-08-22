@@ -125,6 +125,8 @@ const Post = ({ post, posts }) => {
       return acc;
     }, []);
   };
+
+  console.log(post.imgs);
   return (
     <>
       <div className='flex flex-col'>
@@ -239,10 +241,7 @@ const Post = ({ post, posts }) => {
                 <span
                   className='nav-link'
                   onClick={() =>
-                    navigate(
-                      
-                        `/${authUser.username}/status/${post._id}`
-                    )
+                    navigate(`/${authUser.username}/status/${post._id}`)
                   }>
                   <span className='text-lg whitespace-pre-wrap word-wrap '>
                     {highlightMentions(post.repost.originalText)}
@@ -250,32 +249,41 @@ const Post = ({ post, posts }) => {
                 </span>
               )}
 
-              {isOriginalPost && post.img && (
-                <span
-                  className='nav-link'
-                  onClick={() =>
-                    navigate(`/${authUser.username}/status/${post._id}`)
-                  }>
-                  <img
-                    src={post.img}
-                    className='h-full object-cover rounded-lg border border-gray-700 mt-2 w-full'
-                    alt=''
-                  />
-                </span>
+              {isOriginalPost && post.imgs.length > 0 && (
+                <div className='grid grid-cols-2 gap-2 mt-2'>
+                  {post.imgs.map((img, index) => (
+                    <span
+                      key={index}
+                      className='nav-link'
+                      onClick={() =>
+                        navigate(`/${authUser.username}/status/${post._id}`)
+                      }>
+                      <img
+                        src={img}
+                        className='h-full object-cover rounded-lg border border-gray-700 w-full'
+                        alt={`Post image ${index + 1}`}
+                      />
+                    </span>
+                  ))}
+                </div>
               )}
-
-              {!isOriginalPost && post.repost.originalImg && (
-                <span
-                  className='nav-link'
-                  onClick={() =>
-                    navigate(`/${authUser.username}/status/${post._id}`)
-                  }>
-                  <img
-                    src={post.repost.originalImg}
-                    className='h-full object-cover rounded-lg border border-gray-700 mt-2 w-full'
-                    alt=''
-                  />
-                </span>
+              {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
+                <div className='grid grid-cols-2 gap-2 mt-2'>
+                  {post.repost.originalImgs.map((img, index) => (
+                    <span
+                      key={index}
+                      className='nav-link'
+                      onClick={() =>
+                        navigate(`/${authUser.username}/status/${post._id}`)
+                      }>
+                      <img
+                        src={img}
+                        className='h-full object-cover rounded-lg border border-gray-700 w-full'
+                        alt={`Reposted image ${index + 1}`}
+                      />
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 

@@ -13,7 +13,7 @@ import { useTheme } from '../../components/context/ThemeProvider';
 const CreatePost = () => {
   const { theme } = useTheme();
   const [text, setText] = useState('');
-  const [img, setImg] = useState(null);
+  const [imgs, setImgs] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imgRef = useRef(null);
@@ -92,21 +92,22 @@ const CreatePost = () => {
     isError,
     error,
   } = useMutation({
-    mutationFn: async ({ text, img }) => {
+    mutationFn: async ({ text, imgs }) => {
       const res = await fetch('/api/posts/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text, img }),
+        body: JSON.stringify({ text, imgs }),
       });
+      console.log(imgs);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       return data;
     },
     onSuccess: () => {
       setText('');
-      setImg(null);
+      setImgs([]);
       toast.success('Post created successfully');
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
@@ -114,17 +115,27 @@ const CreatePost = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createPost({ text, img });
+    createPost({ text, imgs });
   };
 
   const handleImgChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImg(reader.result);
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files && files.length + imgs.length <= 9) {
+      const newImgs = [...imgs];
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          newImgs.push(reader.result);
+          if (newImgs.length <= 9) {
+            setImgs(newImgs);
+          } else {
+            toast.error('You can upload up to 9 images.');
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    } else {
+      toast.error('You can upload up to 9 images.');
     }
   };
 
@@ -154,21 +165,39 @@ const CreatePost = () => {
           className='word-wrap'
         />
 
-        {img && (
-          <div className='relative w-72 mx-auto'>
-            <IoCloseSharp
-              className='absolute top-0 right-0 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
-              onClick={() => {
-                setImg(null);
-              }}
-            />
-            <img
-              src={img}
-              className='w-full mx-auto h-72 object-contain rounded'
-              alt='Preview'
-            />
+        <div className='w-full '>
+          <div className='justify-center mx-auto   sm:w-1/2'>
+            {imgs.length > 0 && (
+              <div
+                className='carousel flex overflow-x-scroll rounded-box gap-3 h-auto'
+                style={{ width: 'calc(2 * 10rem + 1rem)' }}>
+                {imgs.map((img, index) => (
+                  <div
+                    key={index}
+                    className='relative carousel-item'
+                    style={imgs.length > 1 ? { flex: '0 0 10rem' } : {}} // Adjusts each item to take up exactly one-half of the carousel width
+                    id={`slide${index + 1}`}>
+                    <IoCloseSharp
+                      className='absolute top-1 right-2 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
+                      onClick={() => {
+                        setImgs(imgs.filter((_, i) => i !== index));
+                      }}
+                    />
+                    <img
+                      src={img}
+                      className={
+                        imgs.length > 1
+                          ? `w-full h-full object-cover rounded-2xl`
+                          : ` w-36 h-44 sm:w-64 sm:h-72 mx-auto  object-cover rounded-2xl`
+                      }
+                      alt={`Preview ${index + 1}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
         <div className=' relative flex justify-between border-t py-2 border-t-gray-700'>
           <div className='flex gap-1 items-center'>
             <CiImageOn
@@ -196,6 +225,7 @@ const CreatePost = () => {
             ref={imgRef}
             accept='image/*'
             onChange={handleImgChange}
+            multiple
           />
           <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
             {isPending ? 'Posting...' : 'Post'}
