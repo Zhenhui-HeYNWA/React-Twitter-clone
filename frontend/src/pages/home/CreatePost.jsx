@@ -24,7 +24,6 @@ const CreatePost = () => {
     queryKey: ['authUser'],
   });
 
-  // Your existing searchUsers function
   const searchUsers = async (query) => {
     const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`);
     if (!res.ok) {
@@ -59,32 +58,30 @@ const CreatePost = () => {
     }
   };
 
-  const itemTemplate = (user) => {
-    return (
-      <div className='card rounded-none z-0 bg-gray-100 dark:bg-[#15202B] w-60  h-18 flex ring-1 ring-white'>
-        <div className='card-body p-0'>
-          <div
-            className='flex gap-2 items-center hover:bg-slate-400 dark:hover:bg-cyan-900 p-2'
-            key={user._id}>
-            <div className='avatar'>
-              <div className='w-8 rounded-full'>
-                <img
-                  src={user.profileImg || '/avatar-placeholder.png'}
-                  alt={`${user.fullName}'s profile`}
-                />
-              </div>
+  const itemTemplate = (user) => (
+    <div className='card rounded-none z-0 bg-gray-100 dark:bg-[#15202B] w-60 h-18 flex ring-1 ring-white'>
+      <div className='card-body p-0'>
+        <div
+          className='flex gap-2 items-center hover:bg-slate-400 dark:hover:bg-cyan-900 p-2'
+          key={user._id}>
+          <div className='avatar'>
+            <div className='w-8 rounded-full'>
+              <img
+                src={user.profileImg || '/avatar-placeholder.png'}
+                alt={`${user.fullName}'s profile`}
+              />
             </div>
-            <div className='flex flex-col'>
-              <span className='font-semibold tracking-tight truncate w-28'>
-                {user.fullName}
-              </span>
-              <span className='text-sm text-slate-500'>@{user.username}</span>
-            </div>
+          </div>
+          <div className='flex flex-col'>
+            <span className='font-semibold tracking-tight truncate w-28'>
+              {user.fullName}
+            </span>
+            <span className='text-sm text-slate-500'>@{user.username}</span>
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
 
   const {
     mutate: createPost,
@@ -100,7 +97,6 @@ const CreatePost = () => {
         },
         body: JSON.stringify({ text, imgs }),
       });
-      console.log(imgs);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       return data;
@@ -144,7 +140,7 @@ const CreatePost = () => {
   };
 
   return (
-    <div className='  flex p-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700'>
+    <div className='flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full'>
       <div className='avatar'>
         <div className='w-8 rounded-full'>
           <img
@@ -153,7 +149,7 @@ const CreatePost = () => {
           />
         </div>
       </div>
-      <form className=' flex flex-col gap-2 w-full' onSubmit={handleSubmit}>
+      <form className='flex flex-col gap-2 w-full' onSubmit={handleSubmit}>
         <Mention
           value={text}
           onChange={handleChange}
@@ -165,40 +161,32 @@ const CreatePost = () => {
           className='word-wrap'
         />
 
-        <div className='w-full '>
-          <div className='justify-center mx-auto   sm:w-1/2'>
-            {imgs.length > 0 && (
-              <div
-                className='carousel flex overflow-x-scroll rounded-box gap-3 h-auto'
-                style={{ width: 'calc(2 * 10rem + 1rem)' }}>
-                {imgs.map((img, index) => (
-                  <div
-                    key={index}
-                    className='relative carousel-item'
-                    style={imgs.length > 1 ? { flex: '0 0 10rem' } : {}} // Adjusts each item to take up exactly one-half of the carousel width
-                    id={`slide${index + 1}`}>
-                    <IoCloseSharp
-                      className='absolute top-1 right-2 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
-                      onClick={() => {
-                        setImgs(imgs.filter((_, i) => i !== index));
-                      }}
-                    />
-                    <img
-                      src={img}
-                      className={
-                        imgs.length > 1
-                          ? `w-full h-full object-cover rounded-2xl`
-                          : ` w-36 h-44 sm:w-64 sm:h-72 mx-auto  object-cover rounded-2xl`
-                      }
-                      alt={`Preview ${index + 1}`}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+        {imgs.length > 0 && (
+          <div className='w-full overflow-x-auto'>
+            <div className='flex gap-2'>
+              {imgs.map((img, index) => (
+                <div
+                  key={index}
+                  className='relative flex-shrink-0'
+                  style={{ flex: imgs.length > 1 ? '0 0 10rem' : '0 0 auto' }}>
+                  <IoCloseSharp
+                    className='absolute top-1 right-2 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
+                    onClick={() => {
+                      setImgs(imgs.filter((_, i) => i !== index));
+                    }}
+                  />
+                  <img
+                    src={img}
+                    className='w-full h-full object-cover rounded-2xl'
+                    alt={`Preview ${index + 1}`}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-        <div className=' relative flex justify-between border-t py-2 border-t-gray-700'>
+        )}
+
+        <div className='relative flex justify-between border-t py-2 border-t-gray-700'>
           <div className='flex gap-1 items-center'>
             <CiImageOn
               className='fill-primary w-6 h-6 cursor-pointer'
