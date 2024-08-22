@@ -175,7 +175,7 @@ const Post = ({ post, posts }) => {
                 {/* fullName */}
                 {isOriginalPost && (
                   <Link to={`/profile/${post.user.username}`}>
-                    <span className=' font-bold text-nowrap'>
+                    <span className=' font-bold text-nowrap '>
                       {post.user.fullName}
                     </span>
                   </Link>
@@ -239,7 +239,10 @@ const Post = ({ post, posts }) => {
                 <span
                   className='nav-link'
                   onClick={() =>
-                    navigate(`/${authUser.username}/status/${post._id}`)
+                    navigate(
+                      
+                        `/${authUser.username}/status/${post._id}`
+                    )
                   }>
                   <span className='text-lg whitespace-pre-wrap word-wrap '>
                     {highlightMentions(post.repost.originalText)}

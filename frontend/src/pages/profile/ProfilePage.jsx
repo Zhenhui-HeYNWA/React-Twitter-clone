@@ -132,7 +132,7 @@ const ProfilePage = () => {
         <div className='flex flex-col h-full  '>
           {!isLoading && !isRefetching && user && (
             <>
-              <div className='sticky top-0   z-10 w-full   backdrop-blur-xl px-4 py-1'>
+              <div className='sticky top-0   z-10 w-full   backdrop-blur-3xl px-4 py-1'>
                 <div className=' mx-auto flex items-center  justify-between '>
                   <div className='flex  flex-row items-center gap-10 '>
                     <Link to='/'>
@@ -162,10 +162,10 @@ const ProfilePage = () => {
                 </div>
               </div>
               {/* COVER IMG */}
-              <div className='relative group/cover'>
+              <div className='relative group '>
                 <img
                   src={coverImg || user?.coverImg || '/cover.png'}
-                  className='h-60 w-full object-cover'
+                  className='h-30 md:h-60 w-full object-fill'
                   alt='cover image'
                 />
                 {isMyProfile && (

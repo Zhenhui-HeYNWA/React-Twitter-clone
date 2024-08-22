@@ -17,6 +17,9 @@ import usePostMutations from '../../hooks/usePostMutations';
 import LoadingSpinner from './LoadingSpinner';
 import RenderSubComments from './RenderSubComments';
 import CreateCommentForm from './CreateCommentForm';
+import { RiShare2Line } from 'react-icons/ri';
+import { AiOutlineLink } from 'react-icons/ai';
+import toast from 'react-hot-toast';
 
 const SinglePost = () => {
   const { data: authUser } = useQuery({
@@ -126,6 +129,8 @@ const SinglePost = () => {
     return;
   };
 
+  
+
   const highlightMentions = (text) => {
     const regex = /@\w+/g; // Regex to find mentions in the text
     return text.split(regex).map((part, index) => {
@@ -152,7 +157,18 @@ const SinglePost = () => {
   };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
-
+//Handle ShareLink
+const handleShareLink = async (url) => {
+  const content = window.location.origin + url;
+  try {
+    await navigator.clipboard.writeText(content);
+    toast.success('Post link Copied');
+    console.log('content', content);
+  } catch (error) {
+    toast.error('Failed to Copy');
+    console.log(error);
+  }
+};
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
       <div className='flex flex-col '>
@@ -476,6 +492,31 @@ const SinglePost = () => {
                 <FaBookmark className='w-4 h-4 cursor-pointer  ' />
               )}
             </div>
+            <div className=' dropdown dropdown-top dropdown-end '>
+          <RiShare2Line
+            className='h-5 w-5 text-slate-500 '
+            tabIndex={0}
+            role='button'
+          />
+
+          <ul
+            tabIndex={0}
+            className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
+            <li
+              className='flex'
+              onClick={() =>
+                handleShareLink(`/${authUser.username}/status/${post._id}`)
+              }>
+              <>
+                <span className='text-slate-200'>
+                  {' '}
+                  <AiOutlineLink className='w-5 h-5 text-slate-200' />
+                  Copy link
+                </span>
+              </>
+            </li>
+          </ul>
+        </div>
           </div>
         </div>
 

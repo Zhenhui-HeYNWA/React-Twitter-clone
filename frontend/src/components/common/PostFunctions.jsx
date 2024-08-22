@@ -1,9 +1,12 @@
-import { BiComment, BiRepost } from 'react-icons/bi';
-import LoadingSpinner from './LoadingSpinner';
-import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
 import usePostMutations from '../../hooks/usePostMutations';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { RiShare2Line } from 'react-icons/ri';
+import { BiComment, BiRepost } from 'react-icons/bi';
+import LoadingSpinner from './LoadingSpinner';
+import { AiOutlineLink } from 'react-icons/ai';
+import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 
 const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
@@ -13,13 +16,9 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
   const isOriginalPost = post?.repost?.originalPost == null;
   const isLiked = post?.likes.includes(authUser._id);
 
-  console.log(typeof post.bookmarks);
-
-  console.log(post.bookmarks.includes(authUser._id));
-
   // Check if the post is liked by the authenticated user
   const isMarked = post.bookmarks.includes(authUser._id);
-  console.log(isMarked);
+
   // Check if the post is bookmarked by the authenticated user
   // Fetch the current authenticated user's data
   // Hook to handle post mutations like delete, like, bookmark, and repost
@@ -75,6 +74,19 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
   const handleBookmarkPost = () => {
     if (isBookmarking) return;
     bookmarkPost();
+  };
+
+  //Handle ShareLink
+  const handleShareLink = async (url) => {
+    const content = window.location.origin + url;
+    try {
+      await navigator.clipboard.writeText(content);
+      toast.success('Post link Copied');
+      console.log('content', content);
+    } catch (error) {
+      toast.error('Failed to Copy');
+      console.log(error);
+    }
   };
   return (
     <div className='flex justify-between mt-3 '>
@@ -159,7 +171,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
             {isRepostedByAuthUser ? (
               <ul
                 tabIndex={0}
-                className='dropdown-content menu bg-gray-100 dark:bg-secondary  border-gray-600 rounded-box z-[1] w-52 p-2 shadow  '>
+                className='dropdown-content menu bg-gray-100 dark:bg-[#1E2732]  border-gray-200 border rounded-box z-[1] w-52 p-2 shadow  '>
                 <li onClick={handleRepost}>
                   <button className='text-red-500'>Undo repost</button>
                 </li>
@@ -244,6 +256,32 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
           {isMarked && !isBookmarking && (
             <FaBookmark className='w-4 h-4 cursor-pointer  ' />
           )}
+        </div>
+
+        <div className=' dropdown dropdown-top dropdown-end '>
+          <RiShare2Line
+            className='h-5 w-5 text-slate-500 '
+            tabIndex={0}
+            role='button'
+          />
+
+          <ul
+            tabIndex={0}
+            className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
+            <li
+              className='flex'
+              onClick={() =>
+                handleShareLink(`/${authUser.username}/status/${post._id}`)
+              }>
+              <>
+                <span className='text-slate-200'>
+                  {' '}
+                  <AiOutlineLink className='w-5 h-5 text-slate-200' />
+                  Copy link
+                </span>
+              </>
+            </li>
+          </ul>
         </div>
       </div>
     </div>

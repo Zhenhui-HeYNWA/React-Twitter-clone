@@ -24,7 +24,7 @@ const FollowPage = () => {
   }, [initialFeedType]);
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen'>
-      <div className='flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700'>
+      <div className='flex sticky top-0 z-10 bg-gray-200 dark:bg-[#15202b] justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700'>
         <Link to='/'>
           <FaArrowLeft className='w-4 h-4' />
         </Link>
@@ -36,7 +36,7 @@ const FollowPage = () => {
           <SearchUser className='w-4 h-4' authUser={authUser} />
         </div>
       </div>
-      <div className='flex w-full border-b border-gray-200 dark:border-gray-700 pt-3 items-center  font-semibold'>
+      <div className='flex w-full border-b border-gray-200 dark:border-gray-700  items-center  font-semibold'>
         {!isMyProfile && (
           <div
             className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
@@ -49,7 +49,7 @@ const FollowPage = () => {
         )}
 
         <div
-          className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
+          className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-[#1E2732] transition duration-300 relative cursor-pointer'
           onClick={() => setFollowType('following')}>
           Following
           {followType === 'following' && (
@@ -57,7 +57,7 @@ const FollowPage = () => {
           )}
         </div>
         <div
-          className={`flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer ${
+          className={`flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-[#1E2732] transition duration-300 relative cursor-pointer ${
             followType === 'follow' ? 'text-slate-500' : ''
           }`}
           onClick={() => setFollowType('followers')}>
