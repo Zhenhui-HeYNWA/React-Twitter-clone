@@ -129,8 +129,6 @@ const SinglePost = () => {
     return;
   };
 
-  
-
   const highlightMentions = (text) => {
     const regex = /@\w+/g; // Regex to find mentions in the text
     return text.split(regex).map((part, index) => {
@@ -157,18 +155,18 @@ const SinglePost = () => {
   };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
-//Handle ShareLink
-const handleShareLink = async (url) => {
-  const content = window.location.origin + url;
-  try {
-    await navigator.clipboard.writeText(content);
-    toast.success('Post link Copied');
-    console.log('content', content);
-  } catch (error) {
-    toast.error('Failed to Copy');
-    console.log(error);
-  }
-};
+  //Handle ShareLink
+  const handleShareLink = async (url) => {
+    const content = window.location.origin + url;
+    try {
+      await navigator.clipboard.writeText(content);
+      toast.success('Post link Copied');
+      console.log('content', content);
+    } catch (error) {
+      toast.error('Failed to Copy');
+      console.log(error);
+    }
+  };
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
       <div className='flex flex-col '>
@@ -294,11 +292,31 @@ const handleShareLink = async (url) => {
                 )}
 
                 {isOriginalPost && post.img && (
-                  <img
-                    src={post.img}
-                    className='h-full object-cover object-center rounded-lg border border-gray-700 mt-2 w-[40rem]'
-                    alt=''
-                  />
+                  <>
+                    <img
+                      src={post.img}
+                      className='h-full object-cover object-center rounded-lg border border-gray-700 mt-2 w-[40rem]'
+                      alt=''
+                      onClick={() =>
+                        document.getElementById('my_modal_3').showModal()
+                      }
+                    />
+
+                    <dialog id='my_modal_3' className=' model'>
+                      <div className='modal-box h-full w-full'>
+                        <form method='dialog'>
+                          <button className='btn btn-sm btn-circle btn-ghost absolute right-2 top-2'>
+                            ✕
+                          </button>
+                        </form>
+                        <img
+                          src={post.img}
+                          className='h-full w-full object-fill   rounded-lg border border-gray-700 mt-2 '
+                          alt=''
+                        />
+                      </div>
+                    </dialog>
+                  </>
                 )}
                 {!isOriginalPost && post.repost.originalImg && (
                   <img
@@ -481,42 +499,48 @@ const handleShareLink = async (url) => {
                 {post?.likes.length}
               </span>
             </div>
-            <div
-              className=' gap-2 group items-center'
-              onClick={handleBookmarkingPost}>
-              {isBookmarking && <LoadingSpinner size='sm' />}
-              {!isMarked && !isBookmarking && (
-                <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
-              )}
-              {isMarked && !isBookmarking && (
-                <FaBookmark className='w-4 h-4 cursor-pointer  ' />
-              )}
-            </div>
-            <div className=' dropdown dropdown-top dropdown-end '>
-          <RiShare2Line
-            className='h-5 w-5 text-slate-500 '
-            tabIndex={0}
-            role='button'
-          />
+            <div className='flex  items-center  gap-2'>
+              <div
+                className=' gap-2 group items-center'
+                onClick={handleBookmarkingPost}>
+                {isBookmarking && <LoadingSpinner size='sm' />}
+                {!isMarked && !isBookmarking && (
+                  <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+                )}
+                {isMarked && !isBookmarking && (
+                  <FaBookmark className='w-4 h-4 cursor-pointer  ' />
+                )}
+              </div>
 
-          <ul
-            tabIndex={0}
-            className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
-            <li
-              className='flex'
-              onClick={() =>
-                handleShareLink(`/${authUser.username}/status/${post._id}`)
-              }>
-              <>
-                <span className='text-slate-200'>
-                  {' '}
-                  <AiOutlineLink className='w-5 h-5 text-slate-200' />
-                  Copy link
-                </span>
-              </>
-            </li>
-          </ul>
-        </div>
+              {/* Share Link button */}
+              <div className=' dropdown dropdown-top dropdown-end '>
+                <RiShare2Line
+                  className='h-5 w-5 text-slate-500 '
+                  tabIndex={0}
+                  role='button'
+                />
+
+                <ul
+                  tabIndex={0}
+                  className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
+                  <li
+                    className='flex'
+                    onClick={() =>
+                      handleShareLink(
+                        `/${authUser.username}/status/${post._id}`
+                      )
+                    }>
+                    <>
+                      <span className='text-slate-700 dark:text-slate-200'>
+                        {' '}
+                        <AiOutlineLink className='w-5 h-5 text-slate-700 dark:text-slate-200' />
+                        Copy link
+                      </span>
+                    </>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
 

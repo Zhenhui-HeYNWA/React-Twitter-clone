@@ -246,42 +246,44 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
           </span>
         </div>
 
-        <div
-          className='flex gap-2 group items-center'
-          onClick={handleBookmarkPost}>
-          {isBookmarking && <LoadingSpinner size='sm' />}
-          {!isMarked && !isBookmarking && (
-            <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
-          )}
-          {isMarked && !isBookmarking && (
-            <FaBookmark className='w-4 h-4 cursor-pointer  ' />
-          )}
-        </div>
+        <div className='flex gap-2 '>
+          <div
+            className='flex gap-2 group items-center'
+            onClick={handleBookmarkPost}>
+            {isBookmarking && <LoadingSpinner size='sm' />}
+            {!isMarked && !isBookmarking && (
+              <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+            )}
+            {isMarked && !isBookmarking && (
+              <FaBookmark className='w-4 h-4 cursor-pointer  ' />
+            )}
+          </div>
 
-        <div className=' dropdown dropdown-top dropdown-end '>
-          <RiShare2Line
-            className='h-5 w-5 text-slate-500 '
-            tabIndex={0}
-            role='button'
-          />
+          <div className=' dropdown dropdown-top  dropdown-end '>
+            <RiShare2Line
+              className='h-5 w-5 text-slate-500 '
+              tabIndex={0}
+              role='button'
+            />
 
-          <ul
-            tabIndex={0}
-            className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
-            <li
-              className='flex'
-              onClick={() =>
-                handleShareLink(`/${authUser.username}/status/${post._id}`)
-              }>
-              <>
-                <span className='text-slate-200'>
-                  {' '}
-                  <AiOutlineLink className='w-5 h-5 text-slate-200' />
-                  Copy link
-                </span>
-              </>
-            </li>
-          </ul>
+            <ul
+              tabIndex={0}
+              className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
+              <li
+                className='flex'
+                onClick={() =>
+                  handleShareLink(`/${authUser.username}/status/${post._id}`)
+                }>
+                <>
+                  <span className=' text-slate-700  dark:text-slate-200'>
+                    {' '}
+                    <AiOutlineLink className='w-5 h-5 text-slate-700  dark:text-slate-200' />
+                    Copy link
+                  </span>
+                </>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

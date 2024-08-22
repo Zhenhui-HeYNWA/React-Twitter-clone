@@ -5,6 +5,9 @@ import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
 import useCommentMutations from '../../hooks/useCommentMutations';
 import { formatPostDate } from '../../utils/date';
 import { useQuery } from '@tanstack/react-query';
+import { RiShare2Line } from 'react-icons/ri';
+import { AiOutlineLink } from 'react-icons/ai';
+import toast from 'react-hot-toast';
 
 const CommentFunction = ({ postComment }) => {
   const { data: authUser } = useQuery({
@@ -34,7 +37,6 @@ const CommentFunction = ({ postComment }) => {
     (bookmark) =>
       bookmark.onModel === 'Comment' && bookmark.item === postComment._id
   );
-
 
   function getParentCommentsIterative(postComment) {
     const result = [];
@@ -83,6 +85,19 @@ const CommentFunction = ({ postComment }) => {
   const handleBookMarkComment = (commentId) => {
     if (isMarking) return;
     bookmarkComment(commentId);
+  };
+
+  const handleShareLink = async (url) => {
+    const content = window.location.origin + url;
+
+    try {
+      await navigator.clipboard.writeText(content);
+      toast.success('Post link Copied');
+      console.log('content', content);
+    } catch (error) {
+      toast.error('Failed to Copy');
+      console.log(error);
+    }
   };
   return (
     <>
@@ -137,7 +152,7 @@ const CommentFunction = ({ postComment }) => {
                     <div className='mt-2 text-gray-500'>
                       Replying to
                       <span className='text-sky-600'>
-                        @{postComment?.user?.username} 
+                        @{postComment?.user?.username}
                       </span>
                     </div>
                   </div>
@@ -213,16 +228,46 @@ const CommentFunction = ({ postComment }) => {
             )}
           </div>
           {/* bookmark */}
-          <div
-            className='flex gap-2 group items-center'
-            onClick={() => handleBookMarkComment(postComment._id)}>
-            {isMarking && <LoadingSpinner size='sm' />}
-            {!isMarking && markedComment && (
-              <FaBookmark className='w-4 h-4 cursor-pointer ' />
-            )}
-            {!isMarking && !markedComment && (
-              <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
-            )}
+          <div className='flex flex-row gap-3'>
+            <div
+              className='flex gap-2 group items-center'
+              onClick={() => handleBookMarkComment(postComment._id)}>
+              {isMarking && <LoadingSpinner size='sm' />}
+              {!isMarking && markedComment && (
+                <FaBookmark className='w-4 h-4 cursor-pointer ' />
+              )}
+              {!isMarking && !markedComment && (
+                <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+              )}
+            </div>
+            {/* Share Link Function */}
+            <div className=' dropdown dropdown-top dropdown-end '>
+              <RiShare2Line
+                className='h-5 w-5 text-slate-500 '
+                tabIndex={0}
+                role='button'
+              />
+
+              <ul
+                tabIndex={0}
+                className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
+                <li
+                  className='flex'
+                  onClick={() =>
+                    handleShareLink(
+                      `/${postComment.postId._id}/comment/${postComment?.user?.username}/${postComment?._id}`
+                    )
+                  }>
+                  <>
+                    <span className='text-slate-700 dark:text-slate-200'>
+                      {' '}
+                      <AiOutlineLink className='w-5 h-5 text-slate-700 dark:text-slate-200' />
+                      Copy link
+                    </span>
+                  </>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       ) : (

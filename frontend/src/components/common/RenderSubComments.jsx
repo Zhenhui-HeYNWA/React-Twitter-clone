@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react';
 import CommentFunction from './CommentFunction';
 
 const RenderSubComments = ({ pageType, postComment }) => {
-  console.log(pageType);
   console.log({ postComment, pageType });
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 

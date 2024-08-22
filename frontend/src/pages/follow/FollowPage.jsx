@@ -39,7 +39,7 @@ const FollowPage = () => {
       <div className='flex w-full border-b border-gray-200 dark:border-gray-700  items-center  font-semibold'>
         {!isMyProfile && (
           <div
-            className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-secondary transition duration-300 relative cursor-pointer'
+            className='flex justify-center flex-1 p-3 hover:bg-slate-100 dark:hover:bg-[#1E2732] transition duration-300 relative cursor-pointer'
             onClick={() => setFollowType('FollowersUKnow')}>
             Followers you know
             {followType === 'FollowersUKnow' && (

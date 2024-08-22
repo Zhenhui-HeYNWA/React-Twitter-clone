@@ -8,6 +8,8 @@ import { formatDateTime, formatPostDate } from '../../utils/date';
 import { useEffect, useState } from 'react';
 import useCommentMutations from '../../hooks/useCommentMutations';
 import CommentFunction from './CommentFunction';
+import { RiShare2Line } from 'react-icons/ri';
+import { AiOutlineLink } from 'react-icons/ai';
 
 const RenderComments = ({ comment }) => {
   const { data: authUser } = useQuery({
@@ -29,16 +31,9 @@ const RenderComments = ({ comment }) => {
     bookmarkComment,
     isMarking,
   } = useCommentMutations();
-  console.log(comment?._id);
-  console.log(comment?.parentId);
-  console.log('This is comment', comment);
-  console.log(comment?.text);
 
   const isSubComment = comment?.parentId !== null;
-  console.log(isSubComment);
-  const parentComment = comment?.parentId;
-  console.log('parentComment', parentComment);
-  // '66b2c4a1f551c0189d6bbcfc', '66b55f4f2920466fd6ee5896'
+
   const isMyComment = authUser._id === comment?.user._id;
 
   const commentLiked = authUser.likes.some(
@@ -222,7 +217,7 @@ const RenderComments = ({ comment }) => {
         {comment && (
           <div className='flex flex-col gap-2 items-start relative mt-1'>
             <div className=' flex flex-row  w-full'>
-              <div className=' flex flex-row gap-3  items-center   w-full'>
+              <div className=' flex flex-row gap-4  items-center   w-full'>
                 {/* Avatar */}
                 <div className='flex flex-col  items-center  '>
                   {isSubComment && !isSubCommentAvailable && (
@@ -400,16 +395,48 @@ const RenderComments = ({ comment }) => {
                   )}
                 </div>
 
-                <div
-                  className='items-center text-slate-500 hover:text-black cursor-pointer group'
-                  onClick={() => handleBookMarkComment(comment._id)}>
-                  {isMarking && <LoadingSpinner size='sm' />}
-                  {!isMarking && markedComment && (
-                    <FaBookmark className='w-4 h-4 cursor-pointer text-white ' />
-                  )}
-                  {!isMarking && !markedComment && (
-                    <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
-                  )}
+                <div className='flex flex-row items-center gap-3'>
+                  <div
+                    className='items-center  hover:text-black cursor-pointer group'
+                    onClick={() => handleBookMarkComment(comment._id)}>
+                    {isMarking && <LoadingSpinner size='sm' />}
+                    {!isMarking && markedComment && (
+                      <FaBookmark className='w-4 h-4 cursor-pointer ' />
+                    )}
+                    {!isMarking && !markedComment && (
+                      <FaRegBookmark className='w-4 h-4 text-slate-200 cursor-pointer group-hover:fill-black' />
+                    )}
+                  </div>
+
+                  {/* Share Link Function */}
+                  <div className=' dropdown dropdown-top dropdown-end '>
+                    <RiShare2Line
+                      className='h-5 w-5 text-slate-500 '
+                      tabIndex={0}
+                      role='button'
+                    />
+
+                    <ul
+                      tabIndex={0}
+                      className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
+                      <li
+                        className='flex'
+                        // onClick={() =>
+                        //   handleShareLink(
+                        //     `/${postComment.postId._id}/comment/${postComment?.user?.username}/${postComment?._id}`
+                        //   )
+                        // }
+                      >
+                        <>
+                          <span className='text-slate-700 dark:text-slate-200'>
+                            {' '}
+                            <AiOutlineLink className='w-5 h-5 text-slate-700 dark:text-slate-200' />
+                            Copy link
+                          </span>
+                        </>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
