@@ -292,7 +292,12 @@ const SinglePost = () => {
                 )}
 
                 {isOriginalPost && post.imgs.length > 0 && (
-                  <div className='grid grid-cols-2 gap-2 mt-2'>
+                  <div
+                    className={
+                      post.imgs.length > 1
+                        ? 'grid grid-cols-2 gap-2 mt-2'
+                        : 'h-full object-cover rounded-lg  border-gray-700 mt-2 w-full'
+                    }>
                     {post.imgs.map((img, index) => (
                       <>
                         <img
@@ -314,7 +319,7 @@ const SinglePost = () => {
                             </form>
                             <img
                               src={img}
-                              className='h-full w-full object-fill   rounded-lg border border-gray-700 mt-2 '
+                              className='h-full w-full object-fill   rounded-lg  border-gray-700 mt-2 '
                               alt=''
                             />
                           </div>
@@ -324,7 +329,12 @@ const SinglePost = () => {
                   </div>
                 )}
                 {!isOriginalPost && post.repost.originalImgs && (
-                  <div className='grid grid-cols-2 gap-2 mt-2'>
+                  <div
+                    className={
+                      post.repost.originalImgs?.length > 1
+                        ? 'grid grid-cols-2 gap-2 mt-2'
+                        : 'h-full object-cover rounded-xl  border-gray-700 mt-2 w-full'
+                    }>
                     {post.repost.originalImgs.map((img, index) => (
                       <>
                         <img

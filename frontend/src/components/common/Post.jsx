@@ -250,7 +250,12 @@ const Post = ({ post, posts }) => {
               )}
 
               {isOriginalPost && post.imgs.length > 0 && (
-                <div className='grid grid-cols-2 gap-2 mt-2'>
+                <div
+                  className={
+                    post.imgs.length > 1
+                      ? 'grid grid-cols-2 gap-2 mt-2'
+                      : 'h-full object-cover rounded-lg  border-gray-700 mt-2 w-full'
+                  }>
                   {post.imgs.map((img, index) => (
                     <span
                       key={index}
@@ -260,7 +265,7 @@ const Post = ({ post, posts }) => {
                       }>
                       <img
                         src={img}
-                        className='h-full object-cover rounded-lg border border-gray-700 w-full'
+                        className='h-full object-cover rounded-lg  border-gray-700 w-full'
                         alt={`Post image ${index + 1}`}
                       />
                     </span>
@@ -268,7 +273,12 @@ const Post = ({ post, posts }) => {
                 </div>
               )}
               {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
-                <div className='grid grid-cols-2 gap-2 mt-2'>
+                <div
+                  className={
+                    post.repost.originalImgs?.length > 1
+                      ? 'grid grid-cols-2 gap-2 mt-2'
+                      : 'h-full object-cover rounded-lg  border-gray-700 mt-2 w-full'
+                  }>
                   {post.repost.originalImgs.map((img, index) => (
                     <span
                       key={index}
@@ -278,7 +288,7 @@ const Post = ({ post, posts }) => {
                       }>
                       <img
                         src={img}
-                        className='h-full object-cover rounded-lg border border-gray-700 w-full'
+                        className='h-full object-cover rounded-lg  border-gray-700 w-full'
                         alt={`Reposted image ${index + 1}`}
                       />
                     </span>
