@@ -116,22 +116,22 @@ const CreatePost = () => {
 
   const handleImgChange = (e) => {
     const files = e.target.files;
-    if (files && files.length + imgs.length <= 9) {
+    if (files && files.length + imgs.length <= 4) {
       const newImgs = [...imgs];
       Array.from(files).forEach((file) => {
         const reader = new FileReader();
         reader.onload = () => {
           newImgs.push(reader.result);
-          if (newImgs.length <= 9) {
+          if (newImgs.length <= 4) {
             setImgs(newImgs);
           } else {
-            toast.error('You can upload up to 9 images.');
+            toast.error('You can upload up to 4 images.');
           }
         };
         reader.readAsDataURL(file);
       });
     } else {
-      toast.error('You can upload up to 9 images.');
+      toast.error('You can upload up to 4 images.');
     }
   };
 
@@ -162,7 +162,7 @@ const CreatePost = () => {
         />
 
         {imgs.length > 0 && (
-          <div className='w-full overflow-x-auto'>
+          <div className='w-full overflow-x-auto '>
             <div className='flex gap-2'>
               {imgs.map((img, index) => (
                 <div

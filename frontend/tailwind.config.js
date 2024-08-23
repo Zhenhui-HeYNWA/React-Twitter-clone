@@ -5,7 +5,17 @@ export default {
   darkMode: ['class'],
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      height: {
+        150: '32rem',
+      },
+      width: {
+        100: '26rem',
+      },
+      maxHeight: {
+        128: '32rem',
+      },
+    },
   },
   plugins: [daisyui],
 

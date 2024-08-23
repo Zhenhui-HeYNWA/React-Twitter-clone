@@ -19,10 +19,10 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ error: 'Post must have text or images' });
     }
 
-    if (imgs && imgs.length > 9) {
+    if (imgs && imgs.length > 4) {
       return res
         .status(400)
-        .json({ error: 'You can upload a maximum of 9 images' });
+        .json({ error: 'You can upload a maximum of 4 images' });
     }
     let uploadedImages = [];
     if (imgs && imgs.length > 0) {

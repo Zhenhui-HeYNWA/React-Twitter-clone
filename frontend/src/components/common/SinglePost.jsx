@@ -294,17 +294,35 @@ const SinglePost = () => {
                 {isOriginalPost && post.imgs.length > 0 && (
                   <div
                     className={
-                      post.imgs.length > 1
-                        ? 'grid grid-cols-2 gap-2 mt-2'
-                        : 'h-full object-cover rounded-lg  border-gray-700 mt-2 w-full'
+                      post.imgs.length === 1
+                        ? 'w-full rounded-xl'
+                        : post.imgs.length === 2
+                        ? 'grid grid-cols-2 rounded-2xl max-h-128 h-96 overflow-hidden'
+                        : post.imgs.length === 3
+                        ? 'grid grid-cols-4 rounded-2xl max-h-128 w-full h-96 overflow-hidden'
+                        : post.imgs.length === 4
+                        ? 'grid grid-cols-4  rounded-2xl max-h-128 h-96 w-full overflow-hidden'
+                        : 'grid grid-cols-4 rounded-2xl max-h-128 h-96 w-full overflow-hidden'
                     }>
                     {post.imgs.map((img, index) => (
                       <>
                         <img
-                          src={img}
-                          className='h-full object-cover object-center rounded-lg border border-gray-700  w-[40rem] '
-                          alt=''
                           key={index}
+                          src={img}
+                          className={
+                            post.imgs.length === 1
+                              ? 'object-cover rounded-lg border-gray-700 max-h-128'
+                              : post.imgs.length === 2
+                              ? 'h-full object-cover border-gray-700 w-full'
+                              : post.imgs.length === 3 && index === 0
+                              ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
+                              : post.imgs.length === 3
+                              ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
+                              : post.imgs.length === 4
+                              ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
+                              : 'object-cover rounded-lg border-gray-700 w-full'
+                          }
+                          alt={`Post image ${index + 1}`}
                           onClick={() =>
                             document.getElementById('my_modal_3').showModal()
                           }
@@ -328,20 +346,39 @@ const SinglePost = () => {
                     ))}
                   </div>
                 )}
-                {!isOriginalPost && post.repost.originalImgs && (
+                {!isOriginalPost && post.repost.originalImgs > 0 && (
                   <div
                     className={
-                      post.repost.originalImgs?.length > 1
-                        ? 'grid grid-cols-2 gap-2 mt-2'
-                        : 'h-full object-cover rounded-xl  border-gray-700 mt-2 w-full'
+                      post.repost.originalImgs === 1
+                        ? 'w-full rounded-xl'
+                        : post.repost.originalImgs === 2
+                        ? 'grid grid-cols-2 rounded-2xl max-h-128 h-96 overflow-hidden'
+                        : post.repost.originalImgs === 3
+                        ? 'grid grid-cols-4 rounded-2xl max-h-128 w-full h-96 overflow-hidden'
+                        : post.repost.originalImgs === 4
+                        ? 'grid grid-cols-4  rounded-2xl max-h-128 h-96 w-full overflow-hidden'
+                        : 'grid grid-cols-4 rounded-2xl max-h-128 h-96 w-full overflow-hidden'
                     }>
                     {post.repost.originalImgs.map((img, index) => (
                       <>
                         <img
-                          src={img}
-                          className='h-full object-cover object-center rounded-lg border border-gray-700  w-[40rem] '
-                          alt=''
                           key={index}
+                          src={img}
+                          className={
+                            post.repost.originalImgs.length === 1
+                              ? 'object-cover rounded-lg border-gray-700 max-h-128'
+                              : post.repost.originalImgs.length === 2
+                              ? 'h-full object-cover border-gray-700 w-full'
+                              : post.repost.originalImgs.length === 3 &&
+                                index === 0
+                              ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
+                              : post.repost.originalImgs.length === 3
+                              ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
+                              : post.repost.originalImgs.length === 4
+                              ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
+                              : 'object-cover rounded-lg border-gray-700 w-full'
+                          }
+                          alt={`Post image ${index + 1}`}
                           onClick={() =>
                             document.getElementById('my_modal_3').showModal()
                           }
