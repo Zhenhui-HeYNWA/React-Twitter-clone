@@ -67,6 +67,9 @@ const postSchema = new mongoose.Schema(
       originalText: { type: String },
       originalImgs: { type: String },
     },
+    postLocation: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

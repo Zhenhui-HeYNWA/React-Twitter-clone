@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { CiImageOn } from 'react-icons/ci';
 import { BsEmojiSmileFill } from 'react-icons/bs';
 import { IoCloseSharp } from 'react-icons/io5';
+import { CiLocationOn } from 'react-icons/ci';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import Picker from '@emoji-mart/react';
@@ -9,6 +10,7 @@ import data from '@emoji-mart/data';
 import { Mention } from 'primereact/mention';
 import './CreatePost.css';
 import { useTheme } from '../../components/context/ThemeProvider';
+import { fetchLocation } from '../../utils/location/location.js';
 
 const CreatePost = () => {
   const { theme } = useTheme();
@@ -139,6 +141,27 @@ const CreatePost = () => {
     setText((prevText) => prevText + emoji.native);
   };
 
+  const handleLocation = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            const locationData = await fetchLocation(latitude, longitude);
+            console.log(locationData);
+          } catch (error) {
+            console.error('Failed to retrieve location data:', error);
+          }
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+
   return (
     <div className='flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full'>
       <div className='avatar'>
@@ -210,6 +233,10 @@ const CreatePost = () => {
                 />
               </div>
             )}
+            <CiLocationOn
+              className='fill-primary w-5 h-5 cursor-pointer'
+              onClick={handleLocation}
+            />
           </div>
           <input
             type='file'

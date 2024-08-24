@@ -324,14 +324,16 @@ const SinglePost = () => {
                           }
                           alt={`Post image ${index + 1}`}
                           onClick={() =>
-                            document.getElementById('my_modal_3').showModal()
+                            document
+                              .getElementById(`my_modal_${index}`)
+                              .showModal()
                           }
                         />
 
-                        <dialog id='my_modal_3' className=' model'>
-                          <div className='modal-box h-full w-full'>
+                        <dialog id={`my_modal_${index}`} className=' modal  '>
+                          <div className=' modal-box bg-slate-300 '>
                             <form method='dialog'>
-                              <button className='btn btn-sm btn-circle btn-ghost absolute right-2 top-2'>
+                              <button className='btn btn-xs btn-circle btn-ghost absolute right-2 top-2 '>
                                 ✕
                               </button>
                             </form>
@@ -380,20 +382,22 @@ const SinglePost = () => {
                           }
                           alt={`Post image ${index + 1}`}
                           onClick={() =>
-                            document.getElementById('my_modal_3').showModal()
+                            document
+                              .getElementById(`my_modal_${index}`)
+                              .showModal()
                           }
                         />
 
-                        <dialog id='my_modal_3' className=' model'>
-                          <div className='modal-box h-full w-full'>
+                        <dialog id={`my_modal_${index}`} className=' modal  '>
+                          <div className=' modal-box bg-slate-300 '>
                             <form method='dialog'>
-                              <button className='btn btn-sm btn-circle btn-ghost absolute right-2 top-2'>
+                              <button className='btn btn-xs btn-circle btn-ghost absolute right-2 top-2 '>
                                 ✕
                               </button>
                             </form>
                             <img
                               src={img}
-                              className='h-full w-full object-fill   rounded-lg border border-gray-700 mt-2 '
+                              className='h-full w-full object-fill   rounded-lg  border-gray-700 mt-2 '
                               alt=''
                             />
                           </div>
