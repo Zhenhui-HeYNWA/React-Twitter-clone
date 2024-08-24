@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
 const usePostMutations = (postId) => {
-  console.log(postId);
   const queryClient = useQueryClient();
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
@@ -234,6 +233,7 @@ const usePostMutations = (postId) => {
   return {
     deletePost,
     isDeleting,
+
     likePost,
     isLiking,
     bookmarkPost,

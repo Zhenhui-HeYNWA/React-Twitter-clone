@@ -4,7 +4,7 @@ export const fetchLocation = async (lat, lon) => {
 
     const options = { method: 'GET', headers: { accept: 'application/json' } };
     const response = await fetch(
-      `https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${lat}&lon=${lon}&format=json`,
+      `https://us1.locationiq.com/v1/reverse?key=${apiKey}&lat=${lat}&lon=${lon}&format=json&accept-language=en`,
       options
     );
     if (!response.ok) {

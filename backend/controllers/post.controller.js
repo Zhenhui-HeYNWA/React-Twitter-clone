@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 
 export const createPost = async (req, res) => {
   try {
-    const { text, imgs } = req.body;
+    const { text, imgs, locationName } = req.body;
 
     // let { img } = req.body;
     const userId = req.user._id.toString();
@@ -31,11 +31,13 @@ export const createPost = async (req, res) => {
         uploadedImages.push(uploadedResponse.secure_url);
       }
     }
-
+    const location =
+      locationName && locationName.trim() ? locationName : 'Earth';
     const newPost = new Post({
       user: userId,
       text,
       imgs: uploadedImages,
+      postLocation: location,
     });
     await newPost.save();
 

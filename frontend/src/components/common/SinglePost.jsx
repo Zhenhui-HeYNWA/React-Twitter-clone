@@ -7,7 +7,7 @@ import {
   FaRegHeart,
   FaTrash,
 } from 'react-icons/fa';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatDateTime } from '../../utils/date';
 import { useEffect, useState } from 'react';
 import PostSkeleton from '../skeletons/PostSkeleton';
@@ -25,6 +25,7 @@ const SinglePost = () => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
+
   const { username, postId } = useParams();
   // Fetch post data
   const { data: post, isLoading: isPostLoading } = useQuery({
@@ -73,7 +74,7 @@ const SinglePost = () => {
       return data;
     },
   });
-
+  const navigate = useNavigate();
   const {
     commentPostSimple,
     isCommenting,
@@ -92,7 +93,9 @@ const SinglePost = () => {
 
   const handleDeletePost = () => {
     if (isDeleting) return;
-    deletePost;
+
+    deletePost();
+    navigate('/');
   };
 
   const handleCommentSubmit = (e) => {
@@ -408,7 +411,8 @@ const SinglePost = () => {
                 )}
               </div>
               <div className='text-sm mt-2 text-gray-500 flex gap-1'>
-                {formattedDate}
+                {formattedDate} From{' '}
+                {post?.postLocation ? post?.postLocation : 'Earth'}
               </div>
             </div>
           )}

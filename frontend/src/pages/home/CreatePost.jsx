@@ -19,6 +19,7 @@ const CreatePost = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imgRef = useRef(null);
+  const [locationName, setLocationName] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -91,13 +92,13 @@ const CreatePost = () => {
     isError,
     error,
   } = useMutation({
-    mutationFn: async ({ text, imgs }) => {
+    mutationFn: async ({ text, imgs, locationName }) => {
       const res = await fetch('/api/posts/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text, imgs }),
+        body: JSON.stringify({ text, imgs, locationName }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
@@ -106,6 +107,7 @@ const CreatePost = () => {
     onSuccess: () => {
       setText('');
       setImgs([]);
+      setLocationName('');
       toast.success('Post created successfully');
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
@@ -113,7 +115,7 @@ const CreatePost = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createPost({ text, imgs });
+    createPost({ text, imgs, locationName });
   };
 
   const handleImgChange = (e) => {
@@ -148,7 +150,8 @@ const CreatePost = () => {
           const { latitude, longitude } = position.coords;
           try {
             const locationData = await fetchLocation(latitude, longitude);
-            console.log(locationData);
+
+            setLocationName(locationData.address.city);
           } catch (error) {
             console.error('Failed to retrieve location data:', error);
           }
@@ -212,7 +215,13 @@ const CreatePost = () => {
             </div>
           </div>
         )}
-
+        {locationName && (
+          <div className='flex  items-center gap-1'>
+            {' '}
+            <CiLocationOn className='fill-primary w-5 h-5' />
+            From: {locationName}
+          </div>
+        )}
         <div className='relative flex justify-between border-t py-2 border-t-gray-700'>
           <div className='flex gap-1 items-center'>
             <CiImageOn
