@@ -8,7 +8,7 @@ import { AiOutlineLink } from 'react-icons/ai';
 import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 
-const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
+const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
   const [comment, setComment] = useState('');
 
@@ -17,7 +17,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
   const isLiked = post?.likes.includes(authUser._id);
 
   // Check if the post is liked by the authenticated user
-  const isMarked = post.bookmarks.includes(authUser._id);
+  const isMarked = post?.bookmarks.includes(authUser._id);
 
   // Check if the post is bookmarked by the authenticated user
   // Fetch the current authenticated user's data
@@ -89,21 +89,31 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
     }
   };
   return (
-    <div className='flex justify-between mt-3 '>
+    <div
+      className={`flex justify-between  w-full ${
+        size === 'lg' ? '' : 'mt-3'
+      } `}>
       <div className='flex gap-4 items-center w-full justify-between '>
         <div
           className='flex gap-1 items-center cursor-pointer group w-12 '
           onClick={() =>
             document.getElementById('comments_modal' + post._id).showModal()
           }>
-          <BiComment className='w-4 h-4  text-slate-500 group-hover:text-sky-400' />
-          <span className='text-sm text-slate-500 group-hover:text-sky-400'>
+          <BiComment
+            className={`${
+              size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'
+            }  text-slate-500 group-hover:text-sky-400`}
+          />
+          <span
+            className={`${
+              size === 'lg' ? 'text-base' : 'text-sm'
+            } text-slate-500 group-hover:text-sky-400`}>
             {post?.comments?.length}
           </span>
         </div>
         {/* We're using Modal Component from DaisyUI */}
         <dialog
-          id={`comments_modal${post._id}`}
+          id={`comments_modal${post?._id}`}
           className='modal border-none outline-none'>
           <div className='modal-box rounded-xl border bg-gray-100 dark:bg-[#15202B]  border-gray-400'>
             <h3 className='font-bold text-lg mb-4'>COMMENTS</h3>
@@ -194,12 +204,14 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
                   />
                 )}
                 <span
-                  className={`text-sm font-normal ${
+                  className={`${
+                    size === 'lg' ? 'text-base' : 'text-sm'
+                  } font-normal ${
                     isRepostedByAuthUser
                       ? ' text-green-500 group-hover:text-red-600'
                       : ' text-slate-500 group-hover:text-green-500'
                   }`}>
-                  {post.repostByNum}
+                  {post?.repostByNum}
                 </span>
               </div>
             )}
@@ -216,7 +228,9 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
                 )}
 
                 <span
-                  className={`text-sm font-normal ${
+                  className={`${
+                    size === 'lg' ? 'text-base' : 'text-sm'
+                  } font-normal ${
                     isRepostedByAuthUser
                       ? ' text-green-500 group-hover:text-red-600'
                       : ' text-slate-500 group-hover:text-green-500'
@@ -232,17 +246,22 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
           onClick={handleLikePost}>
           {isLiking && <LoadingSpinner size='sm' />}
           {!isLiked && !isLiking && (
-            <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
+            <FaRegHeart
+              size={`${size === 'lg' ? 18 : 15}`}
+              className={` cursor-pointer text-slate-500 group-hover:text-pink-500`}
+            />
           )}
           {isLiked && !isLiking && (
             <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />
           )}
 
           <span
-            className={`text-sm  group-hover:text-pink-500 ${
+            className={`${
+              size === 'lg' ? 'text-base' : 'text-sm'
+            }  group-hover:text-pink-500 ${
               isLiked ? 'text-pink-500' : 'text-slate-500'
             }`}>
-            {post.likes.length}
+            {post?.likes.length}
           </span>
         </div>
 
@@ -252,16 +271,23 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser }) => {
             onClick={handleBookmarkPost}>
             {isBookmarking && <LoadingSpinner size='sm' />}
             {!isMarked && !isBookmarking && (
-              <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+              <FaRegBookmark
+                size={`${size === 'lg' ? 18 : 15}`}
+                className=' text-slate-500 cursor-pointer group-hover:fill-black'
+              />
             )}
             {isMarked && !isBookmarking && (
-              <FaBookmark className='w-4 h-4 cursor-pointer  ' />
+              <FaBookmark
+                size={`${size === 'lg' ? 18 : 15}`}
+                className=' cursor-pointer  '
+              />
             )}
           </div>
 
           <div className=' dropdown dropdown-top  dropdown-end '>
             <RiShare2Line
-              className='h-5 w-5 text-slate-500 '
+              size={`${size === 'lg' ? 20 : 18}`}
+              className=' text-slate-500 '
               tabIndex={0}
               role='button'
             />

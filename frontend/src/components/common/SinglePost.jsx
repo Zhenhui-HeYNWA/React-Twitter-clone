@@ -1,12 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { BiComment, BiRepost } from 'react-icons/bi';
-import {
-  FaArrowLeft,
-  FaBookmark,
-  FaRegBookmark,
-  FaRegHeart,
-  FaTrash,
-} from 'react-icons/fa';
+import { BiRepost } from 'react-icons/bi';
+import { FaArrowLeft, FaTrash } from 'react-icons/fa';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatDateTime } from '../../utils/date';
 import { useEffect, useState } from 'react';
@@ -17,14 +11,17 @@ import usePostMutations from '../../hooks/usePostMutations';
 import LoadingSpinner from './LoadingSpinner';
 import RenderSubComments from './RenderSubComments';
 import CreateCommentForm from './CreateCommentForm';
-import { RiShare2Line } from 'react-icons/ri';
-import { AiOutlineLink } from 'react-icons/ai';
-import toast from 'react-hot-toast';
+
+import QuotePost from './QuotePost';
+import RenderImg from './RenderImg/RenderImg';
+import PostFunctions from './PostFunctions';
 
 const SinglePost = () => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
+
+  const isQuote = true;
 
   const { username, postId } = useParams();
   // Fetch post data
@@ -38,8 +35,6 @@ const SinglePost = () => {
       return data;
     },
   });
-
-  const [comment, setComment] = useState('');
 
   const isMyPost = authUser._id === post?.user._id;
 
@@ -75,61 +70,13 @@ const SinglePost = () => {
     },
   });
   const navigate = useNavigate();
-  const {
-    commentPostSimple,
-    isCommenting,
-    likePost,
-    isLiking,
-    bookmarkPost,
-    isBookmarking,
-    repostPost,
-    isReposting,
-    deletePost,
-    isDeleting,
-  } = usePostMutations(postId);
-
-  const isLiked = post ? post.likes.includes(authUser._id) : false;
-  const isMarked = post ? post.bookmarks.includes(authUser._id) : false;
+  const { deletePost, isDeleting } = usePostMutations(postId);
 
   const handleDeletePost = () => {
     if (isDeleting) return;
 
     deletePost();
     navigate('/');
-  };
-
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    console.log(1);
-    if (isCommenting) return;
-    commentPostSimple({ postId: postId, text: comment });
-    setComment('');
-
-    const modal = document.getElementById('comments_modal' + postId);
-    if (modal) {
-      modal.close();
-    }
-  };
-
-  const handleLikePost = (postId) => {
-    if (isLiking) return;
-    likePost(postId);
-  };
-  const handleBookmarkingPost = () => {
-    if (isBookmarking) return;
-    bookmarkPost();
-  };
-  console.log(authUser);
-
-  const handleRepost = () => {
-    if (isReposting) return;
-
-    if (isRepostedByAuthUser) {
-      repostPost({ actionType: 'remove' });
-      return;
-    }
-    repostPost({ actionType: 'repost' });
-    return;
   };
 
   const highlightMentions = (text) => {
@@ -158,18 +105,11 @@ const SinglePost = () => {
   };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
-  //Handle ShareLink
-  const handleShareLink = async (url) => {
-    const content = window.location.origin + url;
-    try {
-      await navigator.clipboard.writeText(content);
-      toast.success('Post link Copied');
-      console.log('content', content);
-    } catch (error) {
-      toast.error('Failed to Copy');
-      console.log(error);
-    }
+
+  const handleModalImgClick = (index) => {
+    document.getElementById(`my_modal_${index}`).showModal();
   };
+
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
       <div className='flex flex-col '>
@@ -295,119 +235,57 @@ const SinglePost = () => {
                 )}
 
                 {isOriginalPost && post.imgs.length > 0 && (
-                  <div
-                    className={
-                      post.imgs.length === 1
-                        ? 'w-full rounded-xl'
-                        : post.imgs.length === 2
-                        ? 'grid grid-cols-2 rounded-2xl max-h-128 h-96 overflow-hidden'
-                        : post.imgs.length === 3
-                        ? 'grid grid-cols-4 rounded-2xl max-h-128 w-full h-96 overflow-hidden'
-                        : post.imgs.length === 4
-                        ? 'grid grid-cols-4  rounded-2xl max-h-128 h-96 w-full overflow-hidden'
-                        : 'grid grid-cols-4 rounded-2xl max-h-128 h-96 w-full overflow-hidden'
-                    }>
-                    {post.imgs.map((img, index) => (
-                      <>
-                        <img
-                          key={index}
-                          src={img}
-                          className={
-                            post.imgs.length === 1
-                              ? 'object-cover rounded-lg border-gray-700 max-h-128'
-                              : post.imgs.length === 2
-                              ? 'h-full object-cover border-gray-700 w-full'
-                              : post.imgs.length === 3 && index === 0
-                              ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                              : post.imgs.length === 3
-                              ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
-                              : post.imgs.length === 4
-                              ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                              : 'object-cover rounded-lg border-gray-700 w-full'
-                          }
-                          alt={`Post image ${index + 1}`}
-                          onClick={() =>
-                            document
-                              .getElementById(`my_modal_${index}`)
-                              .showModal()
-                          }
-                        />
-
-                        <dialog id={`my_modal_${index}`} className=' modal  '>
-                          <div className=' modal-box bg-slate-300 '>
-                            <form method='dialog'>
-                              <button className='btn btn-xs btn-circle btn-ghost absolute right-2 top-2 '>
-                                ✕
-                              </button>
-                            </form>
-                            <img
-                              src={img}
-                              className='h-full w-full object-fill   rounded-lg  border-gray-700 mt-2 '
-                              alt=''
-                            />
-                          </div>
-                        </dialog>
-                      </>
-                    ))}
-                  </div>
+                  <RenderImg
+                    imgs={post.imgs}
+                    onImgClick={handleModalImgClick}
+                  />
                 )}
-                {!isOriginalPost && post.repost.originalImgs > 0 && (
-                  <div
-                    className={
-                      post.repost.originalImgs === 1
-                        ? 'w-full rounded-xl'
-                        : post.repost.originalImgs === 2
-                        ? 'grid grid-cols-2 rounded-2xl max-h-128 h-96 overflow-hidden'
-                        : post.repost.originalImgs === 3
-                        ? 'grid grid-cols-4 rounded-2xl max-h-128 w-full h-96 overflow-hidden'
-                        : post.repost.originalImgs === 4
-                        ? 'grid grid-cols-4  rounded-2xl max-h-128 h-96 w-full overflow-hidden'
-                        : 'grid grid-cols-4 rounded-2xl max-h-128 h-96 w-full overflow-hidden'
-                    }>
-                    {post.repost.originalImgs.map((img, index) => (
-                      <>
-                        <img
-                          key={index}
-                          src={img}
-                          className={
-                            post.repost.originalImgs.length === 1
-                              ? 'object-cover rounded-lg border-gray-700 max-h-128'
-                              : post.repost.originalImgs.length === 2
-                              ? 'h-full object-cover border-gray-700 w-full'
-                              : post.repost.originalImgs.length === 3 &&
-                                index === 0
-                              ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                              : post.repost.originalImgs.length === 3
-                              ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
-                              : post.repost.originalImgs.length === 4
-                              ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                              : 'object-cover rounded-lg border-gray-700 w-full'
-                          }
-                          alt={`Post image ${index + 1}`}
-                          onClick={() =>
-                            document
-                              .getElementById(`my_modal_${index}`)
-                              .showModal()
-                          }
-                        />
 
-                        <dialog id={`my_modal_${index}`} className=' modal  '>
-                          <div className=' modal-box bg-slate-300 '>
-                            <form method='dialog'>
-                              <button className='btn btn-xs btn-circle btn-ghost absolute right-2 top-2 '>
-                                ✕
-                              </button>
-                            </form>
-                            <img
-                              src={img}
-                              className='h-full w-full object-fill   rounded-lg  border-gray-700 mt-2 '
-                              alt=''
-                            />
-                          </div>
-                        </dialog>
-                      </>
-                    ))}
-                  </div>
+                {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
+                  // <div
+                  //   className={
+                  //     post.repost.originalImgs.length === 1
+                  //       ? 'w-full rounded-xl'
+                  //       : post.repost.originalImgs.length === 2
+                  //       ? 'grid grid-cols-2 rounded-2xl max-h-128 h-96 overflow-hidden'
+                  //       : post.repost.originalImgs.length === 3
+                  //       ? 'grid grid-cols-4 grid-rows-2  rounded-2xl max-h-128 w-full h-96 overflow-hidden'
+                  //       : post.repost.originalImgs.length === 4
+                  //       ? 'grid grid-cols-2 grid-rows-2  rounded-2xl max-h-128 w-full h-auto overflow-hidden'
+                  //       : 'grid grid-cols-4 rounded-2xl max-h-128 md:max-h-96 h-96 w-full overflow-hidden'
+                  //   }>
+                  //   {post.repost.originalImgs.map((img, index) => (
+                  //     <img
+                  //       key={index}
+                  //       src={img}
+                  //       className={
+                  //         post.repost.originalImgs.length === 1
+                  //           ? 'object-cover rounded-lg border-gray-700 max-h-128 w-full'
+                  //           : post.repost.originalImgs.length === 2
+                  //           ? 'h-full object-cover border-gray-700 w-full'
+                  //           : post.repost.originalImgs.length === 3 &&
+                  //             index === 0
+                  //           ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
+                  //           : post.repost.originalImgs.length === 3
+                  //           ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
+                  //           : post.repost.originalImgs.length === 4
+                  //           ? 'object-cover border-gray-700 w-full h-full aspect-square'
+                  //           : 'object-cover rounded-lg border-gray-700 w-full'
+                  //       }
+                  //       alt={`Post image ${index + 1}`}
+                  //       onClick={() =>
+                  //         navigate(`/${authUser.username}/status/${post._id}`)
+                  //       }
+                  //     />
+                  //   ))}
+                  // </div>
+                  <RenderImg
+                    imgs={post.repost.originalImgs}
+                    onImgClick={handleModalImgClick}
+                  />
+                )}
+                {isQuote && (
+                  <QuotePost post={post} isOriginalPost={isOriginalPost} />
                 )}
               </div>
               <div className='text-sm mt-2 text-gray-500 flex gap-1'>
@@ -417,216 +295,13 @@ const SinglePost = () => {
             </div>
           )}
         </div>
-        <div className='flex justify-between my-1 px-5 md:px-14 border-b border-gray-200 dark:border-gray-700 py-2   '>
-          <div className='flex gap-4 items-center justify-between w-full'>
-            <div
-              className='flex gap-1 items-center cursor-pointer group'
-              onClick={() =>
-                document
-                  .getElementById('comments_modal' + post?._id)
-                  .showModal()
-              }>
-              {isCommenting && <LoadingSpinner size='sm' />}
-              {!isCommenting && (
-                <>
-                  {' '}
-                  <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
-                  <span className='text-sm text-slate-500 group-hover:text-sky-400'>
-                    {comments?.length}
-                  </span>{' '}
-                </>
-              )}
-            </div>
-            <dialog
-              id={`comments_modal${post?._id}`}
-              className='modal border-none outline-none'>
-              <div className='modal-box rounded border bg-gray-100 dark:bg-secondary  border-gray-600'>
-                <h3 className='font-bold text-lg mb-4'>COMMENTS</h3>
-                <div className='flex flex-col gap-3 max-h-60 overflow-auto'>
-                  {post?.comments.length === 0 && (
-                    <p className='text-sm text-slate-500'>
-                      No comments yet 🤔 Be the first one 😉
-                    </p>
-                  )}
-                  {comments?.map((comment) => (
-                    <div key={comment?._id} className='flex gap-2 items-start'>
-                      <div className='avatar'>
-                        <div className='w-8 rounded-full'>
-                          <img
-                            src={
-                              comment.user?.profileImg ||
-                              '/avatar-placeholder.png'
-                            }
-                          />
-                        </div>
-                      </div>
-                      <div className='flex flex-col'>
-                        <div className='flex items-center gap-1'>
-                          <span className='font-bold'>
-                            {comment.user?.fullName}
-                          </span>
-                          <span className='text-gray-700 text-sm'>
-                            @{comment.user?.username}
-                            {comment?.isDeleted}
-                          </span>
-                        </div>
-                        <div className='text-sm'>{comment?.text}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <form
-                  className='flex gap-2 items-center mt-4 border-t border-gray-300  dark:border-gray-800  pt-2'
-                  onSubmit={handleCommentSubmit}>
-                  <textarea
-                    className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-secondary border-gray-100  dark:border-gray-800'
-                    placeholder='Add a comment...'
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                  />
-                  <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
-                    {commentPostSimple.isCommenting ? (
-                      <LoadingSpinner size='md' />
-                    ) : (
-                      'Post'
-                    )}
-                  </button>
-                </form>
-              </div>
-              <form method='dialog' className='modal-backdrop'>
-                <button className='outline-none'>close</button>
-              </form>
-            </dialog>
-            <div className='dropdown dropdown-top'>
-              <div
-                tabIndex={0}
-                role={`${isRepostedByAuthUser ? 'button' : ''}`}
-                className={`flex gap-1 items-center group cursor-pointer  
-                    
-                        btn rounded-none  btn-ghost btn-xs  p-0 border-none hover:bg-inherit
-                    
-                     `}
-                onClick={!isRepostedByAuthUser ? handleRepost : undefined}>
-                {isRepostedByAuthUser ? (
-                  <ul
-                    tabIndex={0}
-                    className='dropdown-content menu bg-gray-100 dark:bg-secondary  border-gray-600 rounded-box z-[1] w-52 p-2 shadow  '>
-                    <li onClick={handleRepost}>
-                      <button className='text-red-500'>Undo repost</button>
-                    </li>
-                  </ul>
-                ) : (
-                  ''
-                )}
-
-                {isReposting && <LoadingSpinner size='sm' />}
-
-                {isOriginalPost && (
-                  <>
-                    {!isReposting && (
-                      <BiRepost
-                        className={`w-6 h-6 ${
-                          isRepostedByAuthUser
-                            ? ' text-green-500 group-hover:text-red-600'
-                            : ' text-slate-500 group-hover:text-green-500'
-                        }`}
-                      />
-                    )}
-                    <span
-                      className={`text-sm ${
-                        isRepostedByAuthUser
-                          ? ' text-green-500 group-hover:text-red-600'
-                          : ' text-slate-500 group-hover:text-green-500'
-                      }`}>
-                      {post?.repostByNum}
-                    </span>
-                  </>
-                )}
-                {!isOriginalPost && (
-                  <>
-                    {!isReposting && (
-                      <BiRepost
-                        className={`w-6 h-6 ${
-                          isRepostedByAuthUser
-                            ? ' text-green-500 group-hover:text-red-600'
-                            : ' text-slate-500 group-hover:text-green-500'
-                        }`}
-                      />
-                    )}
-
-                    <span
-                      className={`text-sm ${
-                        isRepostedByAuthUser
-                          ? ' text-green-500 group-hover:text-red-600'
-                          : ' text-slate-500 group-hover:text-green-500'
-                      }`}>
-                      {post.repost.repostNum}
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-            <div
-              className='flex gap-1 items-center group cursor-pointer'
-              onClick={handleLikePost}>
-              {isLiking && <LoadingSpinner size='sm' />}
-              {!isLiked && !isLiking && (
-                <FaRegHeart className='w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500' />
-              )}
-              {isLiked && !isLiking && (
-                <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />
-              )}
-
-              <span
-                className={`text-sm  group-hover:text-pink-500 ${
-                  isLiked ? 'text-pink-500' : 'text-slate-500'
-                }`}>
-                {post?.likes.length}
-              </span>
-            </div>
-            <div className='flex  items-center  gap-2'>
-              <div
-                className=' gap-2 group items-center'
-                onClick={handleBookmarkingPost}>
-                {isBookmarking && <LoadingSpinner size='sm' />}
-                {!isMarked && !isBookmarking && (
-                  <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
-                )}
-                {isMarked && !isBookmarking && (
-                  <FaBookmark className='w-4 h-4 cursor-pointer  ' />
-                )}
-              </div>
-
-              {/* Share Link button */}
-              <div className=' dropdown dropdown-top dropdown-end '>
-                <RiShare2Line
-                  className='h-5 w-5 text-slate-500 '
-                  tabIndex={0}
-                  role='button'
-                />
-
-                <ul
-                  tabIndex={0}
-                  className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
-                  <li
-                    className='flex'
-                    onClick={() =>
-                      handleShareLink(
-                        `/${authUser.username}/status/${post._id}`
-                      )
-                    }>
-                    <>
-                      <span className='text-slate-700 dark:text-slate-200'>
-                        {' '}
-                        <AiOutlineLink className='w-5 h-5 text-slate-700 dark:text-slate-200' />
-                        Copy link
-                      </span>
-                    </>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+        <div className='flex flex-col justify-between my-1 px-5 md:px-14 border-b border-gray-200 dark:border-gray-700 py-2    '>
+          <PostFunctions
+            post={post}
+            comments={comments}
+            isRepostedByAuthUser={isRepostedByAuthUser}
+            size={'lg'}
+          />
         </div>
 
         {/* CREATE COMMENT */}
