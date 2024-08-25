@@ -14,7 +14,7 @@ const CreateCommentForm = ({
   comment,
 }) => {
   const { postId } = useParams();
-  console.log(type);
+
 
   const [replyPostComment, setReplyPostComment] = useState('');
 
@@ -29,7 +29,6 @@ const CreateCommentForm = ({
     }
   };
 
-  console.log('123231', comment);
   function getUniqueUsernames(data) {
     const usernames = new Set();
 

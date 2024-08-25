@@ -375,6 +375,42 @@ export const quotePost = async (req, res) => {
   }
 };
 
+export const pinPost = async (req, res) => {
+  const { id: postId } = req.params;
+  const userId = req.user._id.toString();
+
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const post = await Post.findById(postId);
+
+    if (!post) return res.status(404).json({ error: 'Post not found' });
+
+    if (post.user._id.toString() !== userId)
+      return res.status(400).json({ error: 'You can only pin your own post' });
+
+    if (
+      user.pinnedPost.length > 0 &&
+      user.pinnedPost[0].toString() === postId
+    ) {
+      // 如果用户已经置顶了这个帖子，取消置顶
+      user.pinnedPost = [];
+      await user.save();
+      return res.status(200).json({ message: 'Post unpinned successfully' });
+    } else {
+      // 用户置顶新帖子
+      user.pinnedPost = [postId];
+      await user.save();
+      return res.status(200).json({ message: 'Post pinned successfully' });
+    }
+  } catch (error) {
+    console.log('Error in pinPost controller:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 export const getAllPosts = async (req, res) => {
   try {
     //.populate() can show the entire document ( detail)  in the posts not just the reference

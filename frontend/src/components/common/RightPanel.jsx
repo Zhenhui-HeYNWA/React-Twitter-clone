@@ -5,12 +5,8 @@ import { Link } from 'react-router-dom';
 
 import LoadingSpinner from './LoadingSpinner';
 import RightPanelSkeleton from '../skeletons/RightPanelSkeleton';
-import SearchUser from '../../pages/auth/searchUser/SearchUser';
 
 const RightPanel = () => {
-  const { data: authUser } = useQuery({
-    queryKey: ['authUser'],
-  });
   const { data: suggestedUsers, isLoading } = useQuery({
     queryKey: ['suggestedUsers'],
     queryFn: async () => {

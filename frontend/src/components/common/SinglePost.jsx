@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { BiRepost } from 'react-icons/bi';
-import { FaArrowLeft, FaTrash } from 'react-icons/fa';
+import { FaArrowLeft } from 'react-icons/fa';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatDateTime } from '../../utils/date';
 import { useEffect, useState } from 'react';
@@ -8,9 +8,10 @@ import PostSkeleton from '../skeletons/PostSkeleton';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 
 import usePostMutations from '../../hooks/usePostMutations';
-import LoadingSpinner from './LoadingSpinner';
+
 import RenderSubComments from './RenderSubComments';
 import CreateCommentForm from './CreateCommentForm';
+import ListFunction from './PostCommon/ListFunction';
 
 import QuotePost from './QuotePost';
 import RenderImg from './RenderImg/RenderImg';
@@ -72,13 +73,6 @@ const SinglePost = () => {
   const navigate = useNavigate();
   const { deletePost, isDeleting } = usePostMutations(postId);
 
-  const handleDeletePost = () => {
-    if (isDeleting) return;
-
-    deletePost();
-    navigate('/');
-  };
-
   const highlightMentions = (text) => {
     const regex = /@\w+/g; // Regex to find mentions in the text
     return text.split(regex).map((part, index) => {
@@ -108,6 +102,12 @@ const SinglePost = () => {
 
   const handleModalImgClick = (index) => {
     document.getElementById(`my_modal_${index}`).showModal();
+  };
+
+  const handlePostDeleteClick = (id) => {
+    if (isDeleting) return;
+    deletePost(id);
+    navigate('/');
   };
 
   return (
@@ -208,19 +208,18 @@ const SinglePost = () => {
                     </span>
                   </div>
                 </div>
-                {isMyPost && (
-                  <div className=' flex justify-end items-center'>
-                    <span className='flex justify-end flex-1'>
-                      {!isDeleting && (
-                        <FaTrash
-                          className='cursor-pointer hover:text-red-500'
-                          onClick={handleDeletePost}
-                        />
-                      )}
-                      {isDeleting && <LoadingSpinner size='sm' />}
-                    </span>
-                  </div>
-                )}
+
+                <div className=' flex justify-end items-center'>
+                  <ListFunction
+                    postId={postId}
+                    isMyPost={isMyPost}
+                    isAuthUserRepost={isAuthUserRepost}
+                    postUser={post?.user}
+                    authUser={authUser}
+                    isOriginalPost={isOriginalPost}
+                    onPostDeleteClick={() => handlePostDeleteClick(post._id)}
+                  />
+                </div>
               </div>
               <div className='flex flex-col gap-3 overflow-hidden mt-2'>
                 {isOriginalPost && (
@@ -242,54 +241,17 @@ const SinglePost = () => {
                 )}
 
                 {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
-                  // <div
-                  //   className={
-                  //     post.repost.originalImgs.length === 1
-                  //       ? 'w-full rounded-xl'
-                  //       : post.repost.originalImgs.length === 2
-                  //       ? 'grid grid-cols-2 rounded-2xl max-h-128 h-96 overflow-hidden'
-                  //       : post.repost.originalImgs.length === 3
-                  //       ? 'grid grid-cols-4 grid-rows-2  rounded-2xl max-h-128 w-full h-96 overflow-hidden'
-                  //       : post.repost.originalImgs.length === 4
-                  //       ? 'grid grid-cols-2 grid-rows-2  rounded-2xl max-h-128 w-full h-auto overflow-hidden'
-                  //       : 'grid grid-cols-4 rounded-2xl max-h-128 md:max-h-96 h-96 w-full overflow-hidden'
-                  //   }>
-                  //   {post.repost.originalImgs.map((img, index) => (
-                  //     <img
-                  //       key={index}
-                  //       src={img}
-                  //       className={
-                  //         post.repost.originalImgs.length === 1
-                  //           ? 'object-cover rounded-lg border-gray-700 max-h-128 w-full'
-                  //           : post.repost.originalImgs.length === 2
-                  //           ? 'h-full object-cover border-gray-700 w-full'
-                  //           : post.repost.originalImgs.length === 3 &&
-                  //             index === 0
-                  //           ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                  //           : post.repost.originalImgs.length === 3
-                  //           ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
-                  //           : post.repost.originalImgs.length === 4
-                  //           ? 'object-cover border-gray-700 w-full h-full aspect-square'
-                  //           : 'object-cover rounded-lg border-gray-700 w-full'
-                  //       }
-                  //       alt={`Post image ${index + 1}`}
-                  //       onClick={() =>
-                  //         navigate(`/${authUser.username}/status/${post._id}`)
-                  //       }
-                  //     />
-                  //   ))}
-                  // </div>
                   <RenderImg
                     imgs={post.repost.originalImgs}
                     onImgClick={handleModalImgClick}
                   />
                 )}
-                {isQuote && (
+                {!isQuote && (
                   <QuotePost post={post} isOriginalPost={isOriginalPost} />
                 )}
               </div>
               <div className='text-sm mt-2 text-gray-500 flex gap-1'>
-                {formattedDate} From{' '}
+                {formattedDate} From
                 {post?.postLocation ? post?.postLocation : 'Earth'}
               </div>
             </div>

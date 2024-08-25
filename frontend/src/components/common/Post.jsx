@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaTrash } from 'react-icons/fa';
+
 import { BiRepost } from 'react-icons/bi';
 
-import LoadingSpinner from './LoadingSpinner';
 import { formatPostDate } from '../../utils/date';
-import usePostMutations from '../../hooks/usePostMutations';
+
 import PostFunctions from './PostFunctions';
 import RenderImg from './RenderImg/RenderImg';
+
+import ListFunction from './PostCommon/ListFunction';
+import usePostMutations from '../../hooks/usePostMutations';
 
 // Function to check the existence of mentioned users
 const fetchMentionedUsersExistence = async (usernames) => {
@@ -81,19 +83,6 @@ const Post = ({ post, posts }) => {
   const isMyPost = authUser._id === post.user._id; // Check if the post belongs to the authenticated user
   const formattedDate = formatPostDate(post.createdAt); // Format the post creation date
 
-  // Hook to handle post mutations like delete, like, bookmark, and repost
-  const { deletePost, isDeleting } = usePostMutations(postId);
-
-  // Handle post deletion
-  const handleDeletePost = () => {
-    if (isDeleting) return;
-    deletePost({
-      onSuccess: () => {
-        setIsRepostedByAuthUser(false); // Reset the repost state after deletion
-      },
-    });
-  };
-
   // Highlight mentions in the post text
   const highlightMentions = (text) => {
     const regex = /@\w+/g;
@@ -126,10 +115,19 @@ const Post = ({ post, posts }) => {
       return acc;
     }, []);
   };
+
+  // Hook to handle post mutations like delete, like, bookmark, and repost
+  const { deletePost, isDeleting } = usePostMutations(postId);
+
+  const handlePostDeleteClick = (id) => {
+    if (isDeleting) return;
+    deletePost(id);
+  };
   const handleImgClick = (username, id) => {
     console.log(username, id);
     navigate(`/${username}/status/${id}`);
   };
+
   return (
     <>
       <div className='flex flex-col'>
@@ -215,17 +213,15 @@ const Post = ({ post, posts }) => {
                 </span>
               </div>
               <div>
-                {isMyPost && (
-                  <span className='flex justify-end flex-1'>
-                    {!isDeleting && (
-                      <FaTrash
-                        className='cursor-pointer hover:text-red-500'
-                        onClick={handleDeletePost}
-                      />
-                    )}
-                    {isDeleting && <LoadingSpinner size='sm' />}
-                  </span>
-                )}
+                <ListFunction
+                  postId={postId}
+                  isMyPost={isMyPost}
+                  isAuthUserRepost={isAuthUserRepost}
+                  postUser={post?.user}
+                  authUser={authUser}
+                  isOriginalPost={isOriginalPost}
+                  onPostDeleteClick={() => handlePostDeleteClick(post._id)}
+                />
               </div>
             </div>
             <div className='flex flex-col gap-3 overflow-hidden  '>

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './LoadingSpinner';
 import { FaBookmark, FaRegBookmark, FaRegHeart, FaTrash } from 'react-icons/fa';
@@ -10,12 +10,14 @@ import useCommentMutations from '../../hooks/useCommentMutations';
 import CommentFunction from './CommentFunction';
 import { RiShare2Line } from 'react-icons/ri';
 import { AiOutlineLink } from 'react-icons/ai';
+import toast from 'react-hot-toast';
 
 const RenderComments = ({ comment }) => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
-
+  const url = useParams();
+  console.log(url.postId);
   // // const [isLoading, setIsLoading] = useState(true);
   // console.log(isLoading);
   const [structuredComments, setStructuredComments] = useState([]);
@@ -102,6 +104,25 @@ const RenderComments = ({ comment }) => {
   };
   console.log('structuredComments', structuredComments);
 
+  const handleShareLink = async (url) => {
+    const content = window.location.origin + url;
+
+    try {
+      await navigator.clipboard.writeText(content);
+      const elem = document.activeElement;
+      if (elem) {
+        elem?.blur();
+      }
+      toast.success('Post link Copied');
+    } catch (error) {
+      const elem = document.activeElement;
+      if (elem) {
+        elem?.blur();
+      }
+      toast.error('Failed to Copy');
+      console.log(error);
+    }
+  };
   return (
     <>
       <div className='w-full'>
@@ -404,7 +425,7 @@ const RenderComments = ({ comment }) => {
                       <FaBookmark className='w-4 h-4 cursor-pointer ' />
                     )}
                     {!isMarking && !markedComment && (
-                      <FaRegBookmark className='w-4 h-4 text-slate-200 cursor-pointer group-hover:fill-black' />
+                      <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
                     )}
                   </div>
 
@@ -421,12 +442,11 @@ const RenderComments = ({ comment }) => {
                       className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border  rounded-box z-[1] w-52 p-2 shadow'>
                       <li
                         className='flex'
-                        // onClick={() =>
-                        //   handleShareLink(
-                        //     `/${postComment.postId._id}/comment/${postComment?.user?.username}/${postComment?._id}`
-                        //   )
-                        // }
-                      >
+                        onClick={() => {
+                          handleShareLink(
+                            `/${url.postId}/comment/${comment.user?.username}/${comment?._id}`
+                          );
+                        }}>
                         <>
                           <span className='text-slate-700 dark:text-slate-200'>
                             {' '}

@@ -93,7 +93,7 @@ const userSchema = new mongoose.Schema(
         default: [],
       },
     ],
-    pinnedPosts: [
+    pinnedPost: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Post',

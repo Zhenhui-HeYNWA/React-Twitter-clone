@@ -81,9 +81,17 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
     const content = window.location.origin + url;
     try {
       await navigator.clipboard.writeText(content);
+      //close drop down
+      const elem = document.activeElement;
+      if (elem) {
+        elem?.blur();
+      }
       toast.success('Post link Copied');
-      console.log('content', content);
     } catch (error) {
+      const elem = document.activeElement;
+      if (elem) {
+        elem?.blur();
+      }
       toast.error('Failed to Copy');
       console.log(error);
     }
@@ -182,7 +190,14 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
               <ul
                 tabIndex={0}
                 className='dropdown-content menu bg-gray-100 dark:bg-[#1E2732]  border-gray-200 border rounded-box z-[1] w-52 p-2 shadow  '>
-                <li onClick={handleRepost}>
+                <li
+                  onClick={() => {
+                    const elem = document.activeElement;
+                    if (elem) {
+                      elem?.blur();
+                    }
+                    handleRepost();
+                  }}>
                   <button className='text-red-500'>Undo repost</button>
                 </li>
               </ul>

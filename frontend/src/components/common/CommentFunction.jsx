@@ -92,9 +92,16 @@ const CommentFunction = ({ postComment }) => {
 
     try {
       await navigator.clipboard.writeText(content);
+      const elem = document.activeElement;
+      if (elem) {
+        elem?.blur();
+      }
       toast.success('Post link Copied');
-      console.log('content', content);
     } catch (error) {
+      const elem = document.activeElement;
+      if (elem) {
+        elem?.blur();
+      }
       toast.error('Failed to Copy');
       console.log(error);
     }
@@ -129,7 +136,11 @@ const CommentFunction = ({ postComment }) => {
               <div className='flex flex-row gap-2 max-h-60 overflow-auto   '>
                 <div className='flex flex-col items-center '>
                   <div className='h-10 w-10 rounded-full'>
-                    <img src={postComment?.user?.profileImg} alt='' />
+                    <img
+                      src={postComment?.user?.profileImg}
+                      alt=''
+                      className='h-10 w-10 rounded-full'
+                    />
                   </div>
                   <div className='  w-0.5 h-full  mt-0.5 dark:bg-slate-700  bg-gray-400 '></div>
                 </div>
@@ -164,7 +175,11 @@ const CommentFunction = ({ postComment }) => {
                 <div className='flex flex-row gap-2 '>
                   {' '}
                   <div className='h-10 w-10 rounded-full overflow-auto '>
-                    <img src={authUser.profileImg} alt='' />
+                    <img
+                      src={authUser.profileImg}
+                      alt=''
+                      className='h-10 w-10 rounded-full '
+                    />
                   </div>
                   <textarea
                     className='textarea items-center p-0 w-2/3 h-2 bg-gray-100 dark:bg-[#15202B]   rounded text-md resize-none  focus:outline-none '
