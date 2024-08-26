@@ -7,7 +7,7 @@ const RenderImg = ({ imgs, onImgClick }) => {
           : imgs.length === 2
           ? 'grid grid-cols-2 rounded-2xl gap-2 max-h-128 h-max   md:h-96 overflow-hidden'
           : imgs.length === 3
-          ? 'grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl max-h-128 w-full h-96 overflow-hidden'
+          ? 'grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl max-h-128 w-full h-52  md:h-96 overflow-hidden'
           : imgs.length === 4
           ? 'grid grid-cols-2 grid-rows-2  gap-2  rounded-2xl max-h-128 w-full h-auto overflow-hidden'
           : 'grid grid-cols-4 rounded-2xl max-h-128 md:max-h-96 h-96 w-full overflow-hidden'
@@ -23,7 +23,7 @@ const RenderImg = ({ imgs, onImgClick }) => {
                 : imgs.length === 2
                 ? ' h-full md:h-full object-cover  border-gray-700 w-full'
                 : imgs.length === 3 && index === 0
-                ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
+                ? 'col-span-2 row-span-2 md:h-full object-cover border-gray-700 h-full  w-full'
                 : imgs.length === 3
                 ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
                 : imgs.length === 4
