@@ -230,6 +230,42 @@ const usePostMutations = (postId) => {
     },
   });
 
+  const { mutate: pinPost, isPending: isPinning } = useMutation({
+    mutationFn: async ({ postId }) => {
+      console.log(postId);
+      try {
+        const res = await fetch(`/api/posts/pin/${postId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        return data;
+      } catch (error) {
+        console.error('Error pinning post:', error.message);
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || 'Post Pinned successfully');
+
+      queryClient.setQueryData(['authUser'], (oldData) => {
+        if (!oldData) return oldData;
+
+        return {
+          ...oldData,
+          pinnedPost: data.pinnedPost,
+        };
+      });
+
+      queryClient.invalidateQueries(['authUser']);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
   return {
     deletePost,
     isDeleting,
@@ -244,6 +280,8 @@ const usePostMutations = (postId) => {
     isPostCommenting,
     repostPost,
     isReposting,
+    pinPost,
+    isPinning,
   };
 };
 

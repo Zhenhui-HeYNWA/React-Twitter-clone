@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import Post from './Post';
 import PostSkeleton from '../skeletons/PostSkeleton';
-
 import RenderSubComments from './RenderSubComments';
 
-const Posts = ({ feedType, username }) => {
+const Posts = ({ feedType, username, user }) => {
   const getPostEndPoint = () => {
     switch (feedType) {
       case 'forYou':
@@ -27,32 +26,51 @@ const Posts = ({ feedType, username }) => {
   const POST_ENDPOINT = getPostEndPoint();
 
   const {
-    data: items,
+    data: items = [], // Provide a default value to avoid potential undefined issues
     isLoading,
     refetch,
     isRefetching,
   } = useQuery({
-    queryKey: ['posts'],
+    queryKey: ['posts', feedType, username], // Include feedType and username to refetch data based on these dependencies
     queryFn: async () => {
       try {
-        console.log('Starting fetch to:', POST_ENDPOINT); // Log the endpoint
+        console.log('Starting fetch to:', POST_ENDPOINT);
         const res = await fetch(POST_ENDPOINT);
-        console.log('Fetch response status:', res.status); // Log the response status
+        console.log('Fetch response status:', res.status);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
-
         return data;
       } catch (error) {
-        throw new Error(error);
+        throw new Error(error.message || 'Something went wrong during fetch');
       }
     },
     onError: (error) => {
-      console.error('Error during useQuery:', error); // Log any errors during useQuery
+      console.error('Error during useQuery:', error);
     },
   });
+
+  const handlePinnedPost = useCallback(
+    (data) => {
+      if (user?.pinnedPost?.length > 0 && feedType === 'posts') {
+        const pinnedIndex = data.findIndex(
+          (item) => item._id === user.pinnedPost[0]
+        );
+
+        if (pinnedIndex > 0) {
+          const [pinnedPost] = data.splice(pinnedIndex, 1);
+          data.unshift(pinnedPost);
+        }
+      }
+      return data;
+    },
+    [user?.pinnedPost, feedType]
+  );
+
   useEffect(() => {
-    refetch();
+    refetch(); // Refetch posts when feedType or username changes
   }, [feedType, refetch, username]);
+
+  const processedItems = handlePinnedPost(items);
 
   return (
     <>
@@ -63,17 +81,25 @@ const Posts = ({ feedType, username }) => {
           <PostSkeleton />
         </div>
       )}
-      {!isLoading && !isRefetching && items?.length === 0 && (
+      {!isLoading && !isRefetching && processedItems.length === 0 && (
         <p className='text-center my-4'>No posts in this tab. Switch 👻</p>
       )}
-      {!isLoading && !isRefetching && items && (
+      {!isLoading && !isRefetching && processedItems.length > 0 && (
         <div>
-          {items.map((item) => {
+          {processedItems.map((item) => {
             if (item.img || item.repost) {
-              // Assuming that only posts have these fields
-              return <Post key={item._id} post={item} posts={items} />;
+              // Render posts
+              return (
+                <Post
+                  key={item._id}
+                  post={item}
+                  posts={processedItems}
+                  feedType={feedType}
+                  user={user}
+                />
+              );
             } else if (item.postId) {
-              // Assuming that comments have a postId field
+              // Render comments
               return <RenderSubComments key={item._id} postComment={item} />;
             }
             return null;
@@ -83,4 +109,5 @@ const Posts = ({ feedType, username }) => {
     </>
   );
 };
+
 export default Posts;

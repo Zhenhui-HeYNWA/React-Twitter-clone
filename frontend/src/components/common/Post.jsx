@@ -11,6 +11,7 @@ import RenderImg from './RenderImg/RenderImg';
 
 import ListFunction from './PostCommon/ListFunction';
 import usePostMutations from '../../hooks/usePostMutations';
+import { TbPinnedFilled } from 'react-icons/tb';
 
 // Function to check the existence of mentioned users
 const fetchMentionedUsersExistence = async (usernames) => {
@@ -26,7 +27,7 @@ const fetchMentionedUsersExistence = async (usernames) => {
 };
 
 // Post component
-const Post = ({ post, posts }) => {
+const Post = ({ post, posts, user }) => {
   const navigate = useNavigate();
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
@@ -35,6 +36,8 @@ const Post = ({ post, posts }) => {
 
   const postId = post?._id; // Get the current post ID
   const isOriginalPost = post.repost?.originalPost == null; // Check if the post is an original post
+
+  const isPinnedPost = user.pinnedPost[0] === postId;
 
   // Check if the authenticated user has reposted this post
   useEffect(() => {
@@ -124,7 +127,6 @@ const Post = ({ post, posts }) => {
     deletePost(id);
   };
   const handleImgClick = (username, id) => {
-    console.log(username, id);
     navigate(`/${username}/status/${id}`);
   };
 
@@ -144,6 +146,13 @@ const Post = ({ post, posts }) => {
             {' '}
             <BiRepost className='w-4 h-4  text-slate-500' />
             You reposted
+          </span>
+        )}
+        {isOriginalPost && isPinnedPost && (
+          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2 '>
+            {' '}
+            <TbPinnedFilled className='w-4 h-4  text-slate-500' />
+            Pinned post
           </span>
         )}
         <div className='flex gap-4 items-start py-2 border-b border-gray-200 dark:border-gray-700 justify-center px-4 '>
@@ -214,13 +223,12 @@ const Post = ({ post, posts }) => {
               </div>
               <div>
                 <ListFunction
-                  postId={postId}
-                  isMyPost={isMyPost}
-                  isAuthUserRepost={isAuthUserRepost}
-                  postUser={post?.user}
+                  id={postId}
+                  isBelongsToAuthUser={isMyPost}
+                  owner={post?.user}
                   authUser={authUser}
-                  isOriginalPost={isOriginalPost}
-                  onPostDeleteClick={() => handlePostDeleteClick(post._id)}
+                  isOriginal={isOriginalPost}
+                  onDeleteClick={() => handlePostDeleteClick(post._id)}
                 />
               </div>
             </div>

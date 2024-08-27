@@ -16,6 +16,7 @@ import ListFunction from './PostCommon/ListFunction';
 import QuotePost from './QuotePost';
 import RenderImg from './RenderImg/RenderImg';
 import PostFunctions from './PostFunctions';
+import { TbPinnedFilled } from 'react-icons/tb';
 
 const SinglePost = () => {
   const { data: authUser } = useQuery({
@@ -25,6 +26,7 @@ const SinglePost = () => {
   const isQuote = true;
 
   const { username, postId } = useParams();
+
   // Fetch post data
   const { data: post, isLoading: isPostLoading } = useQuery({
     queryKey: ['post', postId],
@@ -42,7 +44,7 @@ const SinglePost = () => {
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
   const isAuthUserRepost = post?.user._id === authUser._id;
 
-  console.log(post);
+  const isPinnedPost = post?.user?.pinnedPost[0] === post._id;
 
   const isOriginalPost = post?.repost?.originalPost == null;
   useEffect(() => {
@@ -138,6 +140,13 @@ const SinglePost = () => {
             You reposted
           </span>
         )}
+        {isOriginalPost && isPinnedPost && (
+          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2 '>
+            {' '}
+            <TbPinnedFilled className='w-4 h-4  text-slate-500' />
+            Pinned post
+          </span>
+        )}
 
         <div className='flex gap-2 items-start py-2 px-4 border-b border-gray-200 dark:border-gray-700 justify-center'>
           {isPostLoading && <PostSkeleton />}
@@ -211,13 +220,12 @@ const SinglePost = () => {
 
                 <div className=' flex justify-end items-center'>
                   <ListFunction
-                    postId={postId}
-                    isMyPost={isMyPost}
-                    isAuthUserRepost={isAuthUserRepost}
-                    postUser={post?.user}
+                    id={postId}
+                    isBelongsToAuthUser={isMyPost}
+                    owner={post?.user}
                     authUser={authUser}
-                    isOriginalPost={isOriginalPost}
-                    onPostDeleteClick={() => handlePostDeleteClick(post._id)}
+                    isOriginal={isOriginalPost}
+                    onDeleteClick={() => handlePostDeleteClick(post._id)}
                   />
                 </div>
               </div>
@@ -246,7 +254,7 @@ const SinglePost = () => {
                     onImgClick={handleModalImgClick}
                   />
                 )}
-                {!isQuote && (
+                {isQuote && (
                   <QuotePost post={post} isOriginalPost={isOriginalPost} />
                 )}
               </div>

@@ -5,17 +5,19 @@ import { MdOutlinePushPin } from 'react-icons/md';
 
 import { SlUserFollow, SlUserUnfollow } from 'react-icons/sl';
 import useFollow from '../../../hooks/useFollow';
+import usePostMutations from '../../../hooks/usePostMutations';
 
 const ListFunction = ({
-  postId,
-  isMyPost,
-  postUser,
+  id,
+  isBelongsToAuthUser,
+  owner,
   authUser,
-  isOriginalPost,
-  onPostDeleteClick,
+  isOriginal,
+  onDeleteClick,
 }) => {
-  const isFollowing = authUser?.followings.includes(postUser?._id);
+  const isFollowing = authUser?.followings.includes(owner?._id);
   const { follow } = useFollow();
+  const { pinPost } = usePostMutations(id);
 
   return (
     <div className='dropdown dropdown-bottom dropdown-end'>
@@ -23,7 +25,7 @@ const ListFunction = ({
       <ul
         tabIndex={2}
         className='dropdown-content menu bg-slate-100 dark:bg-[#1E2732]  border-gray-200 border rounded-box z-[1] w-max   p-2 shadow'>
-        {isMyPost && (
+        {isBelongsToAuthUser && (
           <>
             <li>
               <span
@@ -34,7 +36,7 @@ const ListFunction = ({
                     elem?.blur();
                   }
 
-                  onPostDeleteClick(postId);
+                  onDeleteClick(id);
                 }}>
                 <FaTrash className='cursor-pointer  ' />
 
@@ -42,11 +44,13 @@ const ListFunction = ({
               </span>
             </li>
 
-            {isOriginalPost && (
+            {isOriginal && (
               <li className='p-0'>
                 <span
                   className='flex items-center justify-start'
                   onClick={() => {
+                    console.log(id);
+                    pinPost({ postId: id });
                     const elem = document.activeElement;
                     if (elem) {
                       elem?.blur();
@@ -59,7 +63,7 @@ const ListFunction = ({
             )}
           </>
         )}
-        {!isMyPost && (
+        {!isBelongsToAuthUser && (
           <>
             {!isFollowing && (
               <li className=''>
@@ -67,7 +71,7 @@ const ListFunction = ({
                   className=' flex font-bold '
                   onClick={(e) => {
                     e.preventDefault();
-                    follow(postUser._id);
+                    follow(owner._id);
                     const elem = document.activeElement;
                     if (elem) {
                       elem?.blur();
@@ -79,7 +83,7 @@ const ListFunction = ({
                     className='w-4 h-4  font-bold'
                     style={{ strokeWidth: '5' }}
                   />
-                  <a>Follow @{postUser?.username}</a>
+                  <a>Follow @{owner?.username}</a>
                 </span>
               </li>
             )}
@@ -89,7 +93,7 @@ const ListFunction = ({
                   className=' flex font-bold '
                   onClick={(e) => {
                     e.preventDefault();
-                    follow(postUser._id);
+                    follow(owner._id);
                     const elem = document.activeElement;
                     if (elem) {
                       elem?.blur();
@@ -101,7 +105,7 @@ const ListFunction = ({
                     className='w-4 h-4  font-bold'
                     style={{ strokeWidth: '5' }}
                   />
-                  <a>Unfollow @{postUser?.username}</a>
+                  <a>Unfollow @{owner?.username}</a>
                 </span>
               </li>
             )}

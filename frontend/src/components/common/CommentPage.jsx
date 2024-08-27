@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { FaArrowLeft, FaTrash } from 'react-icons/fa';
-import { Link, useParams } from 'react-router-dom';
+import { FaArrowLeft } from 'react-icons/fa';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import usePostMutations from '../../hooks/usePostMutations';
 import { formatPostDate } from '../../utils/date';
 import { BiRepost } from 'react-icons/bi';
@@ -14,10 +14,12 @@ import RenderSubComments from './RenderSubComments';
 import SingleCommentSkeleton from '../skeletons/SingleCommentSkeleton';
 
 import CreateCommentForm from './CreateCommentForm';
-import LoadingSpinner from './LoadingSpinner';
+
 import RenderComments from './RenderComments';
 
 import PostFunctions from './PostFunctions';
+import ListFunction from './PostCommon/ListFunction';
+import RenderImg from './RenderImg/RenderImg';
 
 const CommentPage = () => {
   const { data: authUser } = useQuery({
@@ -46,7 +48,7 @@ const CommentPage = () => {
   const isOriginalPost = post?.repost?.originalPost == null;
 
   const formattedPostDate = post ? formatPostDate(post.createdAt) : '';
-
+  const navigate = useNavigate();
   const { data: postComment, isLoading: isPostCommentLoading } = useQuery({
     queryKey: ['comment', commentId],
     queryFn: async () => {
@@ -96,16 +98,21 @@ const CommentPage = () => {
 
   const { deletePost, isDeleting } = usePostMutations(postId);
 
+  const handleModalImgClick = (index) => {
+    document.getElementById(`my_modal_${index}`).showModal();
+  };
+
   //Post:Delete
-  const handleDeletePost = () => {
+  const handlePostDeleteClick = (id) => {
     if (isDeleting) return;
-    deletePost;
+    deletePost(id);
+    navigate('/');
   };
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full '>
       <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
-        <div className='flex gap-10 px-4 pt-1 items-center  '>
+        <div className='flex gap-10  py-1 items-center'>
           <Link to='/'>
             <FaArrowLeft className='w-4 h-4' />
           </Link>
@@ -214,18 +221,16 @@ const CommentPage = () => {
                             </span>
                           </div>
                           <div className=' flex justify-end items-center'>
-                            {/* delete post */}
-                            {isMyPost && (
-                              <span className='flex justify-end flex-1'>
-                                {!isDeleting && (
-                                  <FaTrash
-                                    className='cursor-pointer hover:text-red-500'
-                                    onClick={handleDeletePost}
-                                  />
-                                )}
-                                {isDeleting && <LoadingSpinner size='sm' />}
-                              </span>
-                            )}
+                            <ListFunction
+                              id={postId}
+                              isBelongsToAuthUser={isMyPost}
+                              owner={post?.user}
+                              authUser={authUser}
+                              isOriginal={isOriginalPost}
+                              onDeleteClick={() =>
+                                handlePostDeleteClick(post._id)
+                              }
+                            />
                           </div>
                         </div>
                         {/* post text */}
@@ -243,135 +248,19 @@ const CommentPage = () => {
                               )}
                             </span>
                           )}
-
                           {isOriginalPost && post.imgs.length > 0 && (
-                            <div
-                              className={
-                                post.imgs.length === 1
-                                  ? 'w-full rounded-xl'
-                                  : post.imgs.length === 2
-                                  ? 'grid grid-cols-2 rounded-2xl max-h-128 h-96 overflow-hidden'
-                                  : post.imgs.length === 3
-                                  ? 'grid grid-cols-4 rounded-2xl max-h-128 w-full h-96 overflow-hidden'
-                                  : post.imgs.length === 4
-                                  ? 'grid grid-cols-4  rounded-2xl max-h-128 h-96 w-full overflow-hidden'
-                                  : 'grid grid-cols-4 rounded-2xl max-h-128 h-96 w-full overflow-hidden'
-                              }>
-                              {post.imgs.map((img, index) => (
-                                <>
-                                  <img
-                                    key={index}
-                                    src={img}
-                                    className={
-                                      post.imgs.length === 1
-                                        ? 'object-cover rounded-lg border-gray-700 max-h-128'
-                                        : post.imgs.length === 2
-                                        ? 'h-full object-cover border-gray-700 w-full'
-                                        : post.imgs.length === 3 && index === 0
-                                        ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                                        : post.imgs.length === 3
-                                        ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
-                                        : post.imgs.length === 4
-                                        ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                                        : 'object-cover rounded-lg border-gray-700 w-full'
-                                    }
-                                    alt={`Post image ${index + 1}`}
-                                    onClick={() =>
-                                      document
-                                        .getElementById(`my_modal_${index}`)
-                                        .showModal()
-                                    }
-                                  />
-
-                                  <dialog
-                                    id={`my_modal_${index}`}
-                                    className=' modal  '>
-                                    <div className=' modal-box bg-slate-300 '>
-                                      <form method='dialog'>
-                                        <button className='btn btn-xs btn-circle btn-ghost absolute right-2 top-2 '>
-                                          ✕
-                                        </button>
-                                      </form>
-                                      <img
-                                        src={img}
-                                        className='h-full w-full object-fill   rounded-lg  border-gray-700 mt-2 '
-                                        alt=''
-                                      />
-                                    </div>
-                                  </dialog>
-                                </>
-                              ))}
-                            </div>
-                          )}
-                          {!isOriginalPost && post.repost.originalImgs && (
-                            <img
-                              src={post.repost.originalImg}
-                              className='h-full  object-cover  rounded-lg border border-gray-700 mt-2'
-                              alt=''
-                              style={{ maxWidth: '100%' }}
+                            <RenderImg
+                              imgs={post.imgs}
+                              onImgClick={handleModalImgClick}
                             />
                           )}
 
-                          {isOriginalPost &&
+                          {!isOriginalPost &&
                             post.repost.originalImgs.length > 0 && (
-                              <div
-                                className={
-                                  post.repost.originalImgs.length === 1
-                                    ? 'w-full rounded-xl'
-                                    : post.repost.originalImgs.length === 2
-                                    ? 'grid grid-cols-2 rounded-2xl max-h-128 h-96 overflow-hidden'
-                                    : post.repost.originalImgs.length === 3
-                                    ? 'grid grid-cols-4 rounded-2xl max-h-128 w-full h-96 overflow-hidden'
-                                    : post.repost.originalImgs.length === 4
-                                    ? 'grid grid-cols-4  rounded-2xl max-h-128 h-96 w-full overflow-hidden'
-                                    : 'grid grid-cols-4 rounded-2xl max-h-128 h-96 w-full overflow-hidden'
-                                }>
-                                {post.repost.originalImgs.map((img, index) => (
-                                  <>
-                                    <img
-                                      key={index}
-                                      src={img}
-                                      className={
-                                        post.imgs.length === 1
-                                          ? 'object-cover rounded-lg border-gray-700 max-h-128'
-                                          : post.imgs.length === 2
-                                          ? 'h-full object-cover border-gray-700 w-full'
-                                          : post.imgs.length === 3 &&
-                                            index === 0
-                                          ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                                          : post.imgs.length === 3
-                                          ? 'col-span-2 row-span-1 object-cover border-gray-700 h-full w-full'
-                                          : post.imgs.length === 4
-                                          ? 'col-span-2 row-span-2 object-cover border-gray-700 h-full w-full'
-                                          : 'object-cover rounded-lg border-gray-700 w-full'
-                                      }
-                                      alt={`Post image ${index + 1}`}
-                                      onClick={() =>
-                                        document
-                                          .getElementById(`my_modal_${index}`)
-                                          .showModal()
-                                      }
-                                    />
-
-                                    <dialog
-                                      id={`my_modal_${index}`}
-                                      className=' modal  '>
-                                      <div className=' modal-box bg-slate-300 '>
-                                        <form method='dialog'>
-                                          <button className='btn btn-xs btn-circle btn-ghost absolute right-2 top-2 '>
-                                            ✕
-                                          </button>
-                                        </form>
-                                        <img
-                                          src={img}
-                                          className='h-full w-full object-fill   rounded-lg  border-gray-700 mt-2 '
-                                          alt=''
-                                        />
-                                      </div>
-                                    </dialog>
-                                  </>
-                                ))}
-                              </div>
+                              <RenderImg
+                                imgs={post.repost.originalImgs}
+                                onImgClick={handleModalImgClick}
+                              />
                             )}
                         </div>
                         {/* post functions */}
@@ -401,6 +290,7 @@ const CommentPage = () => {
               </>
             ) : (
               <RenderComments
+                post={post}
                 comment={postComment}
                 isLoading={isCommentsLoading}
               />

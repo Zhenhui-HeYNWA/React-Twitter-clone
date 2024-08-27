@@ -243,22 +243,26 @@ const CommentFunction = ({ postComment }) => {
             )}
           </div>
           {/* bookmark */}
-          <div className='flex flex-row gap-3'>
+          <div className='flex flex-row gap-2'>
             <div
-              className='flex gap-2 group items-center'
+              className='flex  group items-center'
               onClick={() => handleBookMarkComment(postComment._id)}>
               {isMarking && <LoadingSpinner size='sm' />}
               {!isMarking && markedComment && (
-                <FaBookmark className='w-4 h-4 cursor-pointer ' />
+                <FaBookmark size={15} className=' cursor-pointer ' />
               )}
               {!isMarking && !markedComment && (
-                <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+                <FaRegBookmark
+                  size={15}
+                  className=' text-slate-500 cursor-pointer group-hover:fill-black'
+                />
               )}
             </div>
             {/* Share Link Function */}
             <div className=' dropdown dropdown-top dropdown-end '>
               <RiShare2Line
-                className='h-5 w-5 text-slate-500 '
+                size={18}
+                className=' text-slate-500 '
                 tabIndex={0}
                 role='button'
               />

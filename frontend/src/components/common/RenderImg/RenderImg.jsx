@@ -3,13 +3,13 @@ const RenderImg = ({ imgs, onImgClick }) => {
     <div
       className={
         imgs.length === 1
-          ? 'w-full rounded-xl'
+          ? ' h-max max-h-128     w-full rounded-xl overflow-hidden'
           : imgs.length === 2
-          ? 'grid grid-cols-2 rounded-2xl gap-2 max-h-128 h-max   md:h-96 overflow-hidden'
+          ? 'grid grid-cols-2 rounded-2xl gap-1 sm:gap-2 max-h-128 h-max   md:h-96 overflow-hidden'
           : imgs.length === 3
-          ? 'grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl max-h-128 w-full h-52 sm:h-72  md:h-96 overflow-hidden'
+          ? 'grid grid-cols-4 grid-rows-2 gap-1 sm:gap-2 rounded-2xl max-h-128 w-full h-52 sm:h-72  md:h-96 overflow-hidden'
           : imgs.length === 4
-          ? 'grid grid-cols-2 grid-rows-2  gap-2  rounded-2xl max-h-128 w-full h-auto overflow-hidden'
+          ? 'grid grid-cols-2 grid-rows-2  gap-1 sm:gap-2  rounded-2xl max-h-128 w-full h-auto overflow-hidden'
           : 'grid grid-cols-4 rounded-2xl max-h-128 md:max-h-96 h-96 w-full overflow-hidden'
       }>
       {imgs.map((img, index) => (
@@ -19,7 +19,7 @@ const RenderImg = ({ imgs, onImgClick }) => {
             src={img}
             className={
               imgs.length === 1
-                ? 'object-center rounded-lg border-gray-700 max-h-128 w-full'
+                ? ' object-contain  border-gray-700 max-h-128 '
                 : imgs.length === 2
                 ? ' h-full md:h-full object-cover  border-gray-700 w-full'
                 : imgs.length === 3 && index === 0

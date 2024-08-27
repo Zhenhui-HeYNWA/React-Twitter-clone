@@ -123,6 +123,7 @@ const RenderComments = ({ comment }) => {
       console.log(error);
     }
   };
+
   return (
     <>
       <div className='w-full'>
@@ -172,24 +173,24 @@ const RenderComments = ({ comment }) => {
 
                           <div className='flex flex-col w-full gap-1'>
                             <div className='flex items-center justify-between '>
-                              <div className='flex flex-row items-center justify-start gap-2'>
+                              <div className='flex flex-row items-center justify-start gap-1'>
                                 <Link
                                   to={`/profile/${structuredComment?.user.username}`}
-                                  className='font-bold'>
+                                  className='font-bold truncate'>
                                   {structuredComment?.user.fullName}
                                 </Link>
 
                                 {/* username */}
-                                <span className='text-gray-500 flex gap-1 text-base'>
+                                <span className='text-gray-500 flex gap-1 text-base truncate max-w-20 md:max-w-52'>
                                   <Link
                                     to={`/profile/${structuredComment?.user.username}`}>
                                     @{structuredComment?.user.username}
                                   </Link>
                                 </span>
-                                <span className='text-base text-gray-500'>
+                                <span className='text-base text-gray-500 text-nowrap'>
                                   ·
                                 </span>
-                                <span className='text-base text-gray-500 flex gap-1'>
+                                <span className='text-base text-gray-500 flex gap-1 text-nowrap'>
                                   {structuredComment?.createdAt}
                                 </span>
                               </div>
@@ -292,7 +293,7 @@ const RenderComments = ({ comment }) => {
                 {formatDateTime(comment?.createdAt)}
               </div>
 
-              <div className='flex flex-row gap-5 items-center justify-between border-y-2  dark:border-gray-700 py-4'>
+              <div className='flex flex-row gap-5 items-center justify-between border-y-2  dark:border-gray-700 py-2'>
                 <div
                   className='flex flex-row gap-2 items-center text-slate-500 hover:text-sky-400 cursor-pointer'
                   onClick={() =>
@@ -416,7 +417,7 @@ const RenderComments = ({ comment }) => {
                   )}
                 </div>
 
-                <div className='flex flex-row items-center gap-3'>
+                <div className='flex flex-row items-center gap-2'>
                   <div
                     className='items-center  hover:text-black cursor-pointer group'
                     onClick={() => handleBookMarkComment(comment._id)}>
@@ -425,7 +426,10 @@ const RenderComments = ({ comment }) => {
                       <FaBookmark className='w-4 h-4 cursor-pointer ' />
                     )}
                     {!isMarking && !markedComment && (
-                      <FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer group-hover:fill-black' />
+                      <FaRegBookmark
+                        size={18}
+                        className=' text-slate-500 cursor-pointer group-hover:fill-black'
+                      />
                     )}
                   </div>
 
