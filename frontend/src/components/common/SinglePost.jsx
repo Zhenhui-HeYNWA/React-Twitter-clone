@@ -42,9 +42,9 @@ const SinglePost = () => {
   const isMyPost = authUser._id === post?.user._id;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
-  const isAuthUserRepost = post?.user._id === authUser._id;
+  const isAuthUserRepost = post?.user._id === authUser?._id;
 
-  const isPinnedPost = post?.user?.pinnedPost[0] === post._id;
+  const isPinnedPost = post?.user?.pinnedPost[0] === post?._id;
 
   const isOriginalPost = post?.repost?.originalPost == null;
   useEffect(() => {

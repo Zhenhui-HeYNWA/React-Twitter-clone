@@ -35,9 +35,9 @@ const Post = ({ post, posts, user }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] }); // Fetch the current authenticated user's data
 
   const postId = post?._id; // Get the current post ID
-  const isOriginalPost = post.repost?.originalPost == null; // Check if the post is an original post
+  const isOriginalPost = post?.repost?.originalPost == null; // Check if the post is an original post
 
-  const isPinnedPost = user.pinnedPost[0] === postId;
+  const isPinnedPost = user?.pinnedPost[0] === postId;
 
   // Check if the authenticated user has reposted this post
   useEffect(() => {
