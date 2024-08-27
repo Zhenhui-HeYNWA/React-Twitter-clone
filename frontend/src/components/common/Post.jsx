@@ -13,6 +13,8 @@ import ListFunction from './PostCommon/ListFunction';
 import usePostMutations from '../../hooks/usePostMutations';
 import { TbPinnedFilled } from 'react-icons/tb';
 
+import QuotePost from './QuotePost';
+
 // Function to check the existence of mentioned users
 const fetchMentionedUsersExistence = async (usernames) => {
   const res = await fetch('/api/users/check-user', {
@@ -140,7 +142,6 @@ const Post = ({ post, posts, user }) => {
             {post.user.username} reposted
           </span>
         )}
-
         {!isOriginalPost && isAuthUserRepost && (
           <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
             {' '}
@@ -201,7 +202,7 @@ const Post = ({ post, posts, user }) => {
                 )}
 
                 <span className='text-gray-700 flex gap-1 text-basic '>
-                  <span className='text-gray-500 truncate max-w-20 md:max-w-52 text-basic'>
+                  <span className='text-gray-500 truncate max-w-16 md:max-w-52 text-basic'>
                     <Link
                       to={`/profile/${
                         isOriginalPost
@@ -269,7 +270,7 @@ const Post = ({ post, posts, user }) => {
                 />
               )}
             </div>
-
+            <QuotePost post={post} isOriginalPost={isOriginalPost} />
             <PostFunctions
               post={post}
               comments={comments}

@@ -6,6 +6,7 @@ import { BiComment, BiRepost } from 'react-icons/bi';
 import LoadingSpinner from './LoadingSpinner';
 import { AiOutlineLink } from 'react-icons/ai';
 import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
+import { PiPencilLine } from 'react-icons/pi';
 import toast from 'react-hot-toast';
 
 const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
@@ -179,31 +180,63 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
         <div className='dropdown dropdown-top'>
           <div
             tabIndex={0}
-            role={`${isRepostedByAuthUser ? 'button' : ''}`}
+            role={'button'}
             className={`flex gap-1 items-center group cursor-pointer  
                     
                         btn rounded-none  btn-ghost btn-xs  p-0 border-none hover:bg-inherit
                     
                      `}
-            onClick={!isRepostedByAuthUser ? handleRepost : undefined}>
-            {isRepostedByAuthUser ? (
-              <ul
-                tabIndex={0}
-                className='dropdown-content menu bg-gray-100 dark:bg-[#1E2732]  border-gray-200 border rounded-box z-[1] w-52 p-2 shadow  '>
-                <li
-                  onClick={() => {
-                    const elem = document.activeElement;
-                    if (elem) {
-                      elem?.blur();
-                    }
-                    handleRepost();
-                  }}>
-                  <button className='text-red-500'>Undo repost</button>
-                </li>
-              </ul>
-            ) : (
-              ''
-            )}
+            // onClick={!isRepostedByAuthUser ? handleRepost : undefined}
+          >
+            <ul
+              tabIndex={0}
+              className='dropdown-content menu bg-gray-100 dark:bg-[#1E2732]  border-gray-200 border rounded-box z-[1] w-52 p-2 shadow  '>
+              {isRepostedByAuthUser ? (
+                <>
+                  <li
+                    onClick={() => {
+                      const elem = document.activeElement;
+                      if (elem) {
+                        elem?.blur();
+                      }
+                      handleRepost();
+                    }}>
+                    <button className='text-red-500'>
+                      <BiRepost size={18} />
+                      Undo repost
+                    </button>
+                  </li>
+                  <li>
+                    <span className='items-center'>
+                      <PiPencilLine size={18} />
+                      Quote Post
+                    </span>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    <span className='items-center'>
+                      <PiPencilLine size={18} />
+                      Quote Post
+                    </span>
+                  </li>
+                  <li
+                    onClick={() => {
+                      const elem = document.activeElement;
+                      if (elem) {
+                        elem?.blur();
+                      }
+                      handleRepost();
+                    }}>
+                    <span className='items-center'>
+                      <BiRepost size={18} />
+                      Repost Post
+                    </span>
+                  </li>
+                </>
+              )}
+            </ul>
 
             {isReposting && <LoadingSpinner size='sm' />}
 
