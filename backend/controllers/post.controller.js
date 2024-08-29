@@ -351,30 +351,124 @@ export const repostPost = async (req, res) => {
 };
 
 export const quotePost = async (req, res) => {
-  try {
-    const { text } = req.body;
-    const { id: postId } = req.params;
-    const userId = req.user._id;
+  const { text, imgs = [], location } = req.body;
+  const { id: originalPostId } = req.params; // Access the original post ID from req.params
+  const userId = req.user._id; // Assuming you are using a middleware to populate req.user
 
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: 'Post not found' });
+  try {
+    // Check if userId is valid
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
     }
 
-    const quote = new Post({
-      user: userId,
-      text,
-      quote: postId,
-    });
-    await quote.save();
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
 
-    res.status(201).json(quote);
+    if (!text && (!imgs || imgs.length === 0)) {
+      return res.status(400).json({ error: 'Post must have text or images' });
+    }
+
+    // Validate the number of images
+    if (imgs.length > 4) {
+      return res
+        .status(400)
+        .json({ error: 'You can upload a maximum of 4 images' });
+    }
+
+    // Find the original post
+    const originalPost = await Post.findById(originalPostId).populate('user');
+    if (!originalPost) {
+      return res.status(404).json({ message: 'Original post not found' });
+    }
+
+    // Upload images if they exist
+    let uploadedImages = [];
+    if (imgs && imgs.length > 0) {
+      for (const img of imgs) {
+        const uploadedResponse = await cloudinary.uploader.upload(img);
+        uploadedImages.push(uploadedResponse.secure_url);
+      }
+    }
+
+    // Determine if the original post is a repost
+    const isRepost = !!originalPost.repost.originalPost;
+
+    // Set the quote data based on whether the post is a repost or not
+    const quoteData = isRepost
+      ? {
+          originalPost: originalPost.repost.originalPost,
+          originalUser: {
+            _id: originalPost.repost.postOwner._id,
+            username: originalPost.repost.postOwner.username,
+            fullName: originalPost.repost.postOwner.fullName,
+            profileImg: originalPost.repost.postOwner.profileImg,
+          },
+          originalText: originalPost.repost.originalText,
+          originalImgs: originalPost.repost.originalImgs,
+        }
+      : {
+          originalPost: originalPost._id,
+          originalUser: {
+            _id: originalPost.user._id,
+            username: originalPost.user.username,
+            fullName: originalPost.user.fullName,
+            profileImg: originalPost.user.profileImg,
+          },
+          originalText: originalPost.text,
+          originalImgs: originalPost.imgs,
+        };
+
+    // Set the location, defaulting to 'Earth' if none provided
+    const postLocation = location && location.trim() ? location : 'Earth';
+
+    // Create a new quote post
+    const newQuotePost = new Post({
+      user: userId, // Ensure userId is correctly assigned
+      text,
+      imgs: uploadedImages,
+      postLocation,
+      quote: quoteData,
+    });
+
+    // Save the quoted post to the database
+    const savedQuotePost = await newQuotePost.save();
+
+    // Increment the repostByNum of the original post
+    originalPost.repostByNum += 1;
+    await originalPost.save();
+
+    // Add the savedQuotePost's _id to the user's userPosts array
+    await User.findByIdAndUpdate(
+      userId,
+      { $push: { userPosts: savedQuotePost._id } },
+      { new: true } // Optionally return the updated document
+    );
+
+    // Mention detection and notification logic (similar to createPost)
+    const mentionRegex = /@(\w+)/g;
+    let match;
+    while ((match = mentionRegex.exec(text)) !== null) {
+      const mentionedUsername = match[1];
+      const mentionedUser = await User.findOne({ username: mentionedUsername });
+
+      if (mentionedUser) {
+        const notification = new Notification({
+          from: userId,
+          to: mentionedUser._id,
+          type: 'mention',
+        });
+        await notification.save();
+      }
+    }
+
+    return res.status(201).json(savedQuotePost);
   } catch (error) {
-    console.log('Error in quotePost controller:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error creating quoted post:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
-
 export const pinPost = async (req, res) => {
   const { id: postId } = req.params;
   const userId = req.user._id.toString();

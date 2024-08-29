@@ -87,7 +87,11 @@ const Post = ({ post, posts, user }) => {
 
   const isMyPost = authUser._id === post.user._id; // Check if the post belongs to the authenticated user
   const formattedDate = formatPostDate(post.createdAt); // Format the post creation date
-
+  const isQuote = !!(
+    post?.quote &&
+    post?.quote.originalPost &&
+    post?.quote.originalUser
+  );
   // Highlight mentions in the post text
   const highlightMentions = (text) => {
     const regex = /@\w+/g;
@@ -200,7 +204,7 @@ const Post = ({ post, posts, user }) => {
                   </Link>
                 )}
 
-                <span className='text-gray-700 flex gap-1 text-basic '>
+                <span className=' flex gap-1 text-basic '>
                   <span className='text-gray-500 truncate max-w-16 md:max-w-52 text-basic'>
                     <Link
                       to={`/profile/${
@@ -274,7 +278,10 @@ const Post = ({ post, posts, user }) => {
                 )}
               </div>
             </div>
-            <QuotePost post={post} isOriginalPost={isOriginalPost} />
+            {isQuote && (
+              <QuotePost post={post?.quote} isOriginalPost={isOriginalPost} />
+            )}
+
             <PostFunctions
               post={post}
               comments={comments}

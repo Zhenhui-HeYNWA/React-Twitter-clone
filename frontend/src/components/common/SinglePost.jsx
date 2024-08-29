@@ -23,8 +23,6 @@ const SinglePost = () => {
     queryKey: ['authUser'],
   });
 
-  const isQuote = true;
-
   const { username, postId } = useParams();
 
   // Fetch post data
@@ -39,6 +37,13 @@ const SinglePost = () => {
     },
   });
 
+  console.log('QuotePost', post);
+  const isQuote = !!(
+    post?.quote &&
+    post?.quote.originalPost &&
+    post?.quote.originalUser
+  );
+  console.log(isQuote);
   const isMyPost = authUser._id === post?.user._id;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
@@ -47,6 +52,7 @@ const SinglePost = () => {
   const isPinnedPost = post?.user?.pinnedPost[0] === post?._id;
 
   const isOriginalPost = post?.repost?.originalPost == null;
+  console.log(isOriginalPost);
   useEffect(() => {
     if (authUser) {
       // 查找源帖子 ID（如果是转发的帖子）
@@ -255,7 +261,10 @@ const SinglePost = () => {
                   />
                 )}
                 {isQuote && (
-                  <QuotePost post={post} isOriginalPost={isOriginalPost} />
+                  <QuotePost
+                    post={post?.quote}
+                    isOriginalPost={isOriginalPost}
+                  />
                 )}
               </div>
               <div className='text-sm mt-2 text-gray-500 flex gap-1'>

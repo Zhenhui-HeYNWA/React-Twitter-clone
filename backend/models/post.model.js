@@ -53,6 +53,7 @@ const postSchema = new mongoose.Schema(
     },
     repostByNum: { type: Number, default: 0 },
     repostBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
     quote: {
       originalPost: {
         type: mongoose.Schema.Types.ObjectId,
@@ -65,8 +66,9 @@ const postSchema = new mongoose.Schema(
         profileImg: { type: String },
       },
       originalText: { type: String },
-      originalImgs: { type: String },
+      originalImgs: [{ type: String }],
     },
+
     postLocation: {
       type: String,
     },

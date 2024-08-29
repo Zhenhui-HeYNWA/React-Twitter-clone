@@ -11,6 +11,7 @@ import { Mention } from 'primereact/mention';
 import './CreatePost.css';
 import { useTheme } from '../../components/context/ThemeProvider';
 import { fetchLocation } from '../../utils/location/location.js';
+import LoadingSpinner from '../../components/common/LoadingSpinner.jsx';
 
 const CreatePost = () => {
   const { theme } = useTheme();
@@ -20,6 +21,7 @@ const CreatePost = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imgRef = useRef(null);
   const [locationName, setLocationName] = useState('');
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -145,26 +147,28 @@ const CreatePost = () => {
 
   const handleLocation = async () => {
     if (navigator.geolocation) {
+      setIsFetchingLocation(true); // Start loading
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
           try {
             const locationData = await fetchLocation(latitude, longitude);
-
             setLocationName(locationData.address.city);
           } catch (error) {
             console.error('Failed to retrieve location data:', error);
+          } finally {
+            setIsFetchingLocation(false); // Stop loading
           }
         },
         (error) => {
           console.error('Error getting location:', error);
+          setIsFetchingLocation(false); // Stop loading
         }
       );
     } else {
       console.error('Geolocation is not supported by this browser.');
     }
   };
-
   return (
     <div className='flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full h-fit '>
       <div className='avatar'>
@@ -245,10 +249,14 @@ const CreatePost = () => {
                 />
               </div>
             )}
-            <CiLocationOn
-              className='fill-primary w-5 h-5 cursor-pointer'
-              onClick={handleLocation}
-            />
+            {!isFetchingLocation ? (
+              <CiLocationOn
+                className='fill-primary w-5 h-5 cursor-pointer'
+                onClick={handleLocation}
+              />
+            ) : (
+              <LoadingSpinner size='sm' />
+            )}
           </div>
           <input
             type='file'

@@ -98,7 +98,7 @@ const QuotePostModal = ({ authUser, post }) => {
         {/* Modal content */}
         <div className='flex  flex-row pt-4 gap-2 w-full items-center relative'>
           <div className=' absolute top-6 left-0'>
-            <div className='avatar w-10 h-10 rounded-full bg-yellow-200'>
+            <div className='avatar w-10 h-10 rounded-full '>
               <img
                 src={authUser?.profileImg}
                 className='w-10 h-10 rounded-full'
@@ -155,7 +155,7 @@ const QuotePostModal = ({ authUser, post }) => {
                 </div>
               )}
 
-              <div className='w-full border  mt-2 rounded-xl  flex flex-col overflow-hidden'>
+              <div className='w-full border  border-gray-200  dark:border-slate-700  mt-2 rounded-xl  flex flex-col overflow-hidden'>
                 <div className='flex items-center gap-2 w-full p-2'>
                   <div className='avatar w-8   rounded-full'>
                     <img
@@ -186,7 +186,7 @@ const QuotePostModal = ({ authUser, post }) => {
                   <RenderImg imgs={post?.imgs} className='' />
                 )}
               </div>
-              <div className='flex justify-between border-t py-2 border-t-gray-700 mt-2 sticky bottom-0 bg-slate-200 dark:bg-[#15202B]  w-full'>
+              <div className='flex justify-between border-t py-2  border-gray-200  dark:border-slate-700 mt-2 sticky bottom-0 bg-slate-200 dark:bg-[#15202B]  w-full'>
                 <div className='flex gap-1 items-center relative'>
                   <CiImageOn
                     className='fill-primary w-6 h-6 cursor-pointer'
