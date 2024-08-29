@@ -9,9 +9,12 @@ import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
 import { PiPencilLine } from 'react-icons/pi';
 import toast from 'react-hot-toast';
 
+import QuotePostModal from './QuotePostModal';
+
 const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
   const [comment, setComment] = useState('');
+
 
   const postId = post?._id;
   const isOriginalPost = post?.repost?.originalPost == null;
@@ -97,6 +100,14 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
       console.log(error);
     }
   };
+
+  const openQuoteModel = () => {
+    const dialog = document.getElementById('QuoteModel_5');
+    if (dialog) {
+      dialog.showModal();
+    }
+  };
+
   return (
     <div
       className={`flex justify-between  w-full ${
@@ -216,19 +227,22 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
               ) : (
                 <>
                   <li>
-                    <span className='items-center'>
+                    <span
+                      className='items-center'
+                      onClick={() => {
+                        const activeElement = document.activeElement;
+                        if (activeElement) {
+                          activeElement.blur();
+                        }
+
+                        openQuoteModel();
+                      }}>
                       <PiPencilLine size={18} />
                       Quote Post
                     </span>
                   </li>
-                  <li
-                    onClick={() => {
-                      const elem = document.activeElement;
-                      if (elem) {
-                        elem?.blur();
-                      }
-                      handleRepost();
-                    }}>
+
+                  <li>
                     <span className='items-center'>
                       <BiRepost size={18} />
                       Repost Post
@@ -360,6 +374,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
           </div>
         </div>
       </div>
+      <QuotePostModal authUser={authUser} post={post} />
     </div>
   );
 };

@@ -1,5 +1,8 @@
 textarea {
   width: 100%; /* w-full */
+  min-height: 40px; /* 初始高度，可以根据需要调整 */
+  max-height: fit-content;
+  scrollbar-width: none;
   padding: 0; /* p-0 */
   font-size: 1.125rem; /* text-lg (18px) */
   resize: none;
@@ -13,6 +16,8 @@ textarea {
 }
 
 .word-wrap {
+  min-height: 40px; /* 设置一个最小高度 */
+  height: auto;
   word-break: break-word; /* 强制长单词换行 */
   overflow-wrap: break-word; /* 兼容性属性，确保长单词在行尾换行 */
 }

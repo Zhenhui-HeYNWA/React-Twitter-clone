@@ -1,10 +1,13 @@
+import { Link, useNavigate } from 'react-router-dom';
 import { formatDateTime } from '../../utils/date';
 import RenderImg from './RenderImg/RenderImg';
 
 const QuotePost = ({ post, isOriginalPost }) => {
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
-
-  const handleModalImgClick = (index) => {
+  const navigate = useNavigate();
+  const handleModalImgClick = (e, index) => {
+    console.log(index);
+    e.stopPropagation();
     document.getElementById(`my_modal_${index}`).showModal();
   };
 
@@ -19,32 +22,38 @@ const QuotePost = ({ post, isOriginalPost }) => {
     <>
       {postHasImgs ? (
         <div className='h-48 w-full rounded-2xl border border-slate-700 px-3 pt-4 mt-2'>
-          <div className='flex items-center gap-2 w-full'>
-            <div className='avatar w-7 h-7 '>
-              <img
-                src={post.user.profileImg}
-                className='w-7 h-7 rounded-full'
-              />
-            </div>
+          <Link to={`/profile/${post.user.username}`}>
+            <div className='flex items-center gap-2 w-full'>
+              <div className='avatar w-7  '>
+                <img
+                  src={post.user.profileImg}
+                  className='w-7 h-7 rounded-full'
+                />
+              </div>
 
-            <div className=' flex  w-full gap-1  '>
-              <span className='font-bold  text-ellipsis   text-nowrap overflow-hidden w-fit max-w-28 sm:max-w-fit flex-1 bg-black'>
-                {post.user.fullName}
-              </span>
-              <div className=' flex-1 flex   bg-red-500 '>
-                <span className='text-slate-400  truncate overflow-hidden     max-w-12 sm:max-w-52  '>
-                  @{post.user.username}
+              <div className=' flex  w-full gap-1  '>
+                <span className='font-bold  text-ellipsis   text-nowrap overflow-hidden w-fit max-w-28 sm:max-w-fit flex-1 '>
+                  {post.user.fullName}
                 </span>
-                <div className=' flex-1 gap-2 flex '>
-                  <span className='text-slate-400 text-nowrap '>·</span>
-                  <span className='text-slate-400  text-nowrap'>Aug 24</span>
+                <div className=' flex-1 flex '>
+                  <span className='text-slate-400  truncate overflow-hidden     max-w-12 sm:max-w-52  '>
+                    @{post.user.username}
+                  </span>
+                  <div className=' flex-1 gap-2 flex '>
+                    <span className='text-slate-400 text-nowrap '>·</span>
+                    <span className='text-slate-400  text-nowrap'>Aug 24</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className='post items-center flex flex-row  gpa-2 mt-4 w-full h-28  '>
-            <div className='w-32 h-32 rounded-2xl  pb-2'>
+          <div
+            className='post items-center flex flex-row  gpa-2 mt-4 w-full h-28  cursor-pointer '
+            onClick={() =>
+              navigate(`/${post?.user.username}/status/${post?._id}`)
+            }>
+            <div className='w-32 h-32 rounded-2xl  pb-2 cursor-pointer'>
               {isOriginalPost && post.imgs.length > 0 && (
                 <RenderImg
                   imgs={post.imgs}

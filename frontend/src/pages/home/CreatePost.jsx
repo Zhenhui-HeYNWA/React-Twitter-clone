@@ -75,7 +75,7 @@ const CreatePost = () => {
               />
             </div>
           </div>
-          <div className='flex flex-col'>
+          <div className='flex flex-col  '>
             <span className='font-semibold tracking-tight truncate w-28'>
               {user.fullName}
             </span>
@@ -166,7 +166,7 @@ const CreatePost = () => {
   };
 
   return (
-    <div className='flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full'>
+    <div className='flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full h-fit '>
       <div className='avatar'>
         <div className='w-8 rounded-full'>
           <img
@@ -175,7 +175,9 @@ const CreatePost = () => {
           />
         </div>
       </div>
-      <form className='flex flex-col gap-2 w-full' onSubmit={handleSubmit}>
+      <form
+        className='flex flex-col gap-2 w-full h-full '
+        onSubmit={handleSubmit}>
         <Mention
           value={text}
           onChange={handleChange}
@@ -184,7 +186,8 @@ const CreatePost = () => {
           field='username'
           placeholder='What is happening?!'
           itemTemplate={itemTemplate}
-          className='word-wrap'
+          className='word-wrap   h-auto'
+          autoResize={true}
         />
 
         {imgs.length > 0 && (

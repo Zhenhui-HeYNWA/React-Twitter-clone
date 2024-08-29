@@ -93,8 +93,7 @@ const Post = ({ post, posts, user }) => {
     const regex = /@\w+/g;
     const handleClick = (e, path) => {
       e.stopPropagation();
-      console.log(e);
-      console.log(path);
+
       navigate(path);
     };
 
@@ -256,19 +255,24 @@ const Post = ({ post, posts, user }) => {
                   </span>
                 </span>
               )}
-
-              {isOriginalPost && post.imgs.length > 0 && (
-                <RenderImg
-                  imgs={post.imgs}
-                  onImgClick={() => handleImgClick(authUser.username, post._id)}
-                />
-              )}
-              {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
-                <RenderImg
-                  imgs={post.repost.originalImgs}
-                  onImgClick={() => handleImgClick(authUser.username, post._id)}
-                />
-              )}
+              <div className='rounded-xl overflow-hidden'>
+                {isOriginalPost && post.imgs.length > 0 && (
+                  <RenderImg
+                    imgs={post.imgs}
+                    onImgClick={() =>
+                      handleImgClick(authUser.username, post._id)
+                    }
+                  />
+                )}
+                {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
+                  <RenderImg
+                    imgs={post.repost.originalImgs}
+                    onImgClick={() =>
+                      handleImgClick(authUser.username, post._id)
+                    }
+                  />
+                )}
+              </div>
             </div>
             <QuotePost post={post} isOriginalPost={isOriginalPost} />
             <PostFunctions
