@@ -235,9 +235,9 @@ const SinglePost = () => {
                   />
                 </div>
               </div>
-              <div className='flex flex-col gap-3 overflow-hidden mt-2'>
-                {isOriginalPost && (
-                  <span className='text-lg whitespace-pre-wrap word-wrap'>
+              <div className='flex flex-col gap-3  mt-2 '>
+                {isOriginalPost && post.text && (
+                  <span className='text-lg whitespace-pre-wrap word-wrap '>
                     {highlightMentions(post.text)}
                   </span>
                 )}
@@ -246,20 +246,21 @@ const SinglePost = () => {
                     {highlightMentions(post.repost.originalText)}
                   </span>
                 )}
+                <div className='rounded-xl overflow-hidden w-fit'>
+                  {isOriginalPost && post.imgs.length > 0 && (
+                    <RenderImg
+                      imgs={post.imgs}
+                      onImgClick={handleModalImgClick}
+                    />
+                  )}
 
-                {isOriginalPost && post.imgs.length > 0 && (
-                  <RenderImg
-                    imgs={post.imgs}
-                    onImgClick={handleModalImgClick}
-                  />
-                )}
-
-                {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
-                  <RenderImg
-                    imgs={post.repost.originalImgs}
-                    onImgClick={handleModalImgClick}
-                  />
-                )}
+                  {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
+                    <RenderImg
+                      imgs={post.repost.originalImgs}
+                      onImgClick={handleModalImgClick}
+                    />
+                  )}
+                </div>
                 {isQuote && (
                   <QuotePost
                     post={post?.quote}

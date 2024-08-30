@@ -83,25 +83,35 @@ const QuotePost = ({ post, isOriginalPost }) => {
           </div>
         </div>
       ) : (
-        <div className='border border-gray-200  dark:border-slate-700 rounded-2xl overflow-hidden '>
-          <div className=' py-2 px-4'>
-            <div className='flex gap-1 items-center'>
+        <div className='border border-gray-200  dark:border-slate-700 rounded-2xl overflow-hidden  pt-4 mt-2 '>
+          <div className='flex items-center gap-2 w-full px-3'>
+            <div className='avatar w-7  '>
               <img
                 src={post.originalUser.profileImg}
-                alt=''
-                className='w-8 h-8 rounded-full'
+                className='w-7 h-7 rounded-full'
               />
-              <span className='font-bold text-base'>
+            </div>
+
+            <div className=' flex  w-full gap-1  '>
+              <span className='font-bold  text-ellipsis   text-nowrap overflow-hidden w-fit max-w-28 sm:max-w-fit flex-1 '>
                 {post.originalUser.fullName}
               </span>
-              <span className='text-sm'>@{post.originalUser.username}</span>
-              <span>·</span>
-              <span className='text-sm'>{formattedDate}</span>
+              <div className=' flex-1 flex gap-1 '>
+                <span className='text-gray-500 truncate overflow-hidden     max-w-12 sm:max-w-52  '>
+                  @{post.originalUser.username}
+                </span>
+                <div className=' flex-1 gap-1 flex '>
+                  <span className='text-gray-500 text-nowrap '>·</span>
+                  <span className='text-gray-500  text-nowrap'>
+                    {formattedDate}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className='py-2 px-4'>{post.originalText} </div>
-          {/* {isOriginalPost && post.originalImgs.length > 0 && (
+          {isOriginalPost && post.originalImgs.length > 0 && (
             <RenderImg
               imgs={post.originalImgs}
               onImgClick={handleModalImgClick}
@@ -113,7 +123,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
               imgs={post.repost.originalImgs}
               onImgClick={handleModalImgClick}
             />
-          )} */}
+          )}
         </div>
       )}
     </>

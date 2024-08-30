@@ -282,7 +282,7 @@ const Post = ({ post, posts, user, feedType }) => {
                   </span>
                 </span>
               )}
-              <div className='rounded-xl overflow-hidden w-fit'>
+              <div className='rounded-xl overflow-hidden w-fit mb-3'>
                 {isOriginalPost && post.imgs.length > 0 && (
                   <RenderImg
                     imgs={post.imgs}
