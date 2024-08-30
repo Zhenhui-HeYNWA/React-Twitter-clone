@@ -67,6 +67,7 @@ const postSchema = new mongoose.Schema(
       },
       originalText: { type: String },
       originalImgs: [{ type: String }],
+      originalCreatedAt: { type: Date },
     },
 
     postLocation: {

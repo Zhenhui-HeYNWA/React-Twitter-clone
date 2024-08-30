@@ -15,7 +15,6 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
   const [comment, setComment] = useState('');
 
-
   const postId = post?._id;
   const isOriginalPost = post?.repost?.originalPost == null;
   const isLiked = post?.likes.includes(authUser._id);
@@ -101,8 +100,8 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
     }
   };
 
-  const openQuoteModel = () => {
-    const dialog = document.getElementById('QuoteModel_5');
+  const openQuoteModel = (id) => {
+    const dialog = document.getElementById(`QuoteModel${id}`);
     if (dialog) {
       dialog.showModal();
     }
@@ -235,7 +234,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
                           activeElement.blur();
                         }
 
-                        openQuoteModel();
+                        openQuoteModel(post._id);
                       }}>
                       <PiPencilLine size={18} />
                       Quote Post
@@ -243,7 +242,16 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
                   </li>
 
                   <li>
-                    <span className='items-center'>
+                    <span
+                      className='items-center'
+                      onClick={() => {
+                        const activeElement = document.activeElement;
+                        if (activeElement) {
+                          activeElement.blur();
+                        }
+
+                        handleRepost();
+                      }}>
                       <BiRepost size={18} />
                       Repost Post
                     </span>

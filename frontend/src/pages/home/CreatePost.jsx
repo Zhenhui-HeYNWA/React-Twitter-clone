@@ -63,8 +63,8 @@ const CreatePost = () => {
     }
   };
 
-  const itemTemplate = (user) => (
-    <div className='card rounded-none z-0 bg-gray-100 dark:bg-[#15202B] w-60 h-18 flex ring-1 ring-white'>
+  const CreatePostItemTemplate = (user) => (
+    <div className='card rounded-none z-0 bg-gray-100 dark:bg-[#15202B] w-fit h-18 flex ring-1 ring-white'>
       <div className='card-body p-0'>
         <div
           className='flex gap-2 items-center hover:bg-slate-400 dark:hover:bg-cyan-900 p-2'
@@ -170,7 +170,7 @@ const CreatePost = () => {
     }
   };
   return (
-    <div className='flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full h-fit '>
+    <div className='    flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full h-fit '>
       <div className='avatar'>
         <div className='w-8 rounded-full'>
           <img
@@ -180,7 +180,7 @@ const CreatePost = () => {
         </div>
       </div>
       <form
-        className='flex flex-col gap-2 w-full h-full '
+        className=' create-post-container flex flex-col gap-2 w-full h-full '
         onSubmit={handleSubmit}>
         <Mention
           value={text}
@@ -189,8 +189,8 @@ const CreatePost = () => {
           onSearch={onSearch}
           field='username'
           placeholder='What is happening?!'
-          itemTemplate={itemTemplate}
-          className='word-wrap   h-auto'
+          itemTemplate={CreatePostItemTemplate}
+          className='word-wrap    h-auto'
           autoResize={true}
         />
 

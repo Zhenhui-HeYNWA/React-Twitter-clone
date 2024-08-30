@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { formatDateTime } from '../../utils/date';
+import { formatPostDate } from '../../utils/date';
 import RenderImg from './RenderImg/RenderImg';
 
 const QuotePost = ({ post, isOriginalPost }) => {
-  const formattedDate = post ? formatDateTime(post.createdAt) : '';
+  const formattedDate = formatPostDate(post.originalCreatedAt);
   const navigate = useNavigate();
   const handleModalImgClick = (e, index) => {
     console.log(index);
@@ -14,11 +14,12 @@ const QuotePost = ({ post, isOriginalPost }) => {
 
   // Check if either post.imgs or post.repost.originalImgs have images
   const postHasImgs =
-    (isOriginalPost && post?.imgs?.length !== 0) ||
-    (!isOriginalPost && post?.repost.originalImgs?.length > 0);
+    (isOriginalPost && Array.isArray(post?.imgs) && post?.imgs.length > 0) ||
+    (!isOriginalPost &&
+      Array.isArray(post?.repost?.originalImgs) &&
+      post?.repost.originalImgs.length > 0);
 
   console.log(postHasImgs);
-
   return (
     <>
       {postHasImgs ? (
@@ -36,13 +37,15 @@ const QuotePost = ({ post, isOriginalPost }) => {
                 <span className='font-bold  text-ellipsis   text-nowrap overflow-hidden w-fit max-w-28 sm:max-w-fit flex-1 '>
                   {post.originalUser.fullName}
                 </span>
-                <div className=' flex-1 flex '>
+                <div className=' flex-1 flex gap-1 '>
                   <span className='text-gray-500 truncate overflow-hidden     max-w-12 sm:max-w-52  '>
                     @{post.originalUser.username}
                   </span>
-                  <div className=' flex-1 gap-2 flex '>
+                  <div className=' flex-1 gap-1 flex '>
                     <span className='text-gray-500 text-nowrap '>·</span>
-                    <span className='text-gray-500  text-nowrap'>Aug 24</span>
+                    <span className='text-gray-500  text-nowrap'>
+                      {formattedDate}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -80,7 +83,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
           </div>
         </div>
       ) : (
-        <div className='border rounded-2xl overflow-hidden '>
+        <div className='border border-gray-200  dark:border-slate-700 rounded-2xl overflow-hidden '>
           <div className=' py-2 px-4'>
             <div className='flex gap-1 items-center'>
               <img
@@ -97,8 +100,8 @@ const QuotePost = ({ post, isOriginalPost }) => {
             </div>
           </div>
 
-          <div className='py-2 px-4'>{post.originalText}</div>
-          {isOriginalPost && post.originalImgs.length > 0 && (
+          <div className='py-2 px-4'>{post.originalText} </div>
+          {/* {isOriginalPost && post.originalImgs.length > 0 && (
             <RenderImg
               imgs={post.originalImgs}
               onImgClick={handleModalImgClick}
@@ -110,7 +113,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
               imgs={post.repost.originalImgs}
               onImgClick={handleModalImgClick}
             />
-          )}
+          )} */}
         </div>
       )}
     </>

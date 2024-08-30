@@ -11,13 +11,33 @@ textarea {
   background-color: inherit; /* bg-inherit */
 }
 
-.p-mention-panel {
-  scrollbar-width: none;
-}
-
 .word-wrap {
   min-height: 40px; /* 设置一个最小高度 */
   height: auto;
   word-break: break-word; /* 强制长单词换行 */
   overflow-wrap: break-word; /* 兼容性属性，确保长单词在行尾换行 */
+}
+.create-post-container .p-mention-panel {
+  scrollbar-width: none;
+  position: absolute !important;
+  top: 100% !important;
+  left: 50px !important;
+  z-index: 1050 !important;
+
+  padding: 0;
+}
+
+.quote-post-container .p-mention-panel {
+  padding: 10px;
+  scrollbar-width: none;
+  position: absolute !important;
+  top: 100% !important;
+  left: 20px !important;
+  z-index: 1050 !important;
+  height: 150%;
+  border-radius: 5px;
+  border-top: 1px solid white; /* Border at the top */
+  border-bottom: 1px solid white; /* Border at the bottom */
+  width: min-content;
+  padding: 0;
 }

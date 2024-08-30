@@ -10,14 +10,70 @@ import { useTheme } from '../../components/context/ThemeProvider';
 import data from '@emoji-mart/data';
 import { fetchLocation } from '../../utils/location/location.js';
 import LoadingSpinner from './LoadingSpinner';
+import usePostMutations from '../../hooks/usePostMutations.jsx';
+import { formatPostDate } from '../../utils/date/index.js';
 const QuotePostModal = ({ authUser, post }) => {
   const { theme } = useTheme();
   const [quote, setQuote] = useState('');
   const [imgs, setImgs] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
   const [locationName, setLocationName] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imgRef = useRef(null);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const postId = post?._id;
+  const formattedDate = formatPostDate(post?.createdAt);
+
+  const { quotePost, isQuoting, isError, error } = usePostMutations(postId);
+
+  const searchUsers = async (query) => {
+    const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`);
+    if (!res.ok) {
+      throw new Error('Error fetching search results');
+    }
+    return res.json();
+  };
+
+  const onSearch = async (event) => {
+    console.log(123);
+    const query = event.query.trim();
+
+    if (query) {
+      try {
+        const users = await searchUsers(query);
+        setSuggestions(users);
+      } catch (error) {
+        console.error('Failed to fetch search results:', error);
+      }
+    } else {
+      setSuggestions([]); // Clear suggestions if query is empty
+    }
+  };
+
+  const itemTemplate = (user) => (
+    <div className='card border-x rounded-none z-40 bg-gray-100 dark:bg-[#15202B] w-60 h-18 flex ring-1 ring-white '>
+      <div className='card-body p-0'>
+        <div
+          className='flex gap-2 items-center hover:bg-slate-300 dark:hover:bg-cyan-900 p-2'
+          key={user._id}>
+          <div className='avatar'>
+            <div className='w-8 rounded-full'>
+              <img
+                src={user.profileImg || '/avatar-placeholder.png'}
+                alt={`${user.fullName}'s profile`}
+              />
+            </div>
+          </div>
+          <div className='flex flex-col  '>
+            <span className='font-semibold tracking-tight truncate w-28'>
+              {user.fullName}
+            </span>
+            <span className='text-sm text-slate-500'>@{user.username}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const handleImgChange = (e) => {
     const files = e.target.files;
@@ -50,10 +106,13 @@ const QuotePostModal = ({ authUser, post }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(quote);
-    console.log(imgs);
-    console.log(123);
-    console.log(locationName);
+
+    quotePost({
+      text: quote,
+      imgs,
+      locationName,
+    });
+
     setQuote('');
     setImgs([]);
     setLocationName('');
@@ -84,8 +143,10 @@ const QuotePostModal = ({ authUser, post }) => {
     }
   };
   return (
-    <dialog id='QuoteModel_5' className='modal modal-middle '>
-      <div className='modal-box bg-slate-200 dark:bg-[#15202B] pb-0 px-2'>
+    <dialog
+      id={`QuoteModel${post?._id}`}
+      className='modal modal-middle mt-2 dialog-container  '>
+      <div className='modal-box  bg-slate-200 dark:bg-[#15202B] pb-0 px-2   h-max overflow-visible  '>
         <form method='dialog'>
           {/* Close button */}
           <button
@@ -96,7 +157,7 @@ const QuotePostModal = ({ authUser, post }) => {
         </form>
 
         {/* Modal content */}
-        <div className='flex  flex-row pt-4 gap-2 w-full items-center relative'>
+        <div className='flex  flex-row pt-4 gap-2 w-full items-center relative '>
           <div className=' absolute top-6 left-0'>
             <div className='avatar w-10 h-10 rounded-full '>
               <img
@@ -107,14 +168,17 @@ const QuotePostModal = ({ authUser, post }) => {
             </div>
           </div>
           <div className='flex flex-col w-full h-full max-h-128 '>
-            <div className='flex flex-col gap-2 w-full h-full pl-12 '>
-              <div className='pt-4 w-auto h-full'>
+            <div className='flex flex-col gap-2 w-full h-full pl-12  '>
+              <div className='quote-post-container pt-4 w-auto h-full   '>
                 <Mention
                   value={quote}
                   onChange={handleChange}
+                  onSearch={onSearch}
+                  suggestions={suggestions}
                   field='username'
+                  itemTemplate={itemTemplate}
                   placeholder='Add a comment'
-                  className='text-nowrap w-full'
+                  className='text-nowrap h-auto '
                   autoResize={true}
                 />
               </div>
@@ -154,8 +218,13 @@ const QuotePostModal = ({ authUser, post }) => {
                   From: {locationName}
                 </div>
               )}
+              {isError && (
+                <div className='text-red-500'>
+                  {error.message || 'Something went wrong'}
+                </div>
+              )}
 
-              <div className='w-full border  border-gray-200  dark:border-slate-700  mt-2 rounded-xl  flex flex-col overflow-hidden'>
+              <div className='w-full border  border-gray-300 dark:border-gray-700   mt-2 rounded-xl  flex flex-col overflow-hidden'>
                 <div className='flex items-center gap-2 w-full p-2'>
                   <div className='avatar w-8   rounded-full'>
                     <img
@@ -175,7 +244,7 @@ const QuotePostModal = ({ authUser, post }) => {
                       <div className='flex-1 gap-2 flex'>
                         <span className='text-slate-400 text-nowrap'>·</span>
                         <span className='text-slate-400  text-nowrap'>
-                          Aug 24
+                          {formattedDate}
                         </span>
                       </div>
                     </div>
@@ -225,8 +294,16 @@ const QuotePostModal = ({ authUser, post }) => {
                 />
                 <button
                   onClick={handleSubmit} // Handle form submission here
-                  className='btn btn-primary rounded-full btn-sm text-white px-4'>
-                  Quote
+                  className={`btn btn-primary rounded-full btn-sm text-white px-4 ${
+                    isQuoting ? 'disabled' : ''
+                  }`}>
+                  {isQuoting ? (
+                    <>
+                      <LoadingSpinner size='sm' /> Quoting
+                    </>
+                  ) : (
+                    'Quote'
+                  )}
                 </button>
               </div>
             </div>

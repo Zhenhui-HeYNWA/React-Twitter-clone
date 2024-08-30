@@ -4,8 +4,6 @@ import { FaTrash } from 'react-icons/fa';
 import { MdOutlinePushPin } from 'react-icons/md';
 
 import { SlUserFollow, SlUserUnfollow } from 'react-icons/sl';
-import useFollow from '../../../hooks/useFollow';
-import usePostMutations from '../../../hooks/usePostMutations';
 
 const ListFunction = ({
   id,
@@ -14,10 +12,10 @@ const ListFunction = ({
   authUser,
   isOriginal,
   onDeleteClick,
+  onPinClick,
+  onFollowClick,
 }) => {
   const isFollowing = authUser?.followings.includes(owner?._id);
-  const { follow } = useFollow();
-  const { pinPost } = usePostMutations(id);
 
   return (
     <div className='dropdown dropdown-bottom dropdown-end'>
@@ -49,12 +47,11 @@ const ListFunction = ({
                 <span
                   className='flex items-center justify-start'
                   onClick={() => {
-                    console.log(id);
-                    pinPost({ postId: id });
                     const elem = document.activeElement;
                     if (elem) {
                       elem?.blur();
                     }
+                    onPinClick(id);
                   }}>
                   <MdOutlinePushPin className='h-4 w-4' />
                   <a>Pin post</a>
@@ -71,11 +68,12 @@ const ListFunction = ({
                   className=' flex font-bold '
                   onClick={(e) => {
                     e.preventDefault();
-                    follow(owner._id);
+
                     const elem = document.activeElement;
                     if (elem) {
                       elem?.blur();
                     }
+                    onFollowClick(owner._id);
                   }}
                   tabIndex={2}
                   role='button'>
@@ -93,11 +91,12 @@ const ListFunction = ({
                   className=' flex font-bold '
                   onClick={(e) => {
                     e.preventDefault();
-                    follow(owner._id);
+
                     const elem = document.activeElement;
                     if (elem) {
                       elem?.blur();
                     }
+                    onFollowClick(owner._id);
                   }}
                   tabIndex={2}
                   role='button'>

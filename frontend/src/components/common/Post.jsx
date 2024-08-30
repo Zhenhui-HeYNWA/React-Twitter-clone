@@ -14,6 +14,8 @@ import usePostMutations from '../../hooks/usePostMutations';
 import { TbPinnedFilled } from 'react-icons/tb';
 
 import QuotePost from './QuotePost';
+import LoadingSpinner from './LoadingSpinner';
+import useFollow from '../../hooks/useFollow';
 
 // Function to check the existence of mentioned users
 const fetchMentionedUsersExistence = async (usernames) => {
@@ -29,7 +31,7 @@ const fetchMentionedUsersExistence = async (usernames) => {
 };
 
 // Post component
-const Post = ({ post, posts, user }) => {
+const Post = ({ post, posts, user, feedType }) => {
   const navigate = useNavigate();
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
@@ -40,6 +42,7 @@ const Post = ({ post, posts, user }) => {
   const isOriginalPost = post?.repost?.originalPost == null; // Check if the post is an original post
 
   const isPinnedPost = user?.pinnedPost[0] === postId;
+  const { follow, isPending } = useFollow();
 
   // Check if the authenticated user has reposted this post
   useEffect(() => {
@@ -125,7 +128,10 @@ const Post = ({ post, posts, user }) => {
   };
 
   // Hook to handle post mutations like delete, like, bookmark, and repost
-  const { deletePost, isDeleting } = usePostMutations(postId);
+  const { deletePost, isDeleting, pinPost, isPinning } = usePostMutations(
+    postId,
+    feedType
+  );
 
   const handlePostDeleteClick = (id) => {
     if (isDeleting) return;
@@ -133,6 +139,16 @@ const Post = ({ post, posts, user }) => {
   };
   const handleImgClick = (username, id) => {
     navigate(`/${username}/status/${id}`);
+  };
+
+  const handlePinPostClick = (id) => {
+    console.log();
+    if (isPinning) return;
+    pinPost(id);
+  };
+  const handleFollowClick = (id) => {
+    if (isPending) return;
+    follow(id);
   };
 
   return (
@@ -226,14 +242,21 @@ const Post = ({ post, posts, user }) => {
                 </span>
               </div>
               <div>
-                <ListFunction
-                  id={postId}
-                  isBelongsToAuthUser={isMyPost}
-                  owner={post?.user}
-                  authUser={authUser}
-                  isOriginal={isOriginalPost}
-                  onDeleteClick={() => handlePostDeleteClick(post._id)}
-                />
+                {isDeleting || isPinning || isPending ? (
+                  <LoadingSpinner size='sm' />
+                ) : (
+                  <ListFunction
+                    id={postId}
+                    isBelongsToAuthUser={isMyPost}
+                    owner={post?.user}
+                    authUser={authUser}
+                    isOriginal={isOriginalPost}
+                    feedType={feedType}
+                    onDeleteClick={() => handlePostDeleteClick(post._id)}
+                    onPinClick={() => handlePinPostClick(post._id)}
+                    onFollowClick={() => handleFollowClick(post?.user._id)}
+                  />
+                )}
               </div>
             </div>
             <div className='flex flex-col gap-3 overflow-hidden  '>
@@ -259,7 +282,7 @@ const Post = ({ post, posts, user }) => {
                   </span>
                 </span>
               )}
-              <div className='rounded-xl overflow-hidden'>
+              <div className='rounded-xl overflow-hidden w-fit'>
                 {isOriginalPost && post.imgs.length > 0 && (
                   <RenderImg
                     imgs={post.imgs}

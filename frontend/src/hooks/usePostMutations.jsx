@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
-const usePostMutations = (postId) => {
+const usePostMutations = (postId, feedType) => {
   const queryClient = useQueryClient();
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
@@ -231,7 +231,7 @@ const usePostMutations = (postId) => {
   });
 
   const { mutate: pinPost, isPending: isPinning } = useMutation({
-    mutationFn: async ({ postId }) => {
+    mutationFn: async () => {
       console.log(postId);
       try {
         const res = await fetch(`/api/posts/pin/${postId}`, {
@@ -259,13 +259,56 @@ const usePostMutations = (postId) => {
           pinnedPost: data.pinnedPost,
         };
       });
-
-      queryClient.invalidateQueries(['authUser']);
+      if (feedType === 'posts') {
+        queryClient.invalidateQueries(['authUser']);
+      }
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
+
+  const {
+    mutate: quotePost,
+    isPending: isQuoting,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: async ({ text, imgs, locationName }) => {
+      try {
+        const res = await fetch(`/api/posts/quote/${postId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text, imgs, locationName }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        return data;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: () => {
+      toast.success('Quote post successfully');
+      queryClient.setQueryData(['authUser'], (oldData) => {
+        if (!oldData) return oldData;
+
+        const updatedRepostedPosts = [...oldData.repostedPosts, postId]; // Add repost
+
+        return {
+          ...oldData,
+          repostedPosts: updatedRepostedPosts,
+        };
+      });
+
+      // Refresh post and authUser data
+      queryClient.invalidateQueries(['post', postId]);
+      queryClient.invalidateQueries(['authUser']);
+    },
+  });
+
   return {
     deletePost,
     isDeleting,
@@ -282,6 +325,10 @@ const usePostMutations = (postId) => {
     isReposting,
     pinPost,
     isPinning,
+    quotePost,
+    isQuoting,
+    isError,
+    error,
   };
 };
 

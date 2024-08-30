@@ -87,14 +87,17 @@ export const deletePost = async (req, res) => {
         .json({ message: 'You have no right to delete this post' });
     }
 
-    if (post.img) {
-      const imgId = post.img.split('/').pop().split('.')[0];
-      await cloudinary.uploader.destroy(imgId);
+    // Delete images associated with the post (either original or quote post)
+    if (post.imgs && post.imgs.length > 0) {
+      for (const img of post.imgs) {
+        const imgId = img.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(imgId);
+      }
     }
 
     let originalPostId = req.params.id;
 
-    // 如果帖子是转发帖，则处理转发逻辑
+    // If the post is a repost, handle the repost logic
     if (post.repost && post.repost.originalPost) {
       originalPostId = post.repost.originalPost;
 
@@ -110,7 +113,7 @@ export const deletePost = async (req, res) => {
         { session }
       );
     } else {
-      // 如果帖子是原始帖子，处理所有转发逻辑
+      // If the post is the original post, handle all repost logic
       const reposts = await Post.find({
         'repost.originalPost': originalPostId,
       }).session(session);
@@ -131,6 +134,16 @@ export const deletePost = async (req, res) => {
       );
     }
 
+    // If the post is a quote, decrement repostByNum of the original post
+    if (post.quote && post.quote.originalPost) {
+      await Post.findByIdAndUpdate(
+        post.quote.originalPost,
+        { $inc: { repostByNum: -1 } },
+        { session }
+      );
+    }
+
+    // Delete the original post or quoted post
     await User.findByIdAndUpdate(
       userId,
       { $pull: { userPosts: req.params.id } },
@@ -153,7 +166,6 @@ export const deletePost = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
-
 export const likeUnlikePost = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -407,6 +419,7 @@ export const quotePost = async (req, res) => {
           },
           originalText: originalPost.repost.originalText,
           originalImgs: originalPost.repost.originalImgs,
+          originalCreatedAt: originalPost.repost.createdAt, // Capture the original createdAt
         }
       : {
           originalPost: originalPost._id,
@@ -418,6 +431,7 @@ export const quotePost = async (req, res) => {
           },
           originalText: originalPost.text,
           originalImgs: originalPost.imgs,
+          originalCreatedAt: originalPost.createdAt, // Capture the original createdAt
         };
 
     // Set the location, defaulting to 'Earth' if none provided
