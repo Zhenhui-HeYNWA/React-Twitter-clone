@@ -1,5 +1,5 @@
 import usePostMutations from '../../hooks/usePostMutations';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RiShare2Line } from 'react-icons/ri';
 import { BiComment, BiRepost } from 'react-icons/bi';
@@ -11,13 +11,16 @@ import toast from 'react-hot-toast';
 
 import QuotePostModal from './QuotePostModal';
 
-const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
+const PostFunctions = ({ post, isRepostedByAuthUser, size, feedType }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
   const [comment, setComment] = useState('');
+
+  console.log('postfunction', post);
 
   const postId = post?._id;
   const isOriginalPost = post?.repost?.originalPost == null;
   const isLiked = post?.likes.includes(authUser._id);
+  const username = post?.username;
 
   // Check if the post is liked by the authenticated user
   const isMarked = post?.bookmarks.includes(authUser._id);
@@ -27,6 +30,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
   // Hook to handle post mutations like delete, like, bookmark, and repost
   const {
     commentPostAdvanced,
+    // commentPostSimple,
     isPostCommenting,
     likePost,
     isLiking,
@@ -34,7 +38,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
     isBookmarking,
     repostPost,
     isReposting,
-  } = usePostMutations(postId);
+  } = usePostMutations(postId, feedType);
 
   // Handle comment submission
   const handlePostComment = (e) => {
@@ -54,6 +58,24 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
       }
     );
   };
+
+  // Fetch comments for the specific post
+  // Fetch comments data
+  const { data: comments, refetch } = useQuery({
+    queryKey: ['comments', postId],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/comments/${username}/status/${postId}/comments`
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+      return data;
+    },
+  });
+
+  useEffect(() => {
+    refetch();
+  }, [comments?.length, refetch]);
 
   // Handle reposting the post
   const handleRepost = () => {
@@ -127,7 +149,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
             className={`${
               size === 'lg' ? 'text-base' : 'text-sm'
             } text-slate-500 group-hover:text-sky-400`}>
-            {post?.comments?.length}
+            {comments?.length}
           </span>
         </div>
         {/* We're using Modal Component from DaisyUI */}
@@ -149,7 +171,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
                     <div className='w-8 rounded-full'>
                       <img
                         src={
-                          comment.user.profileImg || '/avatar-placeholder.png'
+                          comment?.user?.profileImg || '/avatar-placeholder.png'
                         }
                       />
                     </div>
@@ -217,7 +239,16 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
                     </button>
                   </li>
                   <li>
-                    <span className='items-center'>
+                    <span
+                      className='items-center'
+                      onClick={() => {
+                        const activeElement = document.activeElement;
+                        if (activeElement) {
+                          activeElement.blur();
+                        }
+
+                        openQuoteModel(post._id);
+                      }}>
                       <PiPencilLine size={18} />
                       Quote Post
                     </span>
@@ -382,6 +413,7 @@ const PostFunctions = ({ post, comments, isRepostedByAuthUser, size }) => {
           </div>
         </div>
       </div>
+
       <QuotePostModal authUser={authUser} post={post} />
     </div>
   );

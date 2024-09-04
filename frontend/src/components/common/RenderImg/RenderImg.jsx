@@ -22,7 +22,7 @@ const RenderImg = ({ imgs, onImgClick, size }) => {
                 src={img}
                 className={
                   imgs.length === 1
-                    ? ' object-cover  border-gray-700 h-full w-full '
+                    ? ' object-cover  border-gray-700 h-full  w-full'
                     : imgs.length === 2
                     ? '  object-cover  border-gray-700 w-full h-full gap-1 '
                     : imgs.length === 3 && index === 0

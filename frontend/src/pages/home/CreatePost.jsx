@@ -180,7 +180,7 @@ const CreatePost = () => {
         </div>
       </div>
       <form
-        className=' create-post-container flex flex-col gap-2 w-full h-full '
+        className=' create-post-container flex flex-col gap-2 w-full h-full  '
         onSubmit={handleSubmit}>
         <Mention
           value={text}
@@ -190,7 +190,7 @@ const CreatePost = () => {
           field='username'
           placeholder='What is happening?!'
           itemTemplate={CreatePostItemTemplate}
-          className='word-wrap    h-auto'
+          className='word-wrap '
           autoResize={true}
         />
 

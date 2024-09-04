@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-hot-toast';
 
-const usePostMutations = (postId, feedType) => {
+const usePostMutations = (postId, feedType, username) => {
   const queryClient = useQueryClient();
+
+  console.log(feedType);
 
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
@@ -41,24 +43,28 @@ const usePostMutations = (postId, feedType) => {
       }
     },
     onSuccess: (updatedLikes) => {
+      toast.success('Liked Post!');
       console.log(updatedLikes);
       // Update the 'posts' query data
-      queryClient.setQueryData(['posts'], (oldData) => {
+      queryClient.setQueryData(['posts', feedType, username], (oldData) => {
+        // Debugging line
         if (oldData) {
           return oldData.map((p) => {
             if (p._id === postId) {
+              console.log('Post found, updating likes', updatedLikes); // Debugging line
               return { ...p, likes: updatedLikes }; // Ensure likes is an array
             }
             return p;
           });
         } else {
-          // Handle the case when oldData is undefined
+          console.log('No old data available'); // Debugging line
           return [];
         }
       });
-
       // Update the specific 'post' query data
       queryClient.setQueryData(['post', postId], (oldPost) => {
+        console.log(oldPost);
+
         if (oldPost) {
           return { ...oldPost, likes: updatedLikes || [] }; // Ensure likes is an array
         }
@@ -85,7 +91,7 @@ const usePostMutations = (postId, feedType) => {
     },
     onSuccess: (updatedBookmarks) => {
       console.log(updatedBookmarks);
-      queryClient.setQueryData(['posts'], (oldData) => {
+      queryClient.setQueryData(['posts', feedType, username], (oldData) => {
         if (oldData) {
           return oldData.map((p) => {
             if (p._id === postId) {
@@ -133,51 +139,50 @@ const usePostMutations = (postId, feedType) => {
     },
   });
 
-  // TODO: fix refetch
   const { mutate: commentPostAdvanced, isPending: isPostCommenting } =
     useMutation({
       mutationFn: async ({ postId, text }) => {
         try {
           const res = await fetch(`/api/comments/comment/${postId}`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ text }),
           });
 
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'Something went wrong');
-          return { comment: data.comments, postId };
+          return { comment: data.comment, postId };
         } catch (error) {
           throw new Error(error.message);
         }
       },
+      // onSuccess: () => {
+      //   toast.success('Comment posted successfully');
+      //   queryClient.invalidateQueries(['comments', postId]);
+      // },
       onSuccess: (updateComment, { postId }) => {
         toast.success('Comment posted successfully');
 
-        queryClient.setQueryData(['posts'], (oldData) => {
-          if (!oldData) return oldData;
+        // Update the 'comments' cache directly without refetching
+        queryClient.setQueryData(['comments', postId], (oldComments) => {
+          if (!oldComments) return [updateComment.comment]; // First comment in array
+          return [...oldComments, updateComment.comment]; // Add new comment to existing ones
+        });
 
-          return oldData.map((post) => {
+        // Update the 'posts' cache to reflect new comment count and comments in the post
+        queryClient.setQueryData(['posts', feedType, username], (oldPosts) => {
+          if (!oldPosts) return oldPosts;
+          return oldPosts.map((post) => {
             if (post._id === postId) {
+              const updatedComments = [...post.comments, updateComment.comment];
               return {
                 ...post,
-                comments: [...post.comments, updateComment.comment], // Add the new comment to the existing comments array
+                comments: updatedComments,
+                commentsCount: updatedComments.length, // 同步更新评论计数
               };
             }
             return post;
           });
-        });
-
-        queryClient.setQueryData(['post', postId], (oldPost) => {
-          if (oldPost) {
-            return {
-              ...oldPost,
-              comments: [...(oldPost.comments || []), updateComment.comment], // Append the new comment to the existing comments array
-            };
-          }
-          return oldPost;
         });
       },
       onError: (error) => {
@@ -185,6 +190,7 @@ const usePostMutations = (postId, feedType) => {
         toast.error(error.message);
       },
     });
+
   const { mutate: repostPost, isPending: isReposting } = useMutation({
     mutationFn: async ({ actionType }) => {
       try {

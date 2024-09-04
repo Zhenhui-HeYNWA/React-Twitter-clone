@@ -363,39 +363,44 @@ export const repostPost = async (req, res) => {
 };
 
 export const quotePost = async (req, res) => {
+  // 从请求体中提取文本、图片数组（默认为空数组）和位置数据
   const { text, imgs = [], location } = req.body;
-  const { id: originalPostId } = req.params; // Access the original post ID from req.params
-  const userId = req.user._id; // Assuming you are using a middleware to populate req.user
+  // 从请求参数中提取原始帖子的ID
+  const { id: originalPostId } = req.params;
+  // 从请求中提取当前用户的ID（假设你使用了中间件填充了req.user）
+  const userId = req.user._id;
 
   try {
-    // Check if userId is valid
+    // 检查userId是否存在
     if (!userId) {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
+    // 查找用户
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // 检查帖子是否包含文本或图片，至少需要一项
     if (!text && (!imgs || imgs.length === 0)) {
       return res.status(400).json({ error: 'Post must have text or images' });
     }
 
-    // Validate the number of images
+    // 验证图片数量，最多允许上传4张图片
     if (imgs.length > 4) {
       return res
         .status(400)
         .json({ error: 'You can upload a maximum of 4 images' });
     }
 
-    // Find the original post
+    // 查找原始帖子，并关联用户数据
     const originalPost = await Post.findById(originalPostId).populate('user');
     if (!originalPost) {
       return res.status(404).json({ message: 'Original post not found' });
     }
 
-    // Upload images if they exist
+    // 如果帖子包含图片，上传这些图片到云存储
     let uploadedImages = [];
     if (imgs && imgs.length > 0) {
       for (const img of imgs) {
@@ -404,83 +409,98 @@ export const quotePost = async (req, res) => {
       }
     }
 
-    // Determine if the original post is a repost
+    // 检查原始帖子是否为转发的帖子
     const isRepost = !!originalPost.repost.originalPost;
 
-    // Set the quote data based on whether the post is a repost or not
+    // 根据原始帖子是否是转发，设置引用（quote）的数据
     const quoteData = isRepost
       ? {
-          originalPost: originalPost.repost.originalPost,
+          originalPost: originalPost.repost.originalPost, // 如果是转发的帖子，引用原始帖子
           originalUser: {
-            _id: originalPost.repost.postOwner._id,
-            username: originalPost.repost.postOwner.username,
-            fullName: originalPost.repost.postOwner.fullName,
-            profileImg: originalPost.repost.postOwner.profileImg,
+            _id: originalPost.repost.postOwner._id, // 原始帖子的作者ID
+            username: originalPost.repost.postOwner.username, // 原始帖子的作者用户名
+            fullName: originalPost.repost.postOwner.fullName, // 原始帖子的作者全名
+            profileImg: originalPost.repost.postOwner.profileImg, // 原始帖子的作者头像
           },
-          originalText: originalPost.repost.originalText,
-          originalImgs: originalPost.repost.originalImgs,
-          originalCreatedAt: originalPost.repost.createdAt, // Capture the original createdAt
+          originalText: originalPost.repost.originalText, // 引用原始帖子的文本
+          originalImgs: originalPost.repost.originalImgs, // 引用原始帖子的图片
         }
       : {
-          originalPost: originalPost._id,
+          originalPost: originalPost._id, // 如果不是转发，引用当前帖子
           originalUser: {
-            _id: originalPost.user._id,
-            username: originalPost.user.username,
-            fullName: originalPost.user.fullName,
-            profileImg: originalPost.user.profileImg,
+            _id: originalPost.user._id, // 原始帖子的作者ID
+            username: originalPost.user.username, // 原始帖子的作者用户名
+            fullName: originalPost.user.fullName, // 原始帖子的作者全名
+            profileImg: originalPost.user.profileImg, // 原始帖子的作者头像
           },
-          originalText: originalPost.text,
-          originalImgs: originalPost.imgs,
-          originalCreatedAt: originalPost.createdAt, // Capture the original createdAt
+          originalText: originalPost.text, // 原始帖子的文本
+          originalImgs: originalPost.imgs, // 原始帖子的图片
         };
 
-    // Set the location, defaulting to 'Earth' if none provided
+    // 设置帖子的发布位置，如果没有提供位置，默认为 "Earth"
     const postLocation = location && location.trim() ? location : 'Earth';
 
-    // Create a new quote post
+    // 创建一个新的引用（quote）帖子
     const newQuotePost = new Post({
-      user: userId, // Ensure userId is correctly assigned
-      text,
-      imgs: uploadedImages,
-      postLocation,
-      quote: quoteData,
+      user: userId, // 当前用户的ID
+      text, // 帖子的文本
+      imgs: uploadedImages, // 上传的图片
+      postLocation, // 帖子的地理位置
+      quote: quoteData, // 引用的原始帖子数据
     });
 
-    // Save the quoted post to the database
+    // 将引用的帖子保存到数据库中
     const savedQuotePost = await newQuotePost.save();
 
-    // Increment the repostByNum of the original post
+    // 增加原始帖子的转发次数
     originalPost.repostByNum += 1;
-    await originalPost.save();
 
-    // Add the savedQuotePost's _id to the user's userPosts array
-    await User.findByIdAndUpdate(
-      userId,
-      { $push: { userPosts: savedQuotePost._id } },
-      { new: true } // Optionally return the updated document
-    );
-
-    // Mention detection and notification logic (similar to createPost)
-    const mentionRegex = /@(\w+)/g;
-    let match;
-    while ((match = mentionRegex.exec(text)) !== null) {
-      const mentionedUsername = match[1];
-      const mentionedUser = await User.findOne({ username: mentionedUsername });
-
-      if (mentionedUser) {
-        const notification = new Notification({
-          from: userId,
-          to: mentionedUser._id,
-          type: 'mention',
-        });
-        await notification.save();
+    // 如果引用的是转发的帖子，也增加原始帖子的转发次数
+    if (isRepost) {
+      // 查找最初的原始帖子
+      const originalOriginalPost = await Post.findById(
+        originalPost.repost.originalPost
+      );
+      if (originalOriginalPost) {
+        originalOriginalPost.repostByNum += 1; // 增加原始帖子的转发次数
+        await originalOriginalPost.save(); // 保存更新的原始帖子
       }
     }
 
+    // 保存更新的当前帖子
+    await originalPost.save();
+
+    // 将保存的引用帖子的ID添加到用户的userPosts数组中
+    await User.findByIdAndUpdate(
+      userId,
+      { $push: { userPosts: savedQuotePost._id } }, // 将新帖子推入到用户的帖子列表中
+      { new: true } // 可选，返回更新后的文档
+    );
+
+    // 提及（mention）检测和通知逻辑
+    const mentionRegex = /@(\w+)/g;
+    let match;
+    // 使用正则表达式查找所有提及的用户名
+    while ((match = mentionRegex.exec(text)) !== null) {
+      const mentionedUsername = match[1]; // 提取提及的用户名
+      const mentionedUser = await User.findOne({ username: mentionedUsername }); // 查找被提及的用户
+
+      if (mentionedUser) {
+        // 如果找到了被提及的用户，创建一个通知
+        const notification = new Notification({
+          from: userId, // 发送通知的用户ID
+          to: mentionedUser._id, // 接收通知的用户ID
+          type: 'mention', // 通知类型为提及
+        });
+        await notification.save(); // 保存通知
+      }
+    }
+
+    // 返回成功响应，并发送保存的引用帖子
     return res.status(201).json(savedQuotePost);
   } catch (error) {
-    console.error('Error creating quoted post:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    console.error('Error creating quoted post:', error); // 记录错误日志
+    return res.status(500).json({ message: 'Internal server error' }); // 返回500服务器错误
   }
 };
 export const pinPost = async (req, res) => {

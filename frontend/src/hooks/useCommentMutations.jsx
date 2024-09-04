@@ -23,7 +23,7 @@ const useCommentMutations = () => {
 
     onSuccess: () => {
       toast.success('Reply comment successfully');
-      queryClient.invalidateQueries('comment');
+      queryClient.invalidateQueries(['comment']);
     },
     onError: (error) => {
       toast.error(error.message);

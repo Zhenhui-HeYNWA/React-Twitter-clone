@@ -44,6 +44,7 @@ const Post = ({ post, posts, user, feedType }) => {
   const isPinnedPost = user?.pinnedPost[0] === postId;
   const { follow, isPending } = useFollow();
 
+  console.log('opo', post);
   // Check if the authenticated user has reposted this post
   useEffect(() => {
     if (authUser) {
@@ -282,27 +283,30 @@ const Post = ({ post, posts, user, feedType }) => {
                   </span>
                 </span>
               )}
-              <div className='rounded-xl overflow-hidden w-fit mb-3'>
-                {isOriginalPost && post.imgs.length > 0 && (
+
+              {isOriginalPost && post.imgs.length > 0 && (
+                <div className='rounded-xl overflow-hidden w-fit mb-3'>
                   <RenderImg
                     imgs={post.imgs}
                     onImgClick={() =>
                       handleImgClick(authUser.username, post._id)
                     }
                   />
-                )}
-                {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
+                </div>
+              )}
+              {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
+                <div className='rounded-xl overflow-hidden w-fit mb-3'>
                   <RenderImg
                     imgs={post.repost.originalImgs}
                     onImgClick={() =>
                       handleImgClick(authUser.username, post._id)
                     }
                   />
-                )}
-              </div>
+                </div>
+              )}
             </div>
             {isQuote && (
-              <QuotePost post={post?.quote} isOriginalPost={isOriginalPost} />
+              <QuotePost post={post} isOriginalPost={isOriginalPost} />
             )}
 
             <PostFunctions
@@ -310,6 +314,7 @@ const Post = ({ post, posts, user, feedType }) => {
               comments={comments}
               isRepostedByAuthUser={isRepostedByAuthUser}
               isOriginalPost={isOriginalPost}
+              feedType={feedType}
             />
           </div>
         </div>

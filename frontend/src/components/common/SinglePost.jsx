@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { BiRepost } from 'react-icons/bi';
-import { FaArrowLeft } from 'react-icons/fa';
+
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatDateTime } from '../../utils/date';
 import { useEffect, useState } from 'react';
@@ -16,7 +15,8 @@ import ListFunction from './PostCommon/ListFunction';
 import QuotePost from './QuotePost';
 import RenderImg from './RenderImg/RenderImg';
 import PostFunctions from './PostFunctions';
-import { TbPinnedFilled } from 'react-icons/tb';
+
+import PostHeader from './PostCommon/PostHeader';
 
 const SinglePost = () => {
   const { data: authUser } = useQuery({
@@ -47,9 +47,6 @@ const SinglePost = () => {
   const isMyPost = authUser._id === post?.user._id;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
-  const isAuthUserRepost = post?.user._id === authUser?._id;
-
-  const isPinnedPost = post?.user?.pinnedPost[0] === post?._id;
 
   const isOriginalPost = post?.repost?.originalPost == null;
   console.log(isOriginalPost);
@@ -121,38 +118,7 @@ const SinglePost = () => {
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen w-full'>
       <div className='flex flex-col '>
-        <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
-          <div className='flex gap-10  py-1 items-center'>
-            <Link to='/'>
-              <FaArrowLeft className='w-4 h-4' />
-            </Link>
-            <div className='flex flex-col'>
-              <p className='font-bold text-lg'>Post</p>
-            </div>
-          </div>
-        </div>
-        {!isOriginalPost && !isAuthUserRepost && (
-          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-            {' '}
-            <BiRepost className='w-4 h-4  text-slate-500' />
-            {post.user.username} reposted
-          </span>
-        )}
-
-        {!isOriginalPost && isAuthUserRepost && (
-          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-            {' '}
-            <BiRepost className='w-4 h-4  text-slate-500' />
-            You reposted
-          </span>
-        )}
-        {isOriginalPost && isPinnedPost && (
-          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2 '>
-            {' '}
-            <TbPinnedFilled className='w-4 h-4  text-slate-500' />
-            Pinned post
-          </span>
-        )}
+        <PostHeader post={post} authUser={authUser} />
 
         <div className='flex gap-2 items-start py-2 px-4 border-b border-gray-200 dark:border-gray-700 justify-center'>
           {isPostLoading && <PostSkeleton />}
@@ -262,14 +228,12 @@ const SinglePost = () => {
                   )}
                 </div>
                 {isQuote && (
-                  <QuotePost
-                    post={post?.quote}
-                    isOriginalPost={isOriginalPost}
-                  />
+                  <QuotePost post={post} isOriginalPost={isOriginalPost} />
                 )}
               </div>
               <div className='text-sm mt-2 text-gray-500 flex gap-1'>
                 {formattedDate} From
+                <span></span>
                 {post?.postLocation ? post?.postLocation : 'Earth'}
               </div>
             </div>

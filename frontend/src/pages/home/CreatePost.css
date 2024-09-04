@@ -12,7 +12,7 @@ textarea {
 }
 
 .word-wrap {
-  min-height: 40px; /* 设置一个最小高度 */
+  min-height: 40px;
   height: auto;
   word-break: break-word; /* 强制长单词换行 */
   overflow-wrap: break-word; /* 兼容性属性，确保长单词在行尾换行 */
@@ -27,17 +27,25 @@ textarea {
   padding: 0;
 }
 
-.quote-post-container .p-mention-panel {
+.quote-post-container .p-mention {
+  width: 100%;
+}
+.quote-post-container .p-mention-input {
+  width: 100% !important;
+}
+.quote-post-container .p-mention-panel.p-component {
   padding: 10px;
   scrollbar-width: none;
   position: absolute !important;
-  top: 100% !important;
+
+  min-width: 200px !important;
   left: 20px !important;
   z-index: 1050 !important;
-  height: 150%;
+  max-height: 180px !important;
   border-radius: 5px;
   border-top: 1px solid white; /* Border at the top */
   border-bottom: 1px solid white; /* Border at the bottom */
-  width: min-content;
+
   padding: 0;
+  z-index: auto;
 }

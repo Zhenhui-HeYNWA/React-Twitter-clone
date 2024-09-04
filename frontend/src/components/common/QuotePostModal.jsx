@@ -23,6 +23,8 @@ const QuotePostModal = ({ authUser, post }) => {
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const postId = post?._id;
   const formattedDate = formatPostDate(post?.createdAt);
+  const isReposted = post?.repost.postOwner !== null;
+  console.log(isReposted);
 
   const { quotePost, isQuoting, isError, error } = usePostMutations(postId);
 
@@ -51,7 +53,7 @@ const QuotePostModal = ({ authUser, post }) => {
   };
 
   const itemTemplate = (user) => (
-    <div className='card border-x rounded-none z-40 bg-gray-100 dark:bg-[#15202B] w-60 h-18 flex ring-1 ring-white '>
+    <div className='card border-x rounded-none z-40 bg-gray-100 dark:bg-[#15202B] w-full  h-16 flex ring-1 ring-white '>
       <div className='card-body p-0'>
         <div
           className='flex gap-2 items-center hover:bg-slate-300 dark:hover:bg-cyan-900 p-2'
@@ -145,19 +147,21 @@ const QuotePostModal = ({ authUser, post }) => {
   return (
     <dialog
       id={`QuoteModel${post?._id}`}
-      className='modal modal-middle mt-2 dialog-container  '>
-      <div className='modal-box  bg-slate-200 dark:bg-[#15202B] pb-0 px-2   h-max overflow-visible  '>
-        <form method='dialog'>
-          {/* Close button */}
-          <button
-            type='btn'
-            className='btn-sm btn-circle btn-ghost absolute left-2 top-2'>
-            ✕
-          </button>
-        </form>
+      className='modal modal-middle mt-2 dialog-container   '>
+      <div className='modal-box  bg-slate-200 dark:bg-[#15202B] py-0 h-fit '>
+        <div className=' w-full h-10 sticky top-0 z-50 bg-slate-200 dark:bg-[#15202B]'>
+          <form method='dialog' className=' z-auto'>
+            {/* Close button */}
+            <button
+              type='btn'
+              className='btn-sm btn-circle btn-ghost absolute left-2 top-2'>
+              ✕
+            </button>
+          </form>
+        </div>
 
         {/* Modal content */}
-        <div className='flex  flex-row pt-4 gap-2 w-full items-center relative '>
+        <div className='flex  flex-row pt-4 gap-2 w-full  items-center relative  '>
           <div className=' absolute top-6 left-0'>
             <div className='avatar w-10 h-10 rounded-full '>
               <img
@@ -168,8 +172,8 @@ const QuotePostModal = ({ authUser, post }) => {
             </div>
           </div>
           <div className='flex flex-col w-full h-full max-h-128 '>
-            <div className='flex flex-col gap-2 w-full h-full pl-12  '>
-              <div className='quote-post-container pt-4 w-auto h-full   '>
+            <div className='flex flex-col gap-1 w-full h-full pl-12  '>
+              <div className='quote-post-container pt-4  h-full   '>
                 <Mention
                   value={quote}
                   onChange={handleChange}
@@ -224,17 +228,17 @@ const QuotePostModal = ({ authUser, post }) => {
                 </div>
               )}
 
-              <div className='w-full border  border-gray-300 dark:border-gray-700   mt-2 rounded-xl  flex flex-col overflow-hidden'>
-                <div className='flex items-center gap-2 w-full p-2'>
-                  <div className='avatar w-8   rounded-full'>
+              <div className='w-full  border  border-gray-300 dark:border-gray-700 h-fit   mt-2 rounded-xl  flex flex-col overflow-hidden '>
+                <div className='flex items-center gap-2 w-full   p-2'>
+                  <div className='avatar w-8    rounded-full'>
                     <img
                       src={post?.user.profileImg}
                       className='w-7 h-7 rounded-full'
                     />
                   </div>
 
-                  <div className='flex  w-full gap-1'>
-                    <span className='font-bold  text-ellipsis   text-nowrap overflow-hidden w-fit max-w-28 sm:max-w-fit flex-1 '>
+                  <div className='flex  w-full gap-1 '>
+                    <span className='font-bold  text-ellipsis    text-nowrap overflow-hidden w-fit max-w-28 sm:max-w-fit flex-1 '>
                       {post?.user.fullName}
                     </span>
                     <div className=' flex-1 flex '>
@@ -250,12 +254,39 @@ const QuotePostModal = ({ authUser, post }) => {
                     </div>
                   </div>
                 </div>
-                <div className='p-2'>{post?.text}</div>
-                {post?.imgs.length > 0 && (
-                  <RenderImg imgs={post?.imgs} className='' />
+                {isReposted ? (
+                  <div className='p-2'>{post?.repost.originalText}</div>
+                ) : (
+                  <div className='p-2'>{post?.text}</div>
                 )}
+
+                {isReposted
+                  ? post?.repost?.originalImgs?.length > 0 && (
+                      <div className=' w-full rounded-2xl overflow-hidden '>
+                        <RenderImg
+                          imgs={post?.repost?.originalImgs}
+                          size={imgs.length > 0 ? 'sm' : ''}
+                        />
+                      </div>
+                    )
+                  : post?.imgs.length > 0 && (
+                      <div className=' w-full  rounded-2xl overflow-hidden '>
+                        <RenderImg
+                          imgs={post?.imgs}
+                          size={imgs.length > 0 ? 'sm' : ''}
+                        />
+                      </div>
+                    )}
+                {/* {post?.imgs.length > 0 && (
+                  <div className=' w-full bg-red-700  rounded-2xl overflow-hidden '>
+                    <RenderImg
+                      imgs={post?.imgs}
+                      size={imgs.length > 0 ? 'sm' : ''}
+                    />
+                  </div>
+                )} */}
               </div>
-              <div className='flex justify-between border-t py-2  border-gray-200  dark:border-slate-700 mt-2 sticky bottom-0 bg-slate-200 dark:bg-[#15202B]  w-full'>
+              <div className='flex justify-between border-t py-2  border-gray-200  dark:border-slate-700  sticky bottom-0 bg-slate-200 dark:bg-[#15202B]  w-full'>
                 <div className='flex gap-1 items-center relative'>
                   <CiImageOn
                     className='fill-primary w-6 h-6 cursor-pointer'
@@ -266,7 +297,7 @@ const QuotePostModal = ({ authUser, post }) => {
                     onClick={() => setShowEmojiPicker((prev) => !prev)}
                   />
                   {showEmojiPicker && (
-                    <div className='absolute bottom-10 right-0 md:bottom-11 md:left-0 z-10'>
+                    <div className='absolute top-  sm:bottom-5 md:left-0 z-10'>
                       <Picker
                         data={data}
                         onEmojiSelect={handleEmojiSelect}
