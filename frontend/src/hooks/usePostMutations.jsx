@@ -231,7 +231,6 @@ const usePostMutations = (postId, feedType, username) => {
 
   const { mutate: pinPost, isPending: isPinning } = useMutation({
     mutationFn: async () => {
-      console.log(postId);
       try {
         const res = await fetch(`/api/posts/pin/${postId}`, {
           method: 'POST',

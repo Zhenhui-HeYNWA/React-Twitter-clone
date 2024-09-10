@@ -69,7 +69,6 @@ const SinglePost = () => {
     queryKey: ['comments', postId],
     queryFn: async () => {
       const url = `/api/comments/${username}/status/${postId}/comments`;
-      console.log('Fetching comments from URL:', url);
 
       const res = await fetch(url);
       const data = await res.json();
@@ -85,9 +84,9 @@ const SinglePost = () => {
     const regex = /@\w+/g; // Regex to find mentions in the text
     return text.split(regex).map((part, index) => {
       const match = text.match(regex)?.[index];
-      console.log(match);
+
       const username = match?.substring(1);
-      console.log(username);
+
       if (match) {
         return (
           <>

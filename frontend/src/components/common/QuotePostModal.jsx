@@ -44,7 +44,6 @@ const QuotePostModal = ({ authUser, post }) => {
   };
 
   const onSearch = async (event) => {
-    console.log(123);
     const query = event.query.trim();
 
     if (query) {

@@ -32,7 +32,6 @@ const useCommentMutations = () => {
 
   const { mutate: deleteComment, isPending: isCommentDeleting } = useMutation({
     mutationFn: async ({ commentId }) => {
-      console.log(commentId);
       try {
         const res = await fetch(`/api/comments/${commentId}`, {
           method: 'DELETE',

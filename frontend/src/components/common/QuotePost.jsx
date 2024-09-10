@@ -4,11 +4,10 @@ import RenderImg from './RenderImg/RenderImg';
 
 const QuotePost = ({ post, isOriginalPost }) => {
   const quotePost = post?.quote;
-  console.log('quotePost', post);
+
   const formattedDate = formatPostDate(post?.originalCreatedAt);
   const navigate = useNavigate();
   const handleModalImgClick = (e, index) => {
-    console.log(index);
     e.stopPropagation();
     document.getElementById(`my_modal_${index}`).showModal();
   };
@@ -160,7 +159,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
             <RenderImg
               imgs={quotePost?.originalImgs}
               onImgClick={handleModalImgClick}
-                 size='lg'
+              size='lg'
             />
           )}
 
@@ -168,7 +167,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
             <RenderImg
               imgs={quotePost?.repost.originalImgs}
               onImgClick={handleModalImgClick}
-                 size='lg'
+              size='lg'
             />
           )}
         </div>

@@ -80,8 +80,6 @@ const PostFunctions = ({
   // Fetch comments for the specific post
   // Fetch comments data
 
-  console.log(username);
-
   const { data: comments, refetch } = useQuery({
     queryKey: ['comments', postId],
     queryFn: async () => {

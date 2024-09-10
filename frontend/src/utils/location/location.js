@@ -11,7 +11,7 @@ export const fetchLocation = async (lat, lon) => {
       throw new Error('Failed to fetch location');
     }
     const data = await response.json();
-    console.log(data);
+
     return data;
   } catch (err) {
     console.error('Error fetching location:', err);

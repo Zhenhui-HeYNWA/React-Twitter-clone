@@ -12,7 +12,7 @@ const FollowPage = () => {
   const location = useLocation();
   const { feedType: initialFeedType } = location.state || {};
   const [followType, setFollowType] = useState(initialFeedType || 'following');
-  console.log(initialFeedType);
+
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });

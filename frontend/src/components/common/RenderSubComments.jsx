@@ -10,7 +10,6 @@ import CommentFunction from './CommentFunction';
 import RenderImg from './RenderImg/RenderImg';
 
 const RenderSubComments = ({ pageType, postComment }) => {
-  console.log({ postComment, pageType });
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
   const [structuredComments, setStructuredComments] = useState([]);
@@ -46,7 +45,7 @@ const RenderSubComments = ({ pageType, postComment }) => {
 
     return result.reverse();
   }
-  console.log('postComment', postComment);
+
   useEffect(() => {
     if (isSubComment) {
       const structured = getParentCommentsIterative(postComment);
@@ -59,11 +58,10 @@ const RenderSubComments = ({ pageType, postComment }) => {
       `/${id}/comment/${postComment?.user?.username}/${postComment?._id}`
     );
   };
-  console.log('postComment', postComment);
+
   const { deleteComment, isCommentDeleting } = useCommentMutations();
 
   const handleDeleteComment = (commentId) => {
-    console.log(commentId);
     if (isCommentDeleting) return;
     deleteComment({ commentId });
   };

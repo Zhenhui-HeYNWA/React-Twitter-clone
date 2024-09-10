@@ -59,8 +59,6 @@ const Post = ({ post, posts, user, feedType }) => {
 
   // Fetch comments for the specific post
   const fetchComments = async (postId) => {
-    console.log(post.user.username, postId);
-
     const res = await fetch(
       `/api/comments/${post.user.username}/status/${postId}/comments`
     );
@@ -147,7 +145,6 @@ const Post = ({ post, posts, user, feedType }) => {
   };
 
   const handlePinPostClick = (id) => {
-    console.log();
     if (isPinning) return;
     pinPost(id);
   };

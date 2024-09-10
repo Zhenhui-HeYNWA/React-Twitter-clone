@@ -34,9 +34,8 @@ const Posts = ({ feedType, username, user }) => {
     queryKey: ['posts', feedType, username], // Include feedType and username to refetch data based on these dependencies
     queryFn: async () => {
       try {
-        console.log('Starting fetch to:', POST_ENDPOINT);
         const res = await fetch(POST_ENDPOINT);
-        console.log('Fetch response status:', res.status);
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
         return data;
