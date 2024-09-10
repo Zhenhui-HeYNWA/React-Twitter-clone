@@ -254,7 +254,7 @@ const QuotePostModal = ({ authUser, post }) => {
                   itemTemplate={itemTemplate}
                   placeholder='Add a comment'
                   className='text-nowrap h-auto '
-                  autoResize={true}
+                  // autoResize={true}
                 />
               </div>
               {imgs.length > 0 && (

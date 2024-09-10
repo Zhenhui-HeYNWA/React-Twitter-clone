@@ -191,7 +191,7 @@ const CreatePost = () => {
           placeholder='What is happening?!'
           itemTemplate={CreatePostItemTemplate}
           className='word-wrap '
-          autoResize={true}
+          // autoResize={true}
         />
 
         {imgs.length > 0 && (
