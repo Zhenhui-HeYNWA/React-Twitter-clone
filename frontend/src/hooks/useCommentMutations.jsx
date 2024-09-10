@@ -4,14 +4,14 @@ const useCommentMutations = () => {
   const queryClient = useQueryClient();
 
   const { mutate: replyComment, isPending: isReplying } = useMutation({
-    mutationFn: async ({ commentId, text }) => {
+    mutationFn: async ({ commentId, text, imgs }) => {
       try {
         const res = await fetch(`/api/comments/comment/${commentId}/reply`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, imgs }),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');

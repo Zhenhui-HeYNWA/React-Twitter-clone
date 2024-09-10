@@ -37,3 +37,7 @@ textarea {
 .word-wrap {
   word-break: break-word;
 }
+
+em-emoji-picker {
+  height: 300px;
+}

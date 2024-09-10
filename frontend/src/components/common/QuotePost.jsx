@@ -12,7 +12,32 @@ const QuotePost = ({ post, isOriginalPost }) => {
     e.stopPropagation();
     document.getElementById(`my_modal_${index}`).showModal();
   };
-  console.log('fasfsafsd', post);
+
+  const RenderQuotePostLink = ({ text }) => {
+    const validText = text || '';
+
+    const regexLink = /(\/[a-zA-Z0-9_]+\/status\/[a-zA-Z0-9]+)/;
+
+    const parts = validText.split(regexLink);
+    return (
+      <div>
+        {parts.map((part, index) => {
+          if (regexLink.test(part)) {
+            return (
+              <Link
+                key={index}
+                to={part}
+                className='text-blue-500 hover:underline'>
+                {part}
+              </Link>
+            );
+          }
+
+          return <span key={index}>{part}</span>;
+        })}
+      </div>
+    );
+  };
 
   // Check if either post.imgs or post.repost.originalImgs have images
   const postHasImgs =
@@ -21,10 +46,15 @@ const QuotePost = ({ post, isOriginalPost }) => {
       Array.isArray(post?.repost?.originalImgs) &&
       post?.repost.originalImgs.length > 0);
 
-  console.log(postHasImgs);
+  const shouldShowOriginalImgs =
+    isOriginalPost && quotePost.originalImgs.length > 0 && postHasImgs; // 条件1和3
+
+  const shouldShowRepostImgs =
+    !isOriginalPost && quotePost.repost.originalImgs?.length > 0 && postHasImgs;
+
   return (
     <>
-      {postHasImgs ? (
+      {shouldShowOriginalImgs || shouldShowRepostImgs ? (
         <div className='h-48 w-full rounded-2xl border border-gray-200  dark:border-slate-700 px-3 pt-4 mt-2'>
           <Link to={`/profile/${quotePost?.originalUser.username}`}>
             <div className='flex items-center gap-2 w-full'>
@@ -63,11 +93,20 @@ const QuotePost = ({ post, isOriginalPost }) => {
             }>
             <div className='w-32 h-32 rounded-2xl  pb-2 cursor-pointer'>
               {isOriginalPost && quotePost.originalImgs.length > 0 && (
-                <RenderImg
-                  imgs={quotePost?.originalImgs}
-                  onImgClick={handleModalImgClick}
-                  size='sm'
-                />
+                <>
+                  <div className='w-32 h-32 rounded-2xl  pb-2 cursor-pointer'>
+                    <RenderImg
+                      imgs={quotePost?.originalImgs}
+                      onImgClick={handleModalImgClick}
+                      size='sm'
+                    />
+                  </div>
+                  <div className='px-2 w-full  h-32 py-1  '>
+                    <div className=' text-base w-full h-full  whitespace-pre-wrap word-wrap line-clamp-5 '>
+                      <RenderQuotePostLink text={quotePost?.originalText} />
+                    </div>
+                  </div>
+                </>
               )}
               {!isOriginalPost && quotePost.repost.originalImgs?.length > 0 && (
                 <RenderImg
@@ -79,7 +118,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
             </div>
             <div className='px-2 w-full  h-32 py-1  '>
               <div className=' text-base w-full h-full  whitespace-pre-wrap word-wrap line-clamp-5'>
-                {quotePost.originalText}
+                <RenderQuotePostLink text={quotePost?.originalText} />
               </div>
             </div>
           </div>
@@ -112,11 +151,16 @@ const QuotePost = ({ post, isOriginalPost }) => {
             </div>
           </div>
 
-          <div className='py-2 px-4'>{quotePost?.originalText} </div>
+          <div className='py-2 px-4'>
+            <div className=' text-base w-full h-full  whitespace-pre-wrap word-wrap line-clamp-5'>
+              <RenderQuotePostLink text={quotePost?.originalText} />{' '}
+            </div>
+          </div>
           {isOriginalPost && quotePost?.originalImgs.length > 0 && (
             <RenderImg
               imgs={quotePost?.originalImgs}
               onImgClick={handleModalImgClick}
+                 size='lg'
             />
           )}
 
@@ -124,6 +168,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
             <RenderImg
               imgs={quotePost?.repost.originalImgs}
               onImgClick={handleModalImgClick}
+                 size='lg'
             />
           )}
         </div>

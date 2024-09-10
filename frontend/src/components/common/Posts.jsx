@@ -96,6 +96,7 @@ const Posts = ({ feedType, username, user }) => {
                   posts={processedItems}
                   feedType={feedType}
                   user={user}
+                  username={username}
                 />
               );
             } else if (item.postId) {

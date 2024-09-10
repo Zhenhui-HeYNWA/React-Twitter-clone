@@ -117,13 +117,13 @@ const usePostMutations = (postId, feedType, username) => {
   });
 
   const { mutate: commentPostSimple, isPending: isCommenting } = useMutation({
-    mutationFn: async ({ text }) => {
+    mutationFn: async ({ text, imgs }) => {
       const res = await fetch(`/api/comments/comment/${postId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, imgs }),
       });
 
       const data = await res.json();
@@ -141,12 +141,12 @@ const usePostMutations = (postId, feedType, username) => {
 
   const { mutate: commentPostAdvanced, isPending: isPostCommenting } =
     useMutation({
-      mutationFn: async ({ postId, text }) => {
+      mutationFn: async ({ postId, text, imgs }) => {
         try {
           const res = await fetch(`/api/comments/comment/${postId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text }),
+            body: JSON.stringify({ text, imgs }),
           });
 
           const data = await res.json();

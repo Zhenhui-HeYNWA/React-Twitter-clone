@@ -249,18 +249,24 @@ const CommentPage = () => {
                             </span>
                           )}
                           {isOriginalPost && post.imgs.length > 0 && (
-                            <RenderImg
-                              imgs={post.imgs}
-                              onImgClick={handleModalImgClick}
-                            />
+                            <div className='rounded-xl overflow-hidden w-fit mb-3'>
+                              <RenderImg
+                                imgs={post.imgs}
+                                onImgClick={handleModalImgClick}
+                                size='lg'
+                              />
+                            </div>
                           )}
 
                           {!isOriginalPost &&
                             post.repost.originalImgs.length > 0 && (
-                              <RenderImg
-                                imgs={post.repost.originalImgs}
-                                onImgClick={handleModalImgClick}
-                              />
+                              <div className='rounded-xl overflow-hidden w-fit mb-3'>
+                                <RenderImg
+                                  imgs={post.repost.originalImgs}
+                                  onImgClick={handleModalImgClick}
+                                  size='lg'
+                                />
+                              </div>
                             )}
                         </div>
                         {/* post functions */}
@@ -270,6 +276,8 @@ const CommentPage = () => {
                           comments={comments}
                           isRepostedByAuthUser={isRepostedByAuthUser}
                           isOriginalPost={isOriginalPost}
+                          username={username}
+                          postId={postId}
                         />
                       </div>
                     </div>

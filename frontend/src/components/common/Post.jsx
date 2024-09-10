@@ -16,6 +16,7 @@ import { TbPinnedFilled } from 'react-icons/tb';
 import QuotePost from './QuotePost';
 import LoadingSpinner from './LoadingSpinner';
 import useFollow from '../../hooks/useFollow';
+import RenderPostText from './PostCommon/RenderPostText/RenderPostText';
 
 // Function to check the existence of mentioned users
 const fetchMentionedUsersExistence = async (usernames) => {
@@ -31,8 +32,10 @@ const fetchMentionedUsersExistence = async (usernames) => {
 };
 
 // Post component
-const Post = ({ post, posts, user, feedType }) => {
+const Post = ({ post, posts, user, username, feedType }) => {
   const navigate = useNavigate();
+
+  console.log(username);
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
   const [mentionedUsersExistence, setMentionedUsersExistence] = useState({}); // State to store the existence of mentioned users
@@ -96,6 +99,7 @@ const Post = ({ post, posts, user, feedType }) => {
     post?.quote.originalPost &&
     post?.quote.originalUser
   );
+
   // Highlight mentions in the post text
   const highlightMentions = (text) => {
     const regex = /@\w+/g;
@@ -202,6 +206,7 @@ const Post = ({ post, posts, user, feedType }) => {
               </Link>
             )}
           </div>
+
           <div className='flex flex-col flex-1  '>
             <div className='flex   justify-between items-center w-full  '>
               <div className='flex flex-row gap-1 items-center max-w-sm '>
@@ -291,6 +296,7 @@ const Post = ({ post, posts, user, feedType }) => {
                     onImgClick={() =>
                       handleImgClick(authUser.username, post._id)
                     }
+                    size='lg'
                   />
                 </div>
               )}
@@ -301,6 +307,7 @@ const Post = ({ post, posts, user, feedType }) => {
                     onImgClick={() =>
                       handleImgClick(authUser.username, post._id)
                     }
+                    size='lg'
                   />
                 </div>
               )}
@@ -315,6 +322,7 @@ const Post = ({ post, posts, user, feedType }) => {
               isRepostedByAuthUser={isRepostedByAuthUser}
               isOriginalPost={isOriginalPost}
               feedType={feedType}
+              username={username}
             />
           </div>
         </div>

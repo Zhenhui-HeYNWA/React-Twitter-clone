@@ -9,13 +9,18 @@ import { RiShare2Line } from 'react-icons/ri';
 import { AiOutlineLink } from 'react-icons/ai';
 import toast from 'react-hot-toast';
 
-const CommentFunction = ({ postComment }) => {
+import CommentsControls from './Comments/CommentsControls';
+import { IoCloseSharp } from 'react-icons/io5';
+
+const CommentFunction = ({ postComment, size }) => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
 
+  const [imgs, setImgs] = useState([]);
   const [reply, setReplies] = useState('');
   const [structuredComments, setStructuredComments] = useState([]);
+
   const {
     replyComment,
     isReplying,
@@ -30,6 +35,33 @@ const CommentFunction = ({ postComment }) => {
   const isSubComment = postComment?.parentId !== null;
   console.log(isSubComment);
 
+  const onEmojiSelect = (emoji) => {
+    setReplies((prevText) => prevText + emoji.native);
+  };
+
+  console.log('PostComment object:', postComment);
+  console.log('Post ID:', postComment?.postId?._id);
+  console.log('User:', postComment?.user?.username);
+  const handleImgChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length + imgs.length <= 4) {
+      const newImgs = [...imgs];
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          newImgs.push(reader.result);
+          if (newImgs.length <= 4) {
+            setImgs(newImgs);
+          } else {
+            toast.error('You can upload up to 4 images.');
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    } else {
+      toast.error('You can upload up to 4 images.');
+    }
+  };
   const commentLiked = authUser.likes.some(
     (like) => like.onModel === 'Comment' && like.item === postComment._id
   );
@@ -46,6 +78,7 @@ const CommentFunction = ({ postComment }) => {
       result.push({
         _id: currentComment.parentId._id,
         text: currentComment.parentId.text,
+        imgs: currentComment.parentId.imgs,
         user: currentComment.parentId.user,
         replies: currentComment.parentId.replies,
         createdAt: formatPostDate(currentComment.parentId.createdAt),
@@ -68,8 +101,9 @@ const CommentFunction = ({ postComment }) => {
   const handleReplyComment = (e, commentId) => {
     e.preventDefault();
     if (isReplying) return;
-    replyComment({ commentId, text: reply });
+    replyComment({ commentId, text: reply, imgs: imgs.length > 0 ? imgs : [] });
     setReplies('');
+    setImgs([]);
     const modal = document.getElementById(
       `ReplyComments_modal${postComment?._id}`
     );
@@ -86,8 +120,15 @@ const CommentFunction = ({ postComment }) => {
     if (isMarking) return;
     bookmarkComment(commentId);
   };
+  console.log(`/${postComment?.postId?._id}/comment/`);
 
   const handleShareLink = async (url) => {
+    console.log(
+      `/${postComment?.postId}/comment/${postComment.user?.username}/${postComment._id}`
+    );
+
+    console.log(postComment);
+
     const content = window.location.origin + url;
 
     try {
@@ -109,7 +150,10 @@ const CommentFunction = ({ postComment }) => {
   return (
     <>
       {postComment ? (
-        <div className='flex flex-row items-center justify-between '>
+        <div
+          className={`flex justify-between  w-full ${
+            size === 'lg' ? '' : 'mt-3'
+          } `}>
           <div
             className='flex gap-1 items-center cursor-pointer group '
             onClick={() =>
@@ -120,8 +164,15 @@ const CommentFunction = ({ postComment }) => {
             {isReplying && <LoadingSpinner size='sm' />}
             {!isReplying && (
               <div className='flex items-center gap-1 w-12 '>
-                <BiComment className='w-4 h-4 text-slate-500 group-hover:text-sky-400' />
-                <span className='text-sm text-slate-500 group-hover:text-sky-400'>
+                <BiComment
+                  className={`${
+                    size === 'lg' ? 'w-5 h-5' : 'w-4 h-4'
+                  }  text-slate-500 group-hover:text-sky-400`}
+                />
+                <span
+                  className={`${
+                    size === 'lg' ? 'text-base' : 'text-sm'
+                  } text-slate-500 group-hover:text-sky-400`}>
                   {postComment?.replies?.length}
                 </span>
               </div>
@@ -132,7 +183,7 @@ const CommentFunction = ({ postComment }) => {
           <dialog
             id={`ReplyComments_modal${postComment?._id}`}
             className='modal  outline-none '>
-            <div className='modal-box rounded-xl border  bg-gray-100 border-gray-400 dark:bg-[#15202B]'>
+            <div className='modal-box rounded-xl border  bg-gray-100 border-gray-400 dark:bg-[#15202B] overflow-visible'>
               <div className='flex flex-row gap-2 max-h-60 overflow-auto   '>
                 <div className='flex flex-col items-center '>
                   <div className='h-10 w-10 rounded-full'>
@@ -160,7 +211,7 @@ const CommentFunction = ({ postComment }) => {
                       </div>
                     </div>
                     <div className='text-base '>{postComment?.text}</div>
-                    <div className='mt-2 text-gray-500'>
+                    <div className='mt-2 text-gray-500 bg-blue-950'>
                       Replying to
                       <span className='text-sky-600'>
                         @{postComment?.user?.username}
@@ -172,32 +223,69 @@ const CommentFunction = ({ postComment }) => {
               <form
                 className='flex flex-row gap-2 mt-1 items-center dark:bg-[#15202B] justify-between '
                 onSubmit={(e) => handleReplyComment(e, postComment?._id)}>
-                <div className='flex flex-row gap-2 '>
-                  {' '}
-                  <div className='h-10 w-10 rounded-full overflow-auto '>
-                    <img
-                      src={authUser.profileImg}
-                      alt=''
-                      className='h-10 w-10 rounded-full '
+                <div className='flex flex-col w-full'>
+                  <div className='flex flex-row gap-2 '>
+                    {' '}
+                    <div className='h-10 w-10 rounded-full overflow-auto '>
+                      <img
+                        src={authUser.profileImg}
+                        alt=''
+                        className='h-10 w-10 rounded-full '
+                      />
+                    </div>
+                    <textarea
+                      className='textarea items-center p-0 w-2/3 h-2 bg-gray-100 dark:bg-[#15202B]   rounded text-md resize-none  focus:outline-none '
+                      placeholder='Post your reply'
+                      value={reply}
+                      onChange={(e) => setReplies(e.target.value)}
                     />
                   </div>
-                  <textarea
-                    className='textarea items-center p-0 w-2/3 h-2 bg-gray-100 dark:bg-[#15202B]   rounded text-md resize-none  focus:outline-none '
-                    placeholder='Post your reply'
-                    value={reply}
-                    onChange={(e) => setReplies(e.target.value)}
+
+                  {imgs.length > 0 && (
+                    <div className='w-full overflow-x-auto '>
+                      <div className='flex gap-2'>
+                        {imgs.map((img, index) => (
+                          <div
+                            key={img}
+                            className='relative flex-shrink-0 w-fit h-fit'
+                            style={{
+                              flex: imgs.length > 1 ? '0 0 9rem' : '0 0 auto',
+                            }}>
+                            <IoCloseSharp
+                              className='absolute top-0 right-0 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
+                              onClick={() => {
+                                setImgs(imgs.filter((_, i) => i !== index));
+                              }}
+                            />
+                            <img
+                              src={img}
+                              className={
+                                imgs.length > 1
+                                  ? `w-44 h-48 object-cover rounded-2xl`
+                                  : ` w-28 h-32 sm:w-32 sm:h-36 mx-auto  object-cover rounded-2xl`
+                              }
+                              alt={`Preview ${index + 1}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <CommentsControls
+                    isSending={isReplying}
+                    onEmojiSelect={onEmojiSelect}
+                    onImgsChange={handleImgChange}
                   />
                 </div>
-
-                <button className='btn justify-end btn-primary rounded-full btn-sm text-white px-4'>
+                {/* <button className='btn justify-end btn-primary rounded-full btn-sm text-white px-4'>
                   {replyComment.isCommenting ? (
                     <span className=' flex  gap-1 items-center disabled'>
                       Posting <LoadingSpinner size='md' />
                     </span>
                   ) : (
-                    'Reply'
+                    'Reply '
                   )}
-                </button>
+                </button> */}
               </form>
             </div>
             <form method='dialog' className='modal-backdrop'>
@@ -207,7 +295,9 @@ const CommentFunction = ({ postComment }) => {
 
           <div className='flex items-center group cursor-pointer gap-1 w-12 '>
             <BiRepost
-              className={`w-6 h-6 text-slate-500 group-hover:text-green-500`}
+              className={`${
+                size === 'lg' ? 'w-7 h-7' : 'h-6 w-6'
+              } text-slate-500 group-hover:text-green-500`}
             />
             <span
               className='text-sm font-normal group-hover:text-green-500 
@@ -225,14 +315,15 @@ const CommentFunction = ({ postComment }) => {
             ) : (
               <>
                 <FaRegHeart
-                  className={`w-4 h-4 cursor-pointer ${
+                  size={`${size === 'lg' ? 18 : 15}`}
+                  className={` cursor-pointer ${
                     commentLiked
                       ? 'text-pink-500'
                       : 'text-slate-500 group-hover:text-pink-500'
                   }`}
                 />
                 <span
-                  className={`text-sm ${
+                  className={` ${size === 'lg' ? 'text-base' : 'text-sm'} ${
                     commentLiked
                       ? 'text-pink-500'
                       : 'text-slate-500 group-hover:text-pink-500'
@@ -243,17 +334,20 @@ const CommentFunction = ({ postComment }) => {
             )}
           </div>
           {/* bookmark */}
-          <div className='flex flex-row gap-2'>
+          <div className='flex flex-row gap-2 items-center'>
             <div
               className='flex  group items-center'
               onClick={() => handleBookMarkComment(postComment._id)}>
               {isMarking && <LoadingSpinner size='sm' />}
               {!isMarking && markedComment && (
-                <FaBookmark size={15} className=' cursor-pointer ' />
+                <FaBookmark
+                  size={`${size === 'lg' ? 18 : 15}`}
+                  className=' cursor-pointer '
+                />
               )}
               {!isMarking && !markedComment && (
                 <FaRegBookmark
-                  size={15}
+                  size={`${size === 'lg' ? 18 : 15}`}
                   className=' text-slate-500 cursor-pointer group-hover:fill-black'
                 />
               )}
@@ -261,7 +355,7 @@ const CommentFunction = ({ postComment }) => {
             {/* Share Link Function */}
             <div className=' dropdown dropdown-top dropdown-end '>
               <RiShare2Line
-                size={18}
+                size={`${size === 'lg' ? 20 : 18}`}
                 className=' text-slate-500 '
                 tabIndex={0}
                 role='button'
@@ -274,9 +368,13 @@ const CommentFunction = ({ postComment }) => {
                   className='flex'
                   onClick={() =>
                     handleShareLink(
-                      `/${postComment.postId._id}/comment/${postComment?.user?.username}/${postComment?._id}`
+                      `/${postComment?.postId}/comment/${postComment?.user?.username}/${postComment?._id}`
                     )
-                  }>
+                  }
+                  // onClick={
+                  //   () => handleShareLink(postComment) // Pass the whole postComment object
+                  // }
+                >
                   <>
                     <span className='text-slate-700 dark:text-slate-200'>
                       {' '}

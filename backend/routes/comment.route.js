@@ -18,6 +18,6 @@ router.post('/likes/:id', protectRoute, likeUnlikeComment);
 router.post('/bookmarks/:id', protectRoute, bookmarkComment);
 router.get('/:userId/comment', protectRoute, getUserReplies);
 router.get('/:postId/comment/:username/:commentId', getSingleComment);
-router.get('/:username/status/:id/comments', protectRoute, getPostComments);
+router.get('/:username/status/:postId/comments', protectRoute, getPostComments);
 router.delete('/:id', protectRoute, deleteComment);
 export default router;

@@ -7,6 +7,7 @@ import { formatPostDate } from '../../utils/date';
 import useCommentMutations from '../../hooks/useCommentMutations';
 import { useEffect, useState } from 'react';
 import CommentFunction from './CommentFunction';
+import RenderImg from './RenderImg/RenderImg';
 
 const RenderSubComments = ({ pageType, postComment }) => {
   console.log({ postComment, pageType });
@@ -234,6 +235,11 @@ const RenderSubComments = ({ pageType, postComment }) => {
               <span className='text-lg whitespace-pre-wrap'>
                 {postComment?.text}
               </span>
+              {postComment.imgs.length > 0 && (
+                <div className='rounded-xl overflow-hidden w-fit mb-3'>
+                  <RenderImg imgs={postComment.imgs} size={'md'} />
+                </div>
+              )}
             </div>
 
             {/* comment functions section*/}

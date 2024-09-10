@@ -1,30 +1,37 @@
 import { Mention } from 'primereact/mention';
-import { useRef, useState } from 'react';
-import { BsEmojiSmileFill } from 'react-icons/bs';
+import { useState } from 'react';
+
 import RenderImg from './RenderImg/RenderImg';
 import toast from 'react-hot-toast';
-import Picker from '@emoji-mart/react';
+
 import { IoCloseSharp } from 'react-icons/io5';
-import { CiImageOn, CiLocationOn } from 'react-icons/ci';
+import { CiLocationOn } from 'react-icons/ci';
 import { useTheme } from '../../components/context/ThemeProvider';
-import data from '@emoji-mart/data';
+
 import { fetchLocation } from '../../utils/location/location.js';
-import LoadingSpinner from './LoadingSpinner';
+
 import usePostMutations from '../../hooks/usePostMutations.jsx';
 import { formatPostDate } from '../../utils/date/index.js';
+import { Link } from 'react-router-dom';
+import CreatePostControls from './PostCommon/CreatePostControls.jsx';
+
 const QuotePostModal = ({ authUser, post }) => {
   const { theme } = useTheme();
   const [quote, setQuote] = useState('');
   const [imgs, setImgs] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
   const [locationName, setLocationName] = useState('');
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const imgRef = useRef(null);
+
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
   const postId = post?._id;
   const formattedDate = formatPostDate(post?.createdAt);
-  const isReposted = post?.repost.postOwner !== null;
-  console.log(isReposted);
+  const isReposted = post?.repost.repostNum > 0;
+
+  const isQuote = !!(
+    post?.quote &&
+    post?.quote.originalPost &&
+    post?.quote.originalUser
+  );
 
   const { quotePost, isQuoting, isError, error } = usePostMutations(postId);
 
@@ -120,6 +127,71 @@ const QuotePostModal = ({ authUser, post }) => {
     setLocationName('');
   };
 
+  const renderModalContent = (post, isReposted, isQuote) => {
+    let content;
+
+    switch (true) {
+      case isReposted:
+        content = (
+          <>
+            <div className='p-2'>{post?.repost.originalText}</div>
+            {post?.repost?.originalImgs?.length > 0 && (
+              <div className='w-full  overflow-hidden'>
+                <RenderImg
+                  imgs={post?.repost?.originalImgs}
+                  size={post?.repost?.originalImgs.length > 0 ? 'sm' : 'lg'}
+                />
+              </div>
+            )}
+          </>
+        );
+        break;
+
+      case isQuote:
+        content = (
+          <>
+            <div className='p-2'>
+              {post?.text} <span> </span>
+              <Link
+                to={`/${post?.user?.username}/status/${post?._id}`}
+                className=' text-blue-600 cursor-pointer underline'>
+                {post?.user?.username}/status/{post?._id}
+              </Link>
+            </div>
+            {post?.imgs.length > 0 && (
+              <div className=' w-full  overflow-hidden '>
+                <RenderImg
+                  imgs={post?.imgs}
+                  size={imgs.length > 0 ? 'sm' : 'lg'}
+                />
+              </div>
+            )}
+          </>
+        );
+        break;
+      default:
+        content = (
+          <>
+            <div
+              className='px-2 w-full 
+ text-ellipsis'>
+              <p className='w-full text-pretty'>{post?.text}</p>
+            </div>
+            {post?.imgs?.length > 0 && (
+              <div className='w-full  overflow-hidden'>
+                <RenderImg
+                  imgs={post?.imgs}
+                  size={imgs.length > 0 ? 'sm' : 'lg'}
+                />
+              </div>
+            )}
+          </>
+        );
+        break;
+    }
+    return content;
+  };
+
   const handleLocation = async () => {
     if (navigator.geolocation) {
       setIsFetchingLocation(true); // Start loading
@@ -148,8 +220,8 @@ const QuotePostModal = ({ authUser, post }) => {
     <dialog
       id={`QuoteModel${post?._id}`}
       className='modal modal-middle mt-2 dialog-container   '>
-      <div className='modal-box  bg-slate-200 dark:bg-[#15202B] py-0 h-fit '>
-        <div className=' w-full h-10 sticky top-0 z-50 bg-slate-200 dark:bg-[#15202B]'>
+      <div className='modal-box  bg-slate-100 dark:bg-[#15202B] py-0 h-fit '>
+        <div className=' w-full h-10 sticky top-0 z-50 bg-slate-100 dark:bg-[#15202B]'>
           <form method='dialog' className=' z-auto'>
             {/* Close button */}
             <button
@@ -191,7 +263,7 @@ const QuotePostModal = ({ authUser, post }) => {
                   <div className='flex gap-2'>
                     {imgs.map((img, index) => (
                       <div
-                        key={index}
+                        key={img}
                         className='relative flex-shrink-0'
                         style={{
                           flex: imgs.length > 1 ? '0 0 10rem' : '0 0 auto',
@@ -227,7 +299,6 @@ const QuotePostModal = ({ authUser, post }) => {
                   {error.message || 'Something went wrong'}
                 </div>
               )}
-
               <div className='w-full  border  border-gray-300 dark:border-gray-700 h-fit   mt-2 rounded-xl  flex flex-col overflow-hidden '>
                 <div className='flex items-center gap-2 w-full   p-2'>
                   <div className='avatar w-8    rounded-full'>
@@ -254,89 +325,21 @@ const QuotePostModal = ({ authUser, post }) => {
                     </div>
                   </div>
                 </div>
-                {isReposted ? (
-                  <div className='p-2'>{post?.repost.originalText}</div>
-                ) : (
-                  <div className='p-2'>{post?.text}</div>
-                )}
 
-                {isReposted
-                  ? post?.repost?.originalImgs?.length > 0 && (
-                      <div className=' w-full rounded-2xl overflow-hidden '>
-                        <RenderImg
-                          imgs={post?.repost?.originalImgs}
-                          size={imgs.length > 0 ? 'sm' : ''}
-                        />
-                      </div>
-                    )
-                  : post?.imgs.length > 0 && (
-                      <div className=' w-full  rounded-2xl overflow-hidden '>
-                        <RenderImg
-                          imgs={post?.imgs}
-                          size={imgs.length > 0 ? 'sm' : ''}
-                        />
-                      </div>
-                    )}
-                {/* {post?.imgs.length > 0 && (
-                  <div className=' w-full bg-red-700  rounded-2xl overflow-hidden '>
-                    <RenderImg
-                      imgs={post?.imgs}
-                      size={imgs.length > 0 ? 'sm' : ''}
-                    />
-                  </div>
-                )} */}
-              </div>
-              <div className='flex justify-between border-t py-2  border-gray-200  dark:border-slate-700  sticky bottom-0 bg-slate-200 dark:bg-[#15202B]  w-full'>
-                <div className='flex gap-1 items-center relative'>
-                  <CiImageOn
-                    className='fill-primary w-6 h-6 cursor-pointer'
-                    onClick={() => imgRef.current.click()}
-                  />
-                  <BsEmojiSmileFill
-                    className='fill-primary w-5 h-5 cursor-pointer'
-                    onClick={() => setShowEmojiPicker((prev) => !prev)}
-                  />
-                  {showEmojiPicker && (
-                    <div className='absolute top-  sm:bottom-5 md:left-0 z-10'>
-                      <Picker
-                        data={data}
-                        onEmojiSelect={handleEmojiSelect}
-                        className='bg-slate-100 dark:bg-current'
-                        theme={theme === 'dark' ? 'dark' : 'light'}
-                      />
-                    </div>
-                  )}
-                  {!isFetchingLocation ? (
-                    <CiLocationOn
-                      className='fill-primary w-5 h-5 cursor-pointer'
-                      onClick={handleLocation}
-                    />
-                  ) : (
-                    <LoadingSpinner size='sm' />
-                  )}
+                <div className=''>
+                  {renderModalContent(post, isReposted, isQuote)}
                 </div>
-                <input
-                  type='file'
-                  hidden
-                  ref={imgRef}
-                  accept='image/*'
-                  onChange={handleImgChange}
-                  multiple
-                />
-                <button
-                  onClick={handleSubmit} // Handle form submission here
-                  className={`btn btn-primary rounded-full btn-sm text-white px-4 ${
-                    isQuoting ? 'disabled' : ''
-                  }`}>
-                  {isQuoting ? (
-                    <>
-                      <LoadingSpinner size='sm' /> Quoting
-                    </>
-                  ) : (
-                    'Quote'
-                  )}
-                </button>
               </div>
+              <CreatePostControls
+                onImgsChange={handleImgChange}
+                onEmojiSelect={handleEmojiSelect}
+                onLocationFetch={handleLocation}
+                isFetchingLocation={isFetchingLocation} // Replace with actual state
+                isPosting={isQuoting} // Replace with actual state
+                onSubmit={handleSubmit}
+                theme={theme}
+                type={'quote'}
+              />
             </div>
           </div>
         </div>

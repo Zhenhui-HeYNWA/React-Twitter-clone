@@ -2,28 +2,36 @@ import Post from '../models/post.model.js';
 import User from '../models/user.model.js';
 import Comment from '../models/comment.model.js';
 import Notification from '../models/notification.model.js';
-
+import { v2 as cloudinary } from 'cloudinary';
 //Get Post Top level comments
+
+import mongoose from 'mongoose';
+
 export const getPostComments = async (req, res) => {
-  const { id: postId } = req.params;
+  const { postId } = req.params;
+
+  // 检查 postId 是否有效
+  if (!mongoose.Types.ObjectId.isValid(postId)) {
+    return res.status(400).json({ error: 'Invalid postId' });
+  }
 
   try {
     const post = await Post.findById(postId).populate({
       path: 'comments',
-      match: { parentId: null, isDeleted: { $ne: true } }, // Filter out top-level, non-deleted comments
+      match: { parentId: null, isDeleted: { $ne: true } }, // 过滤顶级非删除评论
       options: {
-        sort: { createdAt: -1 }, // Sort comments by creation date in descending order
+        sort: { createdAt: -1 }, // 按创建日期降序排列
       },
       populate: [
         {
           path: 'user',
-          select: 'username fullName profileImg', // Populate the user field without the password
+          select: 'username fullName profileImg', // 填充用户信息
         },
         {
           path: 'postId',
           populate: {
             path: 'user',
-            select: 'username fullName profileImg', // Populate the user information for the post
+            select: 'username fullName profileImg', // 填充帖子的用户信息
           },
         },
       ],
@@ -171,17 +179,39 @@ export const getUserReplies = async (req, res) => {
 //Post comment on post
 export const commentOnPost = async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, imgs } = req.body;
     const postId = req.params.id;
     const userId = req.user._id;
 
-    if (!text) return res.status(400).json({ error: 'Text field is required' });
+    if (!text && (!imgs || imgs.length === 0)) {
+      return res.status(400).json({ error: 'Post must have text or images' });
+    }
 
+    if (imgs && imgs.length > 4) {
+      return res
+        .status(400)
+        .json({ error: 'You can upload a maximum of 4 images ' });
+    }
+
+    let uploadedImages = [];
+
+    if (imgs && imgs.length > 0) {
+      for (const img of imgs) {
+        const uploadedResponse = await cloudinary.uploader.upload(img);
+        uploadedImages.push(uploadedResponse.secure_url);
+      }
+    }
     const post = await Post.findById(postId);
 
     if (!post) return res.status(400).json({ message: 'Post not found' });
 
-    const comment = new Comment({ user: userId, text, postId }); // 将 postId 存入评论中
+    const comment = new Comment({
+      user: userId,
+      text,
+      imgs: uploadedImages,
+      postId,
+    });
+
     await comment.save();
 
     post.comments.push(comment._id);
@@ -199,11 +229,26 @@ export const commentOnPost = async (req, res) => {
 // Reply to a comment
 export const replyToComment = async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, imgs = [] } = req.body;
     const commentId = req.params.id; // 父评论的ID
     const userId = req.user._id;
 
-    if (!text) return res.status(400).json({ error: 'Text field is required' });
+    if (!text && (!imgs || imgs.length === 0)) {
+      return res.status(400).json({ error: 'Post must have text or images' });
+    }
+    if (imgs && imgs.length > 4) {
+      return res
+        .status(400)
+        .json({ error: 'You can upload a maximum of 4 images' });
+    }
+
+    let uploadedImages = [];
+    if (imgs && imgs.length > 0) {
+      for (const img of imgs) {
+        const uploadedResponse = await cloudinary.uploader.upload(img);
+        uploadedImages.push(uploadedResponse.secure_url);
+      }
+    }
 
     const parentComment = await Comment.findById(commentId).populate('postId');
     if (!parentComment)
@@ -212,6 +257,7 @@ export const replyToComment = async (req, res) => {
     const reply = new Comment({
       user: userId,
       text,
+      imgs: uploadedImages,
       parentId: commentId,
       postId: parentComment.postId,
     });

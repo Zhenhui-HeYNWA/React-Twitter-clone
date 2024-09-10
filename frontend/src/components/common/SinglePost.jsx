@@ -24,6 +24,7 @@ const SinglePost = () => {
   });
 
   const { username, postId } = useParams();
+  console.log('Username:', username, 'PostId:', postId);
 
   // Fetch post data
   const { data: post, isLoading: isPostLoading } = useQuery({
@@ -37,12 +38,12 @@ const SinglePost = () => {
     },
   });
 
-  console.log('QuotePost', post);
   const isQuote = !!(
     post?.quote &&
     post?.quote.originalPost &&
     post?.quote.originalUser
   );
+
   console.log(isQuote);
   const isMyPost = authUser._id === post?.user._id;
 
@@ -64,16 +65,20 @@ const SinglePost = () => {
   }, [authUser, post]);
 
   // Fetch comments data
+  // 确保 username 和 postId 存在后再进行查询
+
   const { data: comments, isLoading: isCommentsLoading } = useQuery({
     queryKey: ['comments', postId],
     queryFn: async () => {
-      const res = await fetch(
-        `/api/comments/${username}/status/${postId}/comments`
-      );
+      const url = `/api/comments/${username}/status/${postId}/comments`;
+      console.log('Fetching comments from URL:', url);
+
+      const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       return data;
     },
+    enabled: !!postId, // 只有在 postId 存在时才执行查询
   });
   const navigate = useNavigate();
   const { deletePost, isDeleting } = usePostMutations(postId);
@@ -217,6 +222,7 @@ const SinglePost = () => {
                     <RenderImg
                       imgs={post.imgs}
                       onImgClick={handleModalImgClick}
+                      size='lg'
                     />
                   )}
 
@@ -224,6 +230,7 @@ const SinglePost = () => {
                     <RenderImg
                       imgs={post.repost.originalImgs}
                       onImgClick={handleModalImgClick}
+                      size='lg'
                     />
                   )}
                 </div>
@@ -245,6 +252,8 @@ const SinglePost = () => {
             comments={comments}
             isRepostedByAuthUser={isRepostedByAuthUser}
             size={'lg'}
+            postId={postId}
+            username={username}
           />
         </div>
 

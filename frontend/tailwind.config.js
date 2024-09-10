@@ -8,9 +8,12 @@ export default {
     extend: {
       height: {
         150: '32rem',
+        190: '50rem',
       },
       width: {
         100: '26rem',
+
+        170: '41rem',
       },
       maxHeight: {
         128: '32rem',

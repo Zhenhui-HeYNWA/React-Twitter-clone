@@ -1,25 +1,25 @@
-import { useState, useRef } from 'react';
-import { CiImageOn } from 'react-icons/ci';
-import { BsEmojiSmileFill } from 'react-icons/bs';
+import { useState } from 'react';
+
 import { IoCloseSharp } from 'react-icons/io5';
 import { CiLocationOn } from 'react-icons/ci';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import Picker from '@emoji-mart/react';
-import data from '@emoji-mart/data';
+
 import { Mention } from 'primereact/mention';
 import './CreatePost.css';
 import { useTheme } from '../../components/context/ThemeProvider';
 import { fetchLocation } from '../../utils/location/location.js';
-import LoadingSpinner from '../../components/common/LoadingSpinner.jsx';
+
+import CreatePostControls from '../../components/common/PostCommon/CreatePostControls.jsx';
 
 const CreatePost = () => {
   const { theme } = useTheme();
-  const [text, setText] = useState('');
+  const [text, setText] = useState(
+    <span style='color: lightgreen'>Great</span>
+  );
   const [imgs, setImgs] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const imgRef = useRef(null);
+
   const [locationName, setLocationName] = useState('');
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
@@ -54,6 +54,7 @@ const CreatePost = () => {
 
   const handleChange = (e) => {
     const value = e.target.value;
+
     setText(value);
 
     const lastAt = value.lastIndexOf('@');
@@ -169,6 +170,7 @@ const CreatePost = () => {
       console.error('Geolocation is not supported by this browser.');
     }
   };
+
   return (
     <div className='    flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full h-fit '>
       <div className='avatar'>
@@ -181,7 +183,8 @@ const CreatePost = () => {
       </div>
       <form
         className=' create-post-container flex flex-col gap-2 w-full h-full  '
-        onSubmit={handleSubmit}>
+        onSubmit={handleSubmit}
+        contentEditable={true}>
         <Mention
           value={text}
           onChange={handleChange}
@@ -192,6 +195,7 @@ const CreatePost = () => {
           itemTemplate={CreatePostItemTemplate}
           className='word-wrap '
           autoResize={true}
+          panelStyle
         />
 
         {imgs.length > 0 && (
@@ -199,7 +203,7 @@ const CreatePost = () => {
             <div className='flex gap-2'>
               {imgs.map((img, index) => (
                 <div
-                  key={index}
+                  key={img}
                   className='relative flex-shrink-0'
                   style={{ flex: imgs.length > 1 ? '0 0 10rem' : '0 0 auto' }}>
                   <IoCloseSharp
@@ -229,7 +233,7 @@ const CreatePost = () => {
             From: {locationName}
           </div>
         )}
-        <div className='relative flex justify-between border-t py-2 border-t-gray-700'>
+        {/* <div className='relative flex justify-between border-t py-2 border-t-gray-700'>
           <div className='flex gap-1 items-center'>
             <CiImageOn
               className='fill-primary w-6 h-6 cursor-pointer'
@@ -269,7 +273,18 @@ const CreatePost = () => {
           <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
             {isPending ? 'Posting...' : 'Post'}
           </button>
-        </div>
+        </div> */}
+
+        <CreatePostControls
+          onImgsChange={handleImgChange}
+          onEmojiSelect={handleEmojiSelect}
+          onLocationFetch={handleLocation}
+          isFetchingLocation={isFetchingLocation} // Replace with actual state
+          isPosting={isPending} // Replace with actual state
+          onSubmit={handleSubmit}
+          theme={theme}
+          type={'post'}
+        />
         {isError && (
           <div className='text-red-500'>
             {error.message || 'Something went wrong'}

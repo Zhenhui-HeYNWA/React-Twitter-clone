@@ -4,8 +4,12 @@ const commentSchema = new mongoose.Schema(
   {
     text: {
       type: String,
-      required: true,
     },
+    imgs: [
+      {
+        type: String,
+      },
+    ],
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -34,12 +38,12 @@ const commentSchema = new mongoose.Schema(
         default: [],
       },
     ],
-    bookmarks:[
+    bookmarks: [
       {
-        type:mongoose.Schema.Types.ObjectId,
-        ref:'User',
-        default:[]
-      }
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: [],
+      },
     ],
     isDeleted: { type: Boolean, default: false },
   },

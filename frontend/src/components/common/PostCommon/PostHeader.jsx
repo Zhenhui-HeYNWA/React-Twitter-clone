@@ -21,21 +21,21 @@ const PostHeader = ({ post, authUser }) => {
         </div>
       </div>
 
-      {!isOriginalPost && !isAuthUserRepost && (
+      {post && !isOriginalPost && !isAuthUserRepost && (
         <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
           <BiRepost className='w-4 h-4 text-slate-500' />
           {post.user.username} reposted
         </span>
       )}
 
-      {!isOriginalPost && isAuthUserRepost && (
+      {post && !isOriginalPost && isAuthUserRepost && (
         <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
           <BiRepost className='w-4 h-4 text-slate-500' />
           You reposted
         </span>
       )}
 
-      {isOriginalPost && isPinnedPost && (
+      {post && isOriginalPost && isPinnedPost && (
         <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
           <TbPinnedFilled className='w-4 h-4 text-slate-500' />
           Pinned post
