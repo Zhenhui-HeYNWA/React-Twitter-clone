@@ -9,7 +9,6 @@ const ReplyCommentModal = (comment, authUser) => {
   const [imgs, setImgs] = useState([]);
 
   const [replyToComment, setReplyToComment] = useState('');
-  console.log(imgs);
 
   const { replyComment, isReplying } = useCommentMutations();
 

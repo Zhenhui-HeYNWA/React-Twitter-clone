@@ -14,9 +14,7 @@ import CreatePostControls from '../../components/common/PostCommon/CreatePostCon
 
 const CreatePost = () => {
   const { theme } = useTheme();
-  const [text, setText] = useState(
-    <span style='color: lightgreen'>Great</span>
-  );
+  const [text, setText] = useState('');
   const [imgs, setImgs] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
 
@@ -183,8 +181,7 @@ const CreatePost = () => {
       </div>
       <form
         className=' create-post-container flex flex-col gap-2 w-full h-full  '
-        onSubmit={handleSubmit}
-        contentEditable={true}>
+        onSubmit={handleSubmit}>
         <Mention
           value={text}
           onChange={handleChange}
@@ -195,7 +192,6 @@ const CreatePost = () => {
           itemTemplate={CreatePostItemTemplate}
           className='word-wrap '
           autoResize={true}
-          panelStyle
         />
 
         {imgs.length > 0 && (

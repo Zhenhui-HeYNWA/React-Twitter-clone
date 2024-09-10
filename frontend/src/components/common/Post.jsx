@@ -32,10 +32,10 @@ const fetchMentionedUsersExistence = async (usernames) => {
 };
 
 // Post component
-const Post = ({ post, posts, user, username, feedType }) => {
+const Post = ({ post, posts, user, feedType }) => {
   const navigate = useNavigate();
 
-  console.log(username);
+  const username = post?.user.username;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
   const [mentionedUsersExistence, setMentionedUsersExistence] = useState({}); // State to store the existence of mentioned users
@@ -61,6 +61,8 @@ const Post = ({ post, posts, user, username, feedType }) => {
 
   // Fetch comments for the specific post
   const fetchComments = async (postId) => {
+    console.log(post.user.username, postId);
+
     const res = await fetch(
       `/api/comments/${post.user.username}/status/${postId}/comments`
     );
@@ -323,6 +325,7 @@ const Post = ({ post, posts, user, username, feedType }) => {
               isOriginalPost={isOriginalPost}
               feedType={feedType}
               username={username}
+              postId={post._id}
             />
           </div>
         </div>
