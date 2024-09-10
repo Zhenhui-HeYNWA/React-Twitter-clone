@@ -32,14 +32,10 @@ const PostFunctions = ({
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  console.log('postfunction', post);
   const { theme } = useTheme();
-
-  console.log(postId);
 
   const isOriginalPost = post?.repost?.originalPost == null;
   const isLiked = post?.likes.includes(authUser._id);
-  console.log(username);
 
   // Check if the post is liked by the authenticated user
   const isMarked = post?.bookmarks.includes(authUser._id);

@@ -4,8 +4,6 @@ import { toast } from 'react-hot-toast';
 const usePostMutations = (postId, feedType, username) => {
   const queryClient = useQueryClient();
 
-  console.log(feedType);
-
   const { mutate: deletePost, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
       try {
@@ -44,27 +42,23 @@ const usePostMutations = (postId, feedType, username) => {
     },
     onSuccess: (updatedLikes) => {
       toast.success('Liked Post!');
-      console.log(updatedLikes);
+
       // Update the 'posts' query data
       queryClient.setQueryData(['posts', feedType, username], (oldData) => {
         // Debugging line
         if (oldData) {
           return oldData.map((p) => {
             if (p._id === postId) {
-              console.log('Post found, updating likes', updatedLikes); // Debugging line
               return { ...p, likes: updatedLikes }; // Ensure likes is an array
             }
             return p;
           });
         } else {
-          console.log('No old data available'); // Debugging line
           return [];
         }
       });
       // Update the specific 'post' query data
       queryClient.setQueryData(['post', postId], (oldPost) => {
-        console.log(oldPost);
-
         if (oldPost) {
           return { ...oldPost, likes: updatedLikes || [] }; // Ensure likes is an array
         }
@@ -90,7 +84,6 @@ const usePostMutations = (postId, feedType, username) => {
       }
     },
     onSuccess: (updatedBookmarks) => {
-      console.log(updatedBookmarks);
       queryClient.setQueryData(['posts', feedType, username], (oldData) => {
         if (oldData) {
           return oldData.map((p) => {

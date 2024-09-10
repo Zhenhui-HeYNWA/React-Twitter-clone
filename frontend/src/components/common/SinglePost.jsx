@@ -24,7 +24,6 @@ const SinglePost = () => {
   });
 
   const { username, postId } = useParams();
-  console.log('Username:', username, 'PostId:', postId);
 
   // Fetch post data
   const { data: post, isLoading: isPostLoading } = useQuery({
@@ -32,7 +31,7 @@ const SinglePost = () => {
     queryFn: async () => {
       const res = await fetch(`/api/posts/${username}/status/${postId}`);
       const data = await res.json();
-      console.log(data);
+
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
       return data;
     },
@@ -44,13 +43,12 @@ const SinglePost = () => {
     post?.quote.originalUser
   );
 
-  console.log(isQuote);
   const isMyPost = authUser._id === post?.user._id;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
 
   const isOriginalPost = post?.repost?.originalPost == null;
-  console.log(isOriginalPost);
+
   useEffect(() => {
     if (authUser) {
       // 查找源帖子 ID（如果是转发的帖子）

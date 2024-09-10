@@ -30,18 +30,12 @@ const CommentFunction = ({ postComment, size }) => {
     isMarking,
   } = useCommentMutations();
 
-  console.log('postComment', postComment);
-  console.log(structuredComments);
   const isSubComment = postComment?.parentId !== null;
-  console.log(isSubComment);
 
   const onEmojiSelect = (emoji) => {
     setReplies((prevText) => prevText + emoji.native);
   };
 
-  console.log('PostComment object:', postComment);
-  console.log('Post ID:', postComment?.postId?._id);
-  console.log('User:', postComment?.user?.username);
   const handleImgChange = (e) => {
     const files = e.target.files;
     if (files && files.length + imgs.length <= 4) {
@@ -120,15 +114,8 @@ const CommentFunction = ({ postComment, size }) => {
     if (isMarking) return;
     bookmarkComment(commentId);
   };
-  console.log(`/${postComment?.postId?._id}/comment/`);
 
   const handleShareLink = async (url) => {
-    console.log(
-      `/${postComment?.postId}/comment/${postComment.user?.username}/${postComment._id}`
-    );
-
-    console.log(postComment);
-
     const content = window.location.origin + url;
 
     try {

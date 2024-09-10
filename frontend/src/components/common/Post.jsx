@@ -16,7 +16,6 @@ import { TbPinnedFilled } from 'react-icons/tb';
 import QuotePost from './QuotePost';
 import LoadingSpinner from './LoadingSpinner';
 import useFollow from '../../hooks/useFollow';
-import RenderPostText from './PostCommon/RenderPostText/RenderPostText';
 
 // Function to check the existence of mentioned users
 const fetchMentionedUsersExistence = async (usernames) => {
@@ -47,7 +46,6 @@ const Post = ({ post, posts, user, feedType }) => {
   const isPinnedPost = user?.pinnedPost[0] === postId;
   const { follow, isPending } = useFollow();
 
-  console.log('opo', post);
   // Check if the authenticated user has reposted this post
   useEffect(() => {
     if (authUser) {

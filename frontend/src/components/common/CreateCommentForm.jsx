@@ -81,7 +81,7 @@ const CreateCommentForm = ({
 
   const handleCommentSubmit = (e) => {
     e.preventDefault();
-    console.log(replyPostComment);
+
     if (type === 'replyToComment') {
       if (isReplying) return;
       replyComment({ commentId, text: replyPostComment, imgs: imgs });
