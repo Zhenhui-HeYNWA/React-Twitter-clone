@@ -1,26 +1,27 @@
-.p-inputtextarea {
-  width: 100%; /* w-full */
+.word-wrap {
+  height: auto !important;
+  max-height: fit-content !important;
+  word-break: break-word; /* 强制长单词换行 */
+  overflow-wrap: break-word; /* 兼容性属性，确保长单词在行尾换行 */
+}
 
-  height: auto;
+.p-inputtextarea {
+  width: 100% !important; /* w-full */
+
+  /* height: inherit; */
   overflow: visible;
-  min-height: 100px;
-  max-height: 300px !important;
+  /* min-height: 100px; */
+  /* max-height: 300px !important; */
 
   overflow-y: scroll;
   padding: 0; /* p-0 */
   font-size: 1.125rem; /* text-lg (18px) */
-  resize: vertical;
+  /* resize: none; */
   border: none; /* border-none */
   outline: none; /* focus:outline-none */
   background-color: inherit; /* bg-inherit */
 }
 
-.word-wrap {
-  min-height: 40px;
-  height: auto;
-  word-break: break-word; /* 强制长单词换行 */
-  overflow-wrap: break-word; /* 兼容性属性，确保长单词在行尾换行 */
-}
 .create-post-container .p-mention-panel {
   scrollbar-width: none;
   position: absolute !important;
@@ -36,7 +37,7 @@
 .create-post-container .p-mention-panel .p-mention-items {
   max-width: fit-content;
   border-radius: 15px;
-  overflow: hidden;
+  overflow: scroll;
 }
 .quote-post-container .p-mention {
   width: 100%;

@@ -180,9 +180,10 @@ const CreatePost = () => {
         </div>
       </div>
       <form
-        className=' create-post-container flex flex-col gap-2 w-full h-full  relative '
+        className=' create-post-container flex flex-col gap-2 w-full h-full relative '
         onSubmit={handleSubmit}>
         {/* TODO fix the mention autoResize prop */}
+
         <Mention
           value={text}
           onChange={handleChange}
@@ -192,8 +193,9 @@ const CreatePost = () => {
           placeholder='What is happening?!'
           itemTemplate={CreatePostItemTemplate}
           className='word-wrap '
-          // autoResize={true}
+          autoResize={true}
         />
+
         {/* <CustomMention
           // Enable auto resize functionality
           value={text} // Pass the state value
