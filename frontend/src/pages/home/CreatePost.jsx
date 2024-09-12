@@ -63,7 +63,7 @@ const CreatePost = () => {
   };
 
   const CreatePostItemTemplate = (user) => (
-    <div className='card rounded-none z-0 bg-gray-100 dark:bg-[#15202B] w-fit h-18 flex ring-1 ring-white'>
+    <div className='card rounded-none z-10 bg-gray-100 dark:bg-[#15202B] w-fit h-18 flex ring-1 ring-white'>
       <div className='card-body p-0'>
         <div
           className='flex gap-2 items-center hover:bg-slate-400 dark:hover:bg-cyan-900 p-2'
@@ -180,7 +180,7 @@ const CreatePost = () => {
         </div>
       </div>
       <form
-        className=' create-post-container flex flex-col gap-2 w-full h-full  '
+        className=' create-post-container flex flex-col gap-2 w-full h-full  relative '
         onSubmit={handleSubmit}>
         {/* TODO fix the mention autoResize prop */}
         <Mention

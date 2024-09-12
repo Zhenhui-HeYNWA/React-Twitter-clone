@@ -3,13 +3,13 @@
 
   height: auto;
   overflow: visible;
-  min-height: 80px;
-  max-height: 300px;
+  min-height: 100px;
+  max-height: 300px !important;
 
   overflow-y: scroll;
   padding: 0; /* p-0 */
   font-size: 1.125rem; /* text-lg (18px) */
-  resize: none;
+  resize: vertical;
   border: none; /* border-none */
   outline: none; /* focus:outline-none */
   background-color: inherit; /* bg-inherit */
@@ -27,10 +27,17 @@
   top: 100% !important;
   left: 50px !important;
   z-index: 1050 !important;
-
+  max-height: 200px !important;
   padding: 0;
+  width: 10px !important;
+  margin-top: 10px;
+  max-width: min-content;
 }
-
+.create-post-container .p-mention-panel .p-mention-items {
+  max-width: fit-content;
+  border-radius: 15px;
+  overflow: hidden;
+}
 .quote-post-container .p-mention {
   width: 100%;
 }
@@ -50,7 +57,7 @@
   border-radius: 5px;
   border-top: 1px solid white; /* Border at the top */
   border-bottom: 1px solid white; /* Border at the bottom */
-
+  max-width: 100px !important;
   padding: 0;
   z-index: auto;
 }
