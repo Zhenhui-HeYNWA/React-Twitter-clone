@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { IoCloseSharp } from 'react-icons/io5';
 import { CiLocationOn } from 'react-icons/ci';
@@ -12,9 +12,8 @@ import { fetchLocation } from '../../utils/location/location.js';
 
 import CreatePostControls from '../../components/common/PostCommon/CreatePostControls.jsx';
 
-import MentionComponent from '../../components/common/MentionComponent.jsx';
-
 const CreatePost = () => {
+  const textAreaMention = useRef(null);
   const { theme } = useTheme();
   const [text, setText] = useState('');
   const [imgs, setImgs] = useState([]);
@@ -185,17 +184,19 @@ const CreatePost = () => {
         className=' create-post-container flex flex-col gap-2 w-full h-full  '
         onSubmit={handleSubmit}>
         {/* TODO fix the mention autoResize prop */}
-        {/* <Mention
+        <Mention
+          ref={textAreaMention}
           value={text}
           onChange={handleChange}
           suggestions={suggestions}
           onSearch={onSearch}
           field='username'
+          rows={1}
           placeholder='What is happening?!'
           itemTemplate={CreatePostItemTemplate}
           className='word-wrap '
-          autoResize={true}
-        /> */}
+          // autoResize={true}
+        />
         {/* <CustomMention
           // Enable auto resize functionality
           value={text} // Pass the state value
@@ -208,14 +209,14 @@ const CreatePost = () => {
           autoResize={true}
         /> */}
 
-        <MentionComponent
+        {/* <MentionComponent
           value={text} // Pass the state value
           onChange={handleChange} // Pass the change handler
           suggestions={suggestions} // Pass suggestions if any
           onSearch={onSearch} // Handle the mention search
           field='username'
           placeholder="What's happening?"
-        />
+        /> */}
         {imgs.length > 0 && (
           <div className='w-full overflow-x-auto '>
             <div className='flex gap-2'>

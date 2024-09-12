@@ -1,14 +1,15 @@
 .p-inputtextarea {
   width: 100%; /* w-full */
-  /* 初始高度，可以根据需要调整 */
+
+  height: auto;
   overflow: visible;
   min-height: 80px;
   max-height: 300px;
-  scrollbar-width: none;
+
   overflow-y: scroll;
   padding: 0; /* p-0 */
   font-size: 1.125rem; /* text-lg (18px) */
-  resize: none;
+  resize: vertical;
   border: none; /* border-none */
   outline: none; /* focus:outline-none */
   background-color: inherit; /* bg-inherit */
