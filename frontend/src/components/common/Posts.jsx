@@ -31,6 +31,7 @@ const Posts = ({ feedType, username, user }) => {
     refetch,
     isRefetching,
   } = useQuery({
+    
     queryKey: ['posts', feedType, username], // Include feedType and username to refetch data based on these dependencies
     queryFn: async () => {
       try {

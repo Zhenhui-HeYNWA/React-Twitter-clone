@@ -45,6 +45,8 @@ const usePostMutations = (postId, feedType, username) => {
 
       // Update the 'posts' query data
       queryClient.setQueryData(['posts', feedType, username], (oldData) => {
+        console.log(feedType);
+
         // Debugging line
         if (oldData) {
           return oldData.map((p) => {

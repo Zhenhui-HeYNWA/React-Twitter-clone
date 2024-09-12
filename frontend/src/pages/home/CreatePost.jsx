@@ -12,6 +12,8 @@ import { fetchLocation } from '../../utils/location/location.js';
 
 import CreatePostControls from '../../components/common/PostCommon/CreatePostControls.jsx';
 
+import MentionComponent from '../../components/common/MentionComponent.jsx';
+
 const CreatePost = () => {
   const { theme } = useTheme();
   const [text, setText] = useState('');
@@ -182,7 +184,8 @@ const CreatePost = () => {
       <form
         className=' create-post-container flex flex-col gap-2 w-full h-full  '
         onSubmit={handleSubmit}>
-        <Mention
+        {/* TODO fix the mention autoResize prop */}
+        {/* <Mention
           value={text}
           onChange={handleChange}
           suggestions={suggestions}
@@ -191,9 +194,28 @@ const CreatePost = () => {
           placeholder='What is happening?!'
           itemTemplate={CreatePostItemTemplate}
           className='word-wrap '
-          // autoResize={true}
-        />
+          autoResize={true}
+        /> */}
+        {/* <CustomMention
+          // Enable auto resize functionality
+          value={text} // Pass the state value
+          onChange={handleChange} // Pass the change handler
+          suggestions={suggestions} // Pass suggestions if any
+          onSearch={onSearch} // Handle the mention search
+          field='username'
+          placeholder="What's happening?"
+          itemTemplate={CreatePostItemTemplate}
+          autoResize={true}
+        /> */}
 
+        <MentionComponent
+          value={text} // Pass the state value
+          onChange={handleChange} // Pass the change handler
+          suggestions={suggestions} // Pass suggestions if any
+          onSearch={onSearch} // Handle the mention search
+          field='username'
+          placeholder="What's happening?"
+        />
         {imgs.length > 0 && (
           <div className='w-full overflow-x-auto '>
             <div className='flex gap-2'>

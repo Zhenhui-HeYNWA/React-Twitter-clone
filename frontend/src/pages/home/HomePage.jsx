@@ -3,8 +3,12 @@ import { useState } from 'react';
 import CreatePost from './CreatePost';
 
 import Posts from '../../components/common/Posts';
+import { useQuery } from '@tanstack/react-query';
 
 const HomePage = () => {
+  const { data: authUser } = useQuery({
+    queryKey: ['authUser'],
+  });
   const [feedType, setFeedType] = useState('forYou');
   return (
     <div className='flex-[4_4_0] border-r  border-gray-200 dark:border-gray-700 min-h-screen'>
@@ -37,7 +41,7 @@ const HomePage = () => {
       <CreatePost />
 
       {/* Posts */}
-      <Posts feedType={feedType} />
+      <Posts feedType={feedType} username={authUser.username} />
     </div>
   );
 };

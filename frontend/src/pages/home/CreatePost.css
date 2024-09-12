@@ -1,8 +1,11 @@
-textarea {
+.p-inputtextarea {
   width: 100%; /* w-full */
-  min-height: 40px; /* 初始高度，可以根据需要调整 */
-  max-height: fit-content;
+  /* 初始高度，可以根据需要调整 */
+  overflow: visible;
+  min-height: 80px;
+  max-height: 300px;
   scrollbar-width: none;
+  overflow-y: scroll;
   padding: 0; /* p-0 */
   font-size: 1.125rem; /* text-lg (18px) */
   resize: none;
