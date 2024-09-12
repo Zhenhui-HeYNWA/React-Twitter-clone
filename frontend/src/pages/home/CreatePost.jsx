@@ -13,7 +13,6 @@ import { fetchLocation } from '../../utils/location/location.js';
 import CreatePostControls from '../../components/common/PostCommon/CreatePostControls.jsx';
 
 const CreatePost = () => {
-  const textAreaMention = useRef(null);
   const { theme } = useTheme();
   const [text, setText] = useState('');
   const [imgs, setImgs] = useState([]);
@@ -185,13 +184,11 @@ const CreatePost = () => {
         onSubmit={handleSubmit}>
         {/* TODO fix the mention autoResize prop */}
         <Mention
-          ref={textAreaMention}
           value={text}
           onChange={handleChange}
           suggestions={suggestions}
           onSearch={onSearch}
           field='username'
-          rows={1}
           placeholder='What is happening?!'
           itemTemplate={CreatePostItemTemplate}
           className='word-wrap '

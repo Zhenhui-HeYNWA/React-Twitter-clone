@@ -9,7 +9,7 @@
   overflow-y: scroll;
   padding: 0; /* p-0 */
   font-size: 1.125rem; /* text-lg (18px) */
-  resize: vertical;
+  resize: none;
   border: none; /* border-none */
   outline: none; /* focus:outline-none */
   background-color: inherit; /* bg-inherit */
