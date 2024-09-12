@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 
 import CommentsControls from './Comments/CommentsControls';
 import { IoCloseSharp } from 'react-icons/io5';
+import CustomMention from './MentionComponent';
 
 const CommentFunction = ({ postComment, size }) => {
   const { data: authUser } = useQuery({
@@ -220,12 +221,14 @@ const CommentFunction = ({ postComment, size }) => {
                         className='h-10 w-10 rounded-full '
                       />
                     </div>
-                    <textarea
-                      className='textarea items-center p-0 w-2/3 h-2 bg-gray-100 dark:bg-[#15202B]   rounded text-md resize-none  focus:outline-none '
-                      placeholder='Post your reply'
-                      value={reply}
-                      onChange={(e) => setReplies(e.target.value)}
-                    />
+                    <div className='quote-post-container'>
+                      <CustomMention
+                        className='textarea items-center p-0 w-2/3 h-2 bg-gray-100 dark:bg-[#15202B]   rounded text-md resize-none  focus:outline-none '
+                        placeholderText='Post your reply'
+                        value={reply}
+                        onChange={(e) => setReplies(e.target.value)}
+                      />
+                    </div>
                   </div>
 
                   {imgs.length > 0 && (

@@ -16,6 +16,7 @@ import { CiImageOn } from 'react-icons/ci';
 import { BsEmojiSmileFill } from 'react-icons/bs';
 import { useTheme } from '../context/ThemeProvider';
 import { IoCloseSharp } from 'react-icons/io5';
+import CustomMention from './MentionComponent';
 
 const PostFunctions = ({
   post,
@@ -54,7 +55,6 @@ const PostFunctions = ({
     repostPost,
     isReposting,
   } = usePostMutations(postId, feedType, username);
- 
   const handleEmojiSelect = (emoji) => {
     setComment((prevText) => prevText + emoji.native);
   };
@@ -234,12 +234,20 @@ const PostFunctions = ({
             <form
               className='flex  flex-col gap-2 items-center mt-4 border-t border-gray-300  dark:border-gray-800  pt-2'
               onSubmit={handlePostComment}>
-              <textarea
+              {/* <textarea
                 className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B]  border-gray-100  dark:border-gray-800'
                 placeholder='Add a comment...'
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-              />
+              /> */}
+              <div className='quote-post-container w-full'>
+                <CustomMention
+                  className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B]  border-gray-100  dark:border-gray-800'
+                  placeholderText='Add a comment...'
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                />
+              </div>
               {imgs.length > 0 && (
                 <div className='w-full overflow-x-auto '>
                   <div className='flex gap-2'>

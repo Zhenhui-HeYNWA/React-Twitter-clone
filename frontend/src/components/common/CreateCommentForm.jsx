@@ -6,6 +6,7 @@ import useCommentMutations from '../../hooks/useCommentMutations';
 import CreatePostControls from './PostCommon/CreatePostControls';
 import toast from 'react-hot-toast';
 import { IoCloseSharp } from 'react-icons/io5';
+import CustomMention from './MentionComponent';
 
 const CreateCommentForm = ({
   post,
@@ -136,13 +137,15 @@ const CreateCommentForm = ({
         <form
           className={`flex gap-2 w-full  flex-col`}
           onSubmit={handleCommentSubmit}>
-          <textarea
-            className='group textarea w-full p-0 text-2xl resize-none border-none focus:outline-none bg-inherit'
-            placeholder='Post your reply '
-            value={replyPostComment}
-            onChange={(e) => setReplyPostComment(e.target.value)}
-            onClick={handleTextareaClick}
-          />
+          <div className='quote-post-container'>
+            <CustomMention
+              className='group textarea w-full p-0 text-2xl resize-none border-none focus:outline-none bg-inherit'
+              placeholderText='Post your reply '
+              value={replyPostComment}
+              onChange={(e) => setReplyPostComment(e.target.value)}
+              onClick={handleTextareaClick}
+            />
+          </div>
           <div className='flex gap-2'>
             {imgs.map((img, index) => (
               <div

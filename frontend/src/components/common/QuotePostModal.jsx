@@ -14,6 +14,7 @@ import usePostMutations from '../../hooks/usePostMutations.jsx';
 import { formatPostDate } from '../../utils/date/index.js';
 import { Link } from 'react-router-dom';
 import CreatePostControls from './PostCommon/CreatePostControls.jsx';
+import CustomMention from './MentionComponent.jsx';
 
 const QuotePostModal = ({ authUser, post }) => {
   const { theme } = useTheme();
@@ -244,8 +245,8 @@ const QuotePostModal = ({ authUser, post }) => {
           </div>
           <div className='flex flex-col w-full h-full max-h-128 '>
             <div className='flex flex-col gap-1 w-full h-full pl-12  '>
-              <div className='quote-post-container pt-4  h-full   '>
-                <Mention
+              <div className=' quote-post-container pt-4  h-full   '>
+                {/* <Mention
                   value={quote}
                   onChange={handleChange}
                   onSearch={onSearch}
@@ -255,6 +256,11 @@ const QuotePostModal = ({ authUser, post }) => {
                   placeholder='Add a comment'
                   className='text-nowrap h-auto '
                   // autoResize={true}
+                /> */}
+                <CustomMention
+                  value={quote}
+                  placeholderText='Post your quote'
+                  onChange={(e) => setQuote(e.target.value)}
                 />
               </div>
               {imgs.length > 0 && (

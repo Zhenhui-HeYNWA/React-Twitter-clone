@@ -10,8 +10,8 @@
 
   /* height: inherit; */
   overflow: visible;
-  /* min-height: 100px; */
-  /* max-height: 300px !important; */
+  min-height: 100px;
+  max-height: 300px !important;
 
   overflow-y: scroll;
   padding: 0; /* p-0 */
@@ -28,7 +28,7 @@
   top: 100% !important;
   left: 50px !important;
   z-index: 1050 !important;
-  max-height: 200px !important;
+  max-height: 180px !important;
   padding: 0;
   width: 10px !important;
   margin-top: 10px;
@@ -36,8 +36,14 @@
 }
 .create-post-container .p-mention-panel .p-mention-items {
   max-width: fit-content;
-  border-radius: 15px;
+
   overflow: scroll;
+  height: fit-content;
+  border-radius: 15px;
+  border: 1px solid rgb(55 65 81 / var(--tw-border-opacity));
+  height: 100%;
+  scrollbar-width: none;
+  max-height: fit-content;
 }
 .quote-post-container .p-mention {
   width: 100%;
@@ -55,9 +61,8 @@
   left: 20px !important;
   z-index: 1050 !important;
   max-height: 180px !important;
-  border-radius: 5px;
-  border-top: 1px solid white; /* Border at the top */
-  border-bottom: 1px solid white; /* Border at the bottom */
+
+  /* Border at the bottom */
   max-width: 100px !important;
   padding: 0;
   z-index: auto;
