@@ -1,4 +1,3 @@
-import { Mention } from 'primereact/mention';
 import { useState } from 'react';
 
 import RenderImg from './RenderImg/RenderImg';
@@ -20,7 +19,7 @@ const QuotePostModal = ({ authUser, post }) => {
   const { theme } = useTheme();
   const [quote, setQuote] = useState('');
   const [imgs, setImgs] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
+
   const [locationName, setLocationName] = useState('');
 
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
@@ -35,54 +34,6 @@ const QuotePostModal = ({ authUser, post }) => {
   );
 
   const { quotePost, isQuoting, isError, error } = usePostMutations(postId);
-
-  const searchUsers = async (query) => {
-    const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`);
-    if (!res.ok) {
-      throw new Error('Error fetching search results');
-    }
-    return res.json();
-  };
-
-  const onSearch = async (event) => {
-    const query = event.query.trim();
-
-    if (query) {
-      try {
-        const users = await searchUsers(query);
-        setSuggestions(users);
-      } catch (error) {
-        console.error('Failed to fetch search results:', error);
-      }
-    } else {
-      setSuggestions([]); // Clear suggestions if query is empty
-    }
-  };
-
-  const itemTemplate = (user) => (
-    <div className='card border-x rounded-none z-40 bg-gray-100 dark:bg-[#15202B] w-full  h-16 flex ring-1 ring-white '>
-      <div className='card-body p-0'>
-        <div
-          className='flex gap-2 items-center hover:bg-slate-300 dark:hover:bg-cyan-900 p-2'
-          key={user._id}>
-          <div className='avatar'>
-            <div className='w-8 rounded-full'>
-              <img
-                src={user.profileImg || '/avatar-placeholder.png'}
-                alt={`${user.fullName}'s profile`}
-              />
-            </div>
-          </div>
-          <div className='flex flex-col  '>
-            <span className='font-semibold tracking-tight truncate w-28'>
-              {user.fullName}
-            </span>
-            <span className='text-sm text-slate-500'>@{user.username}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 
   const handleImgChange = (e) => {
     const files = e.target.files;
@@ -105,10 +56,6 @@ const QuotePostModal = ({ authUser, post }) => {
     }
   };
 
-  const handleChange = (e) => {
-    const value = e.target.value;
-    setQuote(value);
-  };
   const handleEmojiSelect = (emoji) => {
     setQuote((prevText) => prevText + emoji.native);
   };
@@ -246,17 +193,6 @@ const QuotePostModal = ({ authUser, post }) => {
           <div className='flex flex-col w-full h-full max-h-128 '>
             <div className='flex flex-col gap-1 w-full h-full pl-12  '>
               <div className=' quote-post-container pt-4  h-full   '>
-                {/* <Mention
-                  value={quote}
-                  onChange={handleChange}
-                  onSearch={onSearch}
-                  suggestions={suggestions}
-                  field='username'
-                  itemTemplate={itemTemplate}
-                  placeholder='Add a comment'
-                  className='text-nowrap h-auto '
-                  // autoResize={true}
-                /> */}
                 <CustomMention
                   value={quote}
                   placeholderText='Post your quote'

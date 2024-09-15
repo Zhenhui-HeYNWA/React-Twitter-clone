@@ -71,11 +71,14 @@ const CreatePostControls = ({
           <>
             <LoadingSpinner size='sm' /> {type === 'post' && 'Posting'}
             {type === 'quote' && 'Quoting'}
+            {type === 'Reply' && 'Replying'}
           </>
-        ) : type === 'post' ? (
-          'Post'
         ) : (
-          'Quote'
+          <>
+            {type === 'quote' && 'Quote'}
+            {type === 'post' && 'Post'}
+            {type === 'Reply' && 'Reply'}
+          </>
         )}
       </button>
     </div>

@@ -34,6 +34,11 @@
   margin-top: 10px;
   max-width: min-content;
 }
+
+.create-post-container {
+  height: 100%;
+}
+
 .create-post-container .p-mention-panel .p-mention-items {
   max-width: fit-content;
 
@@ -48,6 +53,7 @@
 .quote-post-container .p-mention {
   width: 100%;
 }
+
 .quote-post-container .p-mention-input {
   width: 100% !important;
 }

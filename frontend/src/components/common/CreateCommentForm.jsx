@@ -15,6 +15,7 @@ const CreateCommentForm = ({
   type,
   commentId,
   comment,
+  buttonType,
 }) => {
   const { postId } = useParams();
 
@@ -137,7 +138,7 @@ const CreateCommentForm = ({
         <form
           className={`flex gap-2 w-full  flex-col`}
           onSubmit={handleCommentSubmit}>
-          <div className='quote-post-container'>
+          <div className='quote-post-container h-20 w-full'>
             <CustomMention
               className='group textarea w-full p-0 text-2xl resize-none border-none focus:outline-none bg-inherit'
               placeholderText='Post your reply '
@@ -178,7 +179,7 @@ const CreateCommentForm = ({
             }`}></div>
 
           <CreatePostControls
-            type={'quote'}
+            type={buttonType}
             onEmojiSelect={handleEmojiSelect}
             isPosting={isCommenting}
             onImgsChange={handleImgChange}

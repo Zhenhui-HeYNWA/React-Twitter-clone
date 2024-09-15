@@ -20,14 +20,14 @@ const RenderImg = ({ imgs, onImgClick, size }) => {
       <div
         className={
           imgs.length === 1
-            ? `${getRenderSize()} max-h-128  overflow-hidden rounded-3xl`
+            ? `${getRenderSize()} max-h-128  overflow-hidden `
             : imgs.length === 2
-            ? `grid grid-cols-2  gap-1 ${getRenderSize()}  overflow-hidden rounded-xl`
+            ? `grid grid-cols-2  gap-1 ${getRenderSize()}  overflow-hidden `
             : imgs.length === 3
-            ? `grid grid-cols-4 grid-rows-2 gap-1 rounded-2xl ${getRenderSize()}  overflow-hidden`
+            ? `grid grid-cols-4 grid-rows-2 gap-1  ${getRenderSize()}  overflow-hidden`
             : imgs.length === 4
             ? `grid grid-cols-2 grid-rows-2  gap-1   ${getRenderSize()}   overflow-hidden`
-            : `grid grid-cols-4 rounded-2xl ${getRenderSize()}  overflow-hidden`
+            : `grid grid-cols-4  ${getRenderSize()}  overflow-hidden`
           // grid grid-cols-2 grid-rows-2  gap-1    max-h-128 w-full h-auto overflow-hidden
         }>
         {imgs.map((img, index) => (

@@ -1,3 +1,4 @@
+import { handleMentions } from '../lib/utils/mentionHelper.js';
 import Notification from '../models/notification.model.js';
 import Post from '../models/post.model.js';
 import User from '../models/user.model.js';
@@ -45,21 +46,7 @@ export const createPost = async (req, res) => {
       $push: { userPosts: newPost._id },
     });
 
-    const mentionRegex = /@(\w+)/g;
-    let match;
-    while ((match = mentionRegex.exec(text)) !== null) {
-      const mentionedUsername = match[1];
-      const mentionedUser = await User.findOne({ username: mentionedUsername });
-
-      if (mentionedUser) {
-        const notification = new Notification({
-          from: userId,
-          to: mentionedUser._id,
-          type: 'mention',
-        });
-        await notification.save();
-      }
-    }
+    await handleMentions(text, userId);
     res.status(201).json(newPost);
   } catch (error) {
     console.log('error in createPost controller', error);
@@ -470,21 +457,7 @@ export const quotePost = async (req, res) => {
       { new: true }
     );
 
-    const mentionRegex = /@(\w+)/g;
-    let match;
-    while ((match = mentionRegex.exec(text)) !== null) {
-      const mentionedUsername = match[1];
-      const mentionedUser = await User.findOne({ username: mentionedUsername });
-
-      if (mentionedUser) {
-        const notification = new Notification({
-          from: userId,
-          to: mentionedUser._id,
-          type: 'mention',
-        });
-        await notification.save();
-      }
-    }
+    await handleMentions(text, userId);
 
     return res.status(201).json(savedQuotePost);
   } catch (error) {

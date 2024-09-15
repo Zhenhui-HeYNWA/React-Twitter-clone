@@ -6,6 +6,7 @@ import { v2 as cloudinary } from 'cloudinary';
 //Get Post Top level comments
 
 import mongoose from 'mongoose';
+import { handleMentions } from '../lib/utils/mentionHelper.js';
 
 export const getPostComments = async (req, res) => {
   const { postId } = req.params;
@@ -211,6 +212,8 @@ export const commentOnPost = async (req, res) => {
       imgs: uploadedImages,
       postId,
     });
+
+    await handleMentions(text, userId);
 
     await comment.save();
 

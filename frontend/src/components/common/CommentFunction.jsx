@@ -21,6 +21,7 @@ const CommentFunction = ({ postComment, size }) => {
   const [imgs, setImgs] = useState([]);
   const [reply, setReplies] = useState('');
   const [structuredComments, setStructuredComments] = useState([]);
+  console.log(structuredComments);
 
   const {
     replyComment,
@@ -199,8 +200,8 @@ const CommentFunction = ({ postComment, size }) => {
                       </div>
                     </div>
                     <div className='text-base '>{postComment?.text}</div>
-                    <div className='mt-2 text-gray-500 bg-blue-950'>
-                      Replying to
+                    <div className='mt-2 text-gray-500'>
+                      Replying to 123
                       <span className='text-sky-600'>
                         @{postComment?.user?.username}
                       </span>

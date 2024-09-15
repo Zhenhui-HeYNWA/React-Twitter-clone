@@ -11,7 +11,63 @@ import RenderImg from './RenderImg/RenderImg';
 
 const RenderSubComments = ({ pageType, postComment }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
+  const [mentionedUsersExistence, setMentionedUsersExistence] = useState({});
+  console.log('postComment', postComment);
 
+  const fetchMentionedUsersExistence = async (usernames) => {
+    const res = await fetch('/api/users/check-user', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ usernames }),
+    });
+    const data = await res.json();
+    return data; // This should return an object like { username1: true, username2: false }
+  };
+
+  useEffect(() => {
+    const mentionedUsernames = postComment?.text
+      ?.match(/@\w+/g)
+      .map((m) => m.substring(1));
+
+    if (mentionedUsernames.length > 0) {
+      fetchMentionedUsersExistence(mentionedUsernames).then(
+        setMentionedUsersExistence
+      );
+    }
+  }, [postComment]);
+
+  const highlightMentions = (text) => {
+    const regex = /@\w+/g;
+    const handleClick = (e, path) => {
+      e.stopPropagation();
+
+      navigate(path);
+    };
+
+    return text.split(regex).reduce((acc, part, index) => {
+      if (index === 0) {
+        return [part];
+      }
+
+      const match = text.match(regex)[index - 1];
+      const mentionedUsername = match.substring(1);
+
+      acc.push(
+        <span
+          key={index}
+          className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'
+          onClick={(e) => handleClick(e, `/profile/${mentionedUsername}`)}
+          style={{ cursor: 'pointer' }}>
+          {match}
+        </span>,
+        part
+      );
+
+      return acc;
+    }, []);
+  };
   const [structuredComments, setStructuredComments] = useState([]);
 
   const isMyComment = authUser._id === postComment?.user._id;
@@ -65,6 +121,7 @@ const RenderSubComments = ({ pageType, postComment }) => {
     if (isCommentDeleting) return;
     deleteComment({ commentId });
   };
+  console.log(postComment);
 
   return (
     <div className='border-b  border-gray-200 dark:border-gray-700 flex flex-col flex-1 justify-center py-2 '>
@@ -218,7 +275,7 @@ const RenderSubComments = ({ pageType, postComment }) => {
             </div>
             {!hasParentComment && pageType == 'replies' && (
               <span>
-                Replying to{' '}
+                Replying to
                 <Link
                   className=' mention-highlight text-sky-500 hover:underline hover:text-sky-700'
                   to={`/profile/${postComment?.postId?.user?.username}`}>
@@ -231,7 +288,7 @@ const RenderSubComments = ({ pageType, postComment }) => {
               className='flex flex-col overflow-hidden'
               onClick={() => handleNavigate(postComment?.postId._id)}>
               <span className='text-lg whitespace-pre-wrap'>
-                {postComment?.text}
+                {highlightMentions(postComment?.text)}
               </span>
               {postComment.imgs.length > 0 && (
                 <div className='rounded-xl overflow-hidden w-fit mb-3'>

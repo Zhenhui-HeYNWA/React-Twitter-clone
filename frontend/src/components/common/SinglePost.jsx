@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatDateTime } from '../../utils/date';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PostSkeleton from '../skeletons/PostSkeleton';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 
@@ -89,7 +89,7 @@ const SinglePost = () => {
 
       if (match) {
         return (
-          <>
+          <React.Fragment key={index}>
             <span>
               {part}
               <Link key={index} to={`/profile/${username}`}>
@@ -98,7 +98,7 @@ const SinglePost = () => {
                 </span>
               </Link>
             </span>
-          </>
+          </React.Fragment>
         );
       }
       return part;
@@ -260,6 +260,7 @@ const SinglePost = () => {
           post={post}
           authUser={authUser}
           type={'ReplyToPost'}
+          buttonType = {'Reply'}
         />
         {/* POST COMMENT */}
         <div className=''>

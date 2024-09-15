@@ -13,7 +13,7 @@ const CommentsControls = ({ isSending, onImgsChange, onEmojiSelect }) => {
   const { theme } = useTheme();
 
   return (
-    <div className=' justify-between flex bg-yellow-200 w-full'>
+    <div className=' justify-between flex  w-full'>
       <div className=' flex gap-1 items-center  relative'>
         <CiImageOn
           className='fill-primary w-6 h-6 cursor-pointer'
