@@ -6,7 +6,6 @@ const RenderImg = ({ imgs, onImgClick, size }) => {
     switch (size) {
       case 'lg':
         return 'h-auto w-full max-h-128 ';
-
       case 'md':
         return ' h-72  w-72 ';
       case 'sm':
@@ -15,6 +14,7 @@ const RenderImg = ({ imgs, onImgClick, size }) => {
         return 'h-full w-full';
     }
   }
+
   return (
     <>
       <div
@@ -28,7 +28,6 @@ const RenderImg = ({ imgs, onImgClick, size }) => {
             : imgs.length === 4
             ? `grid grid-cols-2 grid-rows-2  gap-1   ${getRenderSize()}   overflow-hidden`
             : `grid grid-cols-4  ${getRenderSize()}  overflow-hidden`
-          // grid grid-cols-2 grid-rows-2  gap-1    max-h-128 w-full h-auto overflow-hidden
         }>
         {imgs.map((img, index) => (
           <React.Fragment key={uuidv4()}>
@@ -48,9 +47,9 @@ const RenderImg = ({ imgs, onImgClick, size }) => {
                   : 'object-cover rounded-lg border-gray-700 w-full'
               }
               alt={`Post image ${index + 1}`}
-              onClick={() => onImgClick(img)}
+              onClick={(e) => onImgClick(e, index)} // Pass the event and index
             />
-            <dialog id={`my_modal_${img}`} className='modal'>
+            <dialog id={`my_modal_${index}`} className='modal'>
               <div className='modal-box bg-slate-300'>
                 <form method='dialog'>
                   <button className='btn btn-xs btn-circle btn-ghost absolute right-2 top-2'>

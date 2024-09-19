@@ -8,10 +8,9 @@ const QuotePost = ({ post, isOriginalPost }) => {
   const formattedDate = formatPostDate(post?.originalCreatedAt);
   const navigate = useNavigate();
   const handleModalImgClick = (e, index) => {
-    e.stopPropagation();
-    document.getElementById(`my_modal_${index}`).showModal();
+    e.stopPropagation(); // This will prevent event propagation
+    document.getElementById(`my_modal_${index}`).showModal(); // Open the modal
   };
-
   const RenderQuotePostLink = ({ text }) => {
     const validText = text || '';
 
@@ -95,8 +94,11 @@ const QuotePost = ({ post, isOriginalPost }) => {
                 <>
                   <div className='w-32 h-32 rounded-2xl  pb-2 cursor-pointer'>
                     <RenderImg
-                      imgs={quotePost?.originalImgs}
-                      onImgClick={handleModalImgClick}
+                      imgs={
+                        quotePost?.originalImgs ||
+                        quotePost?.repost?.originalImgs
+                      }
+                      onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
                       size='sm'
                     />
                   </div>
@@ -109,8 +111,10 @@ const QuotePost = ({ post, isOriginalPost }) => {
               )}
               {!isOriginalPost && quotePost.repost.originalImgs?.length > 0 && (
                 <RenderImg
-                  imgs={quotePost?.repost.originalImgs}
-                  onImgClick={handleModalImgClick}
+                  imgs={
+                    quotePost?.originalImgs || quotePost?.repost?.originalImgs
+                  }
+                  onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
                   size='sm'
                 />
               )}
@@ -157,17 +161,17 @@ const QuotePost = ({ post, isOriginalPost }) => {
           </div>
           {isOriginalPost && quotePost?.originalImgs.length > 0 && (
             <RenderImg
-              imgs={quotePost?.originalImgs}
-              onImgClick={handleModalImgClick}
+              imgs={quotePost?.originalImgs || quotePost?.repost?.originalImgs}
+              onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
               size='lg'
             />
           )}
 
           {!isOriginalPost && quotePost?.repost.originalImgs?.length > 0 && (
             <RenderImg
-              imgs={quotePost?.repost.originalImgs}
-              onImgClick={handleModalImgClick}
-              size='lg'
+              imgs={quotePost?.originalImgs || quotePost?.repost?.originalImgs}
+              onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
+              size='sm'
             />
           )}
         </div>

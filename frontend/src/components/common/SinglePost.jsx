@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatDateTime } from '../../utils/date';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PostSkeleton from '../skeletons/PostSkeleton';
 import CommentSkeleton from '../skeletons/CommentSkeleton';
 
@@ -17,6 +17,7 @@ import RenderImg from './RenderImg/RenderImg';
 import PostFunctions from './PostFunctions';
 
 import PostHeader from './PostCommon/PostHeader';
+import RenderText from './PostCommon/RenderText';
 
 const SinglePost = () => {
   const { data: authUser } = useQuery({
@@ -79,31 +80,6 @@ const SinglePost = () => {
   });
   const navigate = useNavigate();
   const { deletePost, isDeleting } = usePostMutations(postId);
-
-  const highlightMentions = (text) => {
-    const regex = /@\w+/g; // Regex to find mentions in the text
-    return text.split(regex).map((part, index) => {
-      const match = text.match(regex)?.[index];
-
-      const username = match?.substring(1);
-
-      if (match) {
-        return (
-          <React.Fragment key={index}>
-            <span>
-              {part}
-              <Link key={index} to={`/profile/${username}`}>
-                <span className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'>
-                  {match}
-                </span>
-              </Link>
-            </span>
-          </React.Fragment>
-        );
-      }
-      return part;
-    });
-  };
 
   const formattedDate = post ? formatDateTime(post.createdAt) : '';
 
@@ -206,12 +182,12 @@ const SinglePost = () => {
               <div className='flex flex-col gap-3  mt-2 '>
                 {isOriginalPost && post.text && (
                   <span className='text-lg whitespace-pre-wrap word-wrap '>
-                    {highlightMentions(post.text)}
+                    <RenderText text={post.text} />
                   </span>
                 )}
                 {!isOriginalPost && (
                   <span className='text-lg whitespace-pre-wrap word-wrap'>
-                    {highlightMentions(post.repost.originalText)}
+                    <RenderText text={post.repost.originalText} />
                   </span>
                 )}
                 <div className='rounded-xl overflow-hidden w-fit'>
@@ -260,7 +236,7 @@ const SinglePost = () => {
           post={post}
           authUser={authUser}
           type={'ReplyToPost'}
-          buttonType = {'Reply'}
+          buttonType={'Reply'}
         />
         {/* POST COMMENT */}
         <div className=''>

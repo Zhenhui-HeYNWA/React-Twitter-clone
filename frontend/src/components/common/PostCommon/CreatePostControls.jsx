@@ -18,6 +18,7 @@ const CreatePostControls = ({
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imgRef = useRef(null);
+  console.log(type);
 
   return (
     <div className='flex justify-between border-t py-2   border-gray-200  dark:border-slate-700  sticky bottom-0 bg-slate-100 dark:bg-[#15202B]  w-full'>
@@ -45,7 +46,9 @@ const CreatePostControls = ({
             />
           </div>
         )}
-        {!isFetchingLocation ? (
+        {type === 'Reply' ? (
+          ''
+        ) : !isFetchingLocation ? (
           <CiLocationOn
             className='fill-primary w-5 h-5 cursor-pointer'
             onClick={onLocationFetch}

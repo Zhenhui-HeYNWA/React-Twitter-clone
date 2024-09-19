@@ -9,6 +9,7 @@ import useCommentMutations from '../../hooks/useCommentMutations';
 import CommentFunction from './CommentFunction';
 
 import RenderImg from './RenderImg/RenderImg';
+import RenderText from './PostCommon/RenderText';
 
 const RenderComments = ({ comment }) => {
   const { data: authUser } = useQuery({
@@ -161,12 +162,14 @@ const RenderComments = ({ comment }) => {
                               <span className='text-lg whitespace-pre-wrap'>
                                 {structuredComment?.text}
                               </span>
-                              <div className='rounded-xl overflow-hidden w-fit mb-3'>
-                                <RenderImg
-                                  imgs={structuredComment.imgs}
-                                  size={'md'}
-                                />
-                              </div>
+                              {structuredComment.imgs.length > 0 && (
+                                <div className='rounded-xl overflow-hidden w-fit mb-3'>
+                                  <RenderImg
+                                    imgs={structuredComment.imgs}
+                                    size={'md'}
+                                  />
+                                </div>
+                              )}
                             </div>
 
                             {/* comment functions section*/}
@@ -234,7 +237,7 @@ const RenderComments = ({ comment }) => {
 
             <div className='flex flex-col gap-y-2 w-full'>
               <div className='my-1 text-lg whitespace-pre-wrap'>
-                {comment?.text}
+                <RenderText text={comment?.text} />
               </div>
               {comment?.imgs.length > 0 && (
                 <div className='rounded-xl overflow-hidden w-fit mb-3'>

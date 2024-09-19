@@ -270,7 +270,6 @@ const CommentPage = () => {
                             )}
                         </div>
                         {/* post functions */}
-
                         <PostFunctions
                           post={post}
                           comments={comments}
@@ -279,6 +278,7 @@ const CommentPage = () => {
                           username={username}
                           postId={postId}
                         />
+                      
                       </div>
                     </div>
                   </div>
@@ -302,6 +302,7 @@ const CommentPage = () => {
                 comment={postComment}
                 isLoading={isCommentsLoading}
               />
+              
             )}
           </div>
         </div>
@@ -314,6 +315,7 @@ const CommentPage = () => {
           authUser={authUser}
           type={'replyToComment'}
           commentId={commentId}
+          buttonType={'Reply'}
         />
 
         {/* SubComment sections */}

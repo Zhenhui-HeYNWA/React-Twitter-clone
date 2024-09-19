@@ -17,18 +17,9 @@ import QuotePost from './QuotePost';
 import LoadingSpinner from './LoadingSpinner';
 import useFollow from '../../hooks/useFollow';
 
+import RenderText from './PostCommon/RenderText';
+
 // Function to check the existence of mentioned users
-const fetchMentionedUsersExistence = async (usernames) => {
-  const res = await fetch('/api/users/check-user', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ usernames }),
-  });
-  const data = await res.json();
-  return data; // This should return an object like { username1: true, username2: false }
-};
 
 // Post component
 const Post = ({ post, posts, user, feedType }) => {
@@ -37,9 +28,9 @@ const Post = ({ post, posts, user, feedType }) => {
   const username = post?.user.username;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
-  const [mentionedUsersExistence, setMentionedUsersExistence] = useState({}); // State to store the existence of mentioned users
-  const { data: authUser } = useQuery({ queryKey: ['authUser'] }); // Fetch the current authenticated user's data
 
+  const { data: authUser } = useQuery({ queryKey: ['authUser'] }); // Fetch the current authenticated user's data
+  const [isRenderTextFetching, setIsRenderTextFetching] = useState(true);
   const postId = post?._id; // Get the current post ID
   const isOriginalPost = post?.repost?.originalPost == null; // Check if the post is an original post
 
@@ -73,20 +64,20 @@ const Post = ({ post, posts, user, feedType }) => {
     queryFn: () => fetchComments(postId),
   });
 
-  // Check if mentioned users exist
-  useEffect(() => {
-    const mentionedUsernames = (
-      post?.text?.match(/@\w+/g) ||
-      post?.repost?.originalText?.match(/@\w+/g) ||
-      []
-    ).map((m) => m.substring(1));
+  // // Check if mentioned users exist
+  // useEffect(() => {
+  //   const mentionedUsernames = (
+  //     post?.text?.match(/@\w+/g) ||
+  //     post?.repost?.originalText?.match(/@\w+/g) ||
+  //     []
+  //   ).map((m) => m.substring(1));
 
-    if (mentionedUsernames.length > 0) {
-      fetchMentionedUsersExistence(mentionedUsernames).then(
-        setMentionedUsersExistence
-      );
-    }
-  }, [post.text, post.repost.originalText]);
+  //   if (mentionedUsernames.length > 0) {
+  //     fetchMentionedUsersExistence(mentionedUsernames).then(
+  //       setMentionedUsersExistence
+  //     );
+  //   }
+  // }, [post.text, post.repost.originalText]);
 
   const isAuthUserRepost = post.user._id === authUser._id; // Check if the repost was made by the authenticated user
 
@@ -97,38 +88,6 @@ const Post = ({ post, posts, user, feedType }) => {
     post?.quote.originalPost &&
     post?.quote.originalUser
   );
-
-  // Highlight mentions in the post text
-  const highlightMentions = (text) => {
-    const regex = /@\w+/g;
-    const handleClick = (e, path) => {
-      e.stopPropagation();
-
-      navigate(path);
-    };
-
-    return text.split(regex).reduce((acc, part, index) => {
-      if (index === 0) {
-        return [part];
-      }
-
-      const match = text.match(regex)[index - 1];
-      const mentionedUsername = match.substring(1);
-
-      acc.push(
-        <span
-          key={post._id + index}
-          className='mention-highlight text-sky-500 hover:underline hover:text-sky-700'
-          onClick={(e) => handleClick(e, `/profile/${mentionedUsername}`)}
-          style={{ cursor: 'pointer' }}>
-          {match}
-        </span>,
-        part
-      );
-
-      return acc;
-    }, []);
-  };
 
   // Hook to handle post mutations like delete, like, bookmark, and repost
   const { deletePost, isDeleting, pinPost, isPinning } = usePostMutations(
@@ -270,7 +229,10 @@ const Post = ({ post, posts, user, feedType }) => {
                     navigate(`/${authUser.username}/status/${post._id}`)
                   }>
                   <span className=' text-lg whitespace-pre-wrap word-wrap '>
-                    {highlightMentions(post.text)}
+                    <RenderText
+                      text={post?.text}
+                      setFetchingStatus={setIsRenderTextFetching}
+                    />
                   </span>
                 </span>
               )}
@@ -281,7 +243,13 @@ const Post = ({ post, posts, user, feedType }) => {
                     navigate(`/${authUser.username}/status/${post._id}`)
                   }>
                   <span className='text-lg whitespace-pre-wrap word-wrap '>
-                    {highlightMentions(post.repost.originalText)}
+                    {/* {highlightMentions(post.repost.originalText)}
+                     */}
+
+                    <RenderText
+                      text={post?.repost.originalText}
+                      setFetchingStatus={setIsRenderTextFetching}
+                    />
                   </span>
                 </span>
               )}

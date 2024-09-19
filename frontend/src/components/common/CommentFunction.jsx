@@ -21,7 +21,6 @@ const CommentFunction = ({ postComment, size }) => {
   const [imgs, setImgs] = useState([]);
   const [reply, setReplies] = useState('');
   const [structuredComments, setStructuredComments] = useState([]);
-  console.log(structuredComments);
 
   const {
     replyComment,
