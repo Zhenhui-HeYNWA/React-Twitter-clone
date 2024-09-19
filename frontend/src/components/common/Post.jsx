@@ -30,7 +30,7 @@ const Post = ({ post, posts, user, feedType }) => {
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
 
   const { data: authUser } = useQuery({ queryKey: ['authUser'] }); // Fetch the current authenticated user's data
-  const [isRenderTextFetching, setIsRenderTextFetching] = useState(true);
+
   const postId = post?._id; // Get the current post ID
   const isOriginalPost = post?.repost?.originalPost == null; // Check if the post is an original post
 
@@ -229,10 +229,7 @@ const Post = ({ post, posts, user, feedType }) => {
                     navigate(`/${authUser.username}/status/${post._id}`)
                   }>
                   <span className=' text-lg whitespace-pre-wrap word-wrap '>
-                    <RenderText
-                      text={post?.text}
-                      setFetchingStatus={setIsRenderTextFetching}
-                    />
+                    <RenderText text={post?.text} />
                   </span>
                 </span>
               )}
@@ -246,10 +243,7 @@ const Post = ({ post, posts, user, feedType }) => {
                     {/* {highlightMentions(post.repost.originalText)}
                      */}
 
-                    <RenderText
-                      text={post?.repost.originalText}
-                      setFetchingStatus={setIsRenderTextFetching}
-                    />
+                    <RenderText text={post?.repost.originalText} />
                   </span>
                 </span>
               )}
