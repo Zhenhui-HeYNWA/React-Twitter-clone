@@ -11,14 +11,7 @@ import usePostMutations from '../../../../hooks/usePostMutations';
 import RenderImg from '../../RenderImg/RenderImg';
 import './ReplyPostModal.css';
 
-const ReplyPostModal = ({ post, comments, theme }) => {
-  console.log(comments, 'comments');
-
-  comments?.map((c) => {
-    console.log(c, 'comments');
-    console.log(c.imgs);
-  });
-
+const ReplyPostModal = ({ post, comments, theme, postId }) => {
   const [imgs, setImgs] = useState([]);
   const [comment, setComment] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -27,10 +20,26 @@ const ReplyPostModal = ({ post, comments, theme }) => {
     setComment((prevText) => prevText + emoji.native);
   };
 
-  const {
-    // commentPostSimple,
-    isPostCommenting,
-  } = usePostMutations();
+  const { commentPostAdvanced, isPostCommenting } = usePostMutations(postId);
+
+  // Handle comment submission
+  const handlePostComment = (e) => {
+    e.preventDefault();
+    if (isPostCommenting) return;
+    commentPostAdvanced(
+      { postId: postId, text: comment, imgs: imgs },
+      {
+        onSuccess: () => {
+          setComment(''); // Clear the comment input after successful submission
+          setImgs([]);
+          const modal = document.getElementById('comments_modal' + post._id);
+          if (modal) {
+            modal.close();
+          }
+        },
+      }
+    );
+  };
 
   const handleImgChange = (e) => {
     const files = e.target.files;
@@ -66,37 +75,42 @@ const ReplyPostModal = ({ post, comments, theme }) => {
             </p>
           )}
 
-          {comments?.map((comment) => (
-            <div key={comment?._id} className='flex gap-2 items-start '>
-              <div className='avatar'>
-                <div className='w-8 rounded-full'>
-                  <img
-                    src={comment?.user?.profileImg || '/avatar-placeholder.png'}
-                  />
-                </div>
-              </div>
-              <div className='flex flex-col'>
-                <div className='flex items-center gap-1'>
-                  <span className='font-bold'>{comment?.user?.fullName}</span>
-                  <span className='text-gray-700 text-sm '>
-                    @{comment?.user?.username}
-                  </span>
-                </div>
-                {comment.imgs.length > 0 && (
-                  <div className=' rounded-xl overflow-hidden w-fit mb-2'>
-                    <RenderImg imgs={comment.imgs} size={'sm'} />
+          {comments?.map(
+            (comment) =>
+              comment && ( // Ensure comment is not undefined
+                <div key={comment?._id} className='flex gap-2 items-start '>
+                  <div className='avatar'>
+                    <div className='w-8 rounded-full'>
+                      <img
+                        src={
+                          comment?.user?.profileImg || '/avatar-placeholder.png'
+                        }
+                      />
+                    </div>
                   </div>
-                )}
-
-                <div className='text-sm'>{comment?.text}</div>
-              </div>
-            </div>
-          ))}
+                  <div className='flex flex-col'>
+                    <div className='flex items-center gap-1'>
+                      <span className='font-bold'>
+                        {comment?.user?.fullName}
+                      </span>
+                      <span className='text-gray-700 text-sm '>
+                        @{comment?.user?.username}
+                      </span>
+                    </div>
+                    {comment?.imgs?.length > 0 && ( // Add optional chaining to comment
+                      <div className=' rounded-xl overflow-hidden w-fit mb-2'>
+                        <RenderImg imgs={comment?.imgs} size={'sm'} />
+                      </div>
+                    )}
+                    <div className='text-sm'>{comment?.text}</div>
+                  </div>
+                </div>
+              )
+          )}
         </div>
         <form
           className='flex  flex-col gap-2 items-center mt-4 border-t border-gray-300  dark:border-gray-800  pt-2'
-          // onSubmit={handlePostComment}
-        >
+          onSubmit={handlePostComment}>
           <div className='quote-post-container w-full'>
             <CustomMention
               className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B]  border-gray-100  dark:border-gray-800'
@@ -105,20 +119,20 @@ const ReplyPostModal = ({ post, comments, theme }) => {
               onChange={(e) => setComment(e.target.value)}
             />
           </div>
-          {imgs.length > 0 && (
+          {imgs?.length > 0 && (
             <div className='w-full overflow-x-auto '>
               <div className='flex gap-2'>
-                {imgs.map((img, index) => (
+                {imgs?.map((img, index) => (
                   <div
                     key={img}
                     className='relative flex-shrink-0'
                     style={{
-                      flex: imgs.length > 1 ? '0 0 10rem' : '0 0 auto',
+                      flex: imgs?.length > 1 ? '0 0 10rem' : '0 0 auto',
                     }}>
                     <IoCloseSharp
                       className='absolute top-1 right-2 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
                       onClick={() => {
-                        setImgs(imgs.filter((_, i) => i !== index));
+                        setImgs(imgs?.filter((_, i) => i !== index));
                       }}
                     />
                     <img

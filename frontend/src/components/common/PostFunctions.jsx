@@ -1,5 +1,5 @@
 import usePostMutations from '../../hooks/usePostMutations';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { RiShare2Line } from 'react-icons/ri';
 import { BiComment, BiRepost } from 'react-icons/bi';
@@ -8,15 +8,11 @@ import { AiOutlineLink } from 'react-icons/ai';
 import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
 import { PiPencilLine } from 'react-icons/pi';
 import toast from 'react-hot-toast';
-import Picker from '@emoji-mart/react';
 
-import data from '@emoji-mart/data';
 import QuotePostModal from './QuotePostModal';
-import { CiImageOn } from 'react-icons/ci';
-import { BsEmojiSmileFill } from 'react-icons/bs';
+
 import { useTheme } from '../context/ThemeProvider';
-import { IoCloseSharp } from 'react-icons/io5';
-import CustomMention from './MentionComponent';
+
 import ReplyPostModal from './PostCommon/ReplyPostModal/ReplyPostModal';
 
 const PostFunctions = ({
@@ -27,13 +23,7 @@ const PostFunctions = ({
   username,
   postId,
 }) => {
-  const imgRef = useRef(null);
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
-  const [comment, setComment] = useState('');
-  const [imgs, setImgs] = useState([]);
-  const [drop, setDrop] = useState(false);
-
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const { theme } = useTheme();
 
@@ -47,9 +37,6 @@ const PostFunctions = ({
   // Fetch the current authenticated user's data
   // Hook to handle post mutations like delete, like, bookmark, and repost
   const {
-    commentPostAdvanced,
-    // commentPostSimple,
-    isPostCommenting,
     likePost,
     isLiking,
     bookmarkPost,
@@ -57,28 +44,6 @@ const PostFunctions = ({
     repostPost,
     isReposting,
   } = usePostMutations(postId, feedType, username);
-
-  const handleEmojiSelect = (emoji) => {
-    setComment((prevText) => prevText + emoji.native);
-  };
-  // Handle comment submission
-  const handlePostComment = (e) => {
-    e.preventDefault();
-    if (isPostCommenting) return;
-    commentPostAdvanced(
-      { postId: postId, text: comment, imgs: imgs },
-      {
-        onSuccess: () => {
-          setComment(''); // Clear the comment input after successful submission
-          setImgs([]);
-          const modal = document.getElementById('comments_modal' + post._id);
-          if (modal) {
-            modal.close();
-          }
-        },
-      }
-    );
-  };
 
   // Fetch comments for the specific post
   // Fetch comments data
@@ -121,27 +86,6 @@ const PostFunctions = ({
   const handleBookmarkPost = () => {
     if (isBookmarking) return;
     bookmarkPost();
-  };
-
-  const handleImgChange = (e) => {
-    const files = e.target.files;
-    if (files && files.length + imgs.length <= 4) {
-      const newImgs = [...imgs];
-      Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          newImgs.push(reader.result);
-          if (newImgs.length <= 4) {
-            setImgs(newImgs);
-          } else {
-            toast.error('You can upload up to 4 images.');
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    } else {
-      toast.error('You can upload up to 4 images.');
-    }
   };
 
   //Handle ShareLink
@@ -195,132 +139,13 @@ const PostFunctions = ({
             {comments?.length}
           </span>
         </div>
-        {/* We're using Modal Component from DaisyUI */}
-        {/* <dialog
-          id={`comments_modal${post?._id}`}
-          className='modal  modal-middle border-none outline-none '>
-          <div className='modal-box rounded-xl border bg-gray-100 dark:bg-[#15202B]  border-gray-400 overflow-visible'>
-            <h3 className='font-bold text-lg mb-4'>COMMENTS</h3>
 
-            <div className='flex flex-col gap-3 max-h-60 '>
-              {post?.comments?.length === 0 && (
-                <p className='text-sm text-slate-500'>
-                  No comments yet 🤔 Be the first one 😉
-                </p>
-              )}
-
-              {comments?.map((comment) => (
-                <div key={comment?._id} className='flex gap-2 items-start '>
-                  <div className='avatar'>
-                    <div className='w-8 rounded-full'>
-                      <img
-                        src={
-                          comment?.user?.profileImg || '/avatar-placeholder.png'
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className='flex flex-col'>
-                    <div className='flex items-center gap-1'>
-                      <span className='font-bold'>
-                        {comment?.user?.fullName}
-                      </span>
-                      <span className='text-gray-700 text-sm '>
-                        @{comment?.user?.username}
-                      </span>
-                    </div>
-                    <div className='text-sm'>{comment?.text}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <form
-              className='flex  flex-col gap-2 items-center mt-4 border-t border-gray-300  dark:border-gray-800  pt-2'
-              onSubmit={handlePostComment}>
-              <div className='quote-post-container w-full'>
-                <CustomMention
-                  className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B]  border-gray-100  dark:border-gray-800'
-                  placeholderText='Add a comment...'
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                />
-              </div>
-              {imgs.length > 0 && (
-                <div className='w-full overflow-x-auto '>
-                  <div className='flex gap-2'>
-                    {imgs.map((img, index) => (
-                      <div
-                        key={img}
-                        className='relative flex-shrink-0'
-                        style={{
-                          flex: imgs.length > 1 ? '0 0 10rem' : '0 0 auto',
-                        }}>
-                        <IoCloseSharp
-                          className='absolute top-1 right-2 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
-                          onClick={() => {
-                            setImgs(imgs.filter((_, i) => i !== index));
-                          }}
-                        />
-                        <img
-                          src={img}
-                          className={
-                            imgs.length > 1
-                              ? `w-full h-full object-cover rounded-2xl`
-                              : ` w-36 h-44 sm:w-64 sm:h-72 mx-auto  object-cover rounded-2xl`
-                          }
-                          alt={`Preview ${index + 1}`}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className=' justify-between flex w-full'>
-                <div className=' flex gap-1 items-center  relative'>
-                  <CiImageOn
-                    className='fill-primary w-6 h-6 cursor-pointer'
-                    onClick={() => imgRef.current.click()}
-                  />
-
-                  <BsEmojiSmileFill
-                    className='fill-primary w-5 h-5 cursor-pointer'
-                    onClick={() => setShowEmojiPicker((prev) => !prev)}
-                  />
-
-                  {showEmojiPicker && (
-                    <div className='absolute top-6  md:top-6 md:left-10 z-10 '>
-                      <Picker
-                        data={data}
-                        onEmojiSelect={handleEmojiSelect}
-                        theme={theme === 'dark' ? 'dark' : 'light'}
-                        maxFrequentRows={0}
-                        perLine={7}
-                        emojiSize={20}
-                        searchPosition={'none'}
-                        previewPosition={'bottom'}
-                      />
-                    </div>
-                  )}
-                </div>
-                <input
-                  type='file'
-                  hidden
-                  ref={imgRef}
-                  accept='image/*'
-                  onChange={handleImgChange}
-                  multiple
-                />
-                <button className='btn btn-primary rounded-full btn-sm text-white px-4'>
-                  {isPostCommenting ? <LoadingSpinner size='md' /> : 'Reply'}
-                </button>
-              </div>
-            </form>
-          </div>
-          <form method='dialog' className='modal-backdrop'>
-            <button className='outline-none'>close</button>
-          </form>
-        </dialog> */}
-        <ReplyPostModal post={post} comments={comments} theme={theme} />
+        <ReplyPostModal
+          post={post}
+          comments={comments}
+          theme={theme}
+          postId={postId}
+        />
 
         <div
           className={` dropdown   dropdown-top 
