@@ -17,6 +17,7 @@ import { BsEmojiSmileFill } from 'react-icons/bs';
 import { useTheme } from '../context/ThemeProvider';
 import { IoCloseSharp } from 'react-icons/io5';
 import CustomMention from './MentionComponent';
+import ReplyPostModal from './PostCommon/ReplyPostModal/ReplyPostModal';
 
 const PostFunctions = ({
   post,
@@ -30,6 +31,7 @@ const PostFunctions = ({
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
   const [comment, setComment] = useState('');
   const [imgs, setImgs] = useState([]);
+  const [drop, setDrop] = useState(false);
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
@@ -55,6 +57,7 @@ const PostFunctions = ({
     repostPost,
     isReposting,
   } = usePostMutations(postId, feedType, username);
+
   const handleEmojiSelect = (emoji) => {
     setComment((prevText) => prevText + emoji.native);
   };
@@ -171,7 +174,7 @@ const PostFunctions = ({
 
   return (
     <div
-      className={`flex justify-between  w-full ${
+      className={`flex justify-between items-center  w-full ${
         size === 'lg' ? '' : 'mt-3'
       } `}>
       <div className='flex gap-4 items-center w-full justify-between '>
@@ -193,7 +196,7 @@ const PostFunctions = ({
           </span>
         </div>
         {/* We're using Modal Component from DaisyUI */}
-        <dialog
+        {/* <dialog
           id={`comments_modal${post?._id}`}
           className='modal  modal-middle border-none outline-none '>
           <div className='modal-box rounded-xl border bg-gray-100 dark:bg-[#15202B]  border-gray-400 overflow-visible'>
@@ -234,12 +237,6 @@ const PostFunctions = ({
             <form
               className='flex  flex-col gap-2 items-center mt-4 border-t border-gray-300  dark:border-gray-800  pt-2'
               onSubmit={handlePostComment}>
-              {/* <textarea
-                className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B]  border-gray-100  dark:border-gray-800'
-                placeholder='Add a comment...'
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-              /> */}
               <div className='quote-post-container w-full'>
                 <CustomMention
                   className='textarea w-full p-1 rounded text-md resize-none border focus:outline-none  bg-gray-100 dark:bg-[#15202B]  border-gray-100  dark:border-gray-800'
@@ -322,9 +319,12 @@ const PostFunctions = ({
           <form method='dialog' className='modal-backdrop'>
             <button className='outline-none'>close</button>
           </form>
-        </dialog>
+        </dialog> */}
+        <ReplyPostModal post={post} comments={comments} theme={theme} />
 
-        <div className='dropdown dropdown-top'>
+        <div
+          className={` dropdown   dropdown-top 
+           `}>
           <div
             tabIndex={0}
             role={'button'}
@@ -337,7 +337,7 @@ const PostFunctions = ({
           >
             <ul
               tabIndex={0}
-              className='dropdown-content menu bg-gray-100 dark:bg-[#1E2732]  border-gray-200 border rounded-box z-[1] w-52 p-2 shadow  '>
+              className='dropdown-content menu bg-gray-100 dark:bg-[#1E2732]  border-gray-200 border rounded-box z-10 w-52 p-2 shadow  '>
               {isRepostedByAuthUser ? (
                 <>
                   <li
@@ -349,7 +349,7 @@ const PostFunctions = ({
                       handleRepost();
                     }}>
                     <button className='text-red-500'>
-                      <BiRepost size={18} />
+                      <BiRepost className='w-7 h-7' />
                       Undo repost
                     </button>
                   </li>
@@ -382,7 +382,7 @@ const PostFunctions = ({
 
                         handleRepost();
                       }}>
-                      <BiRepost size={18} />
+                      <BiRepost className='w-7 h-7' />
                       Repost Post
                     </span>
                   </li>
@@ -408,7 +408,7 @@ const PostFunctions = ({
             {isReposting && <LoadingSpinner size='sm' />}
 
             {isOriginalPost && (
-              <div className='flex flex-row items-center gap-1 w-12 '>
+              <div className='flex flex-row items-center gap-1 w-12 z-auto'>
                 {!isReposting && (
                   <BiRepost
                     className={`w-6 h-6 ${
@@ -456,6 +456,7 @@ const PostFunctions = ({
             )}
           </div>
         </div>
+
         <div
           className='flex gap-1 items-center group cursor-pointer w-12'
           onClick={handleLikePost}>

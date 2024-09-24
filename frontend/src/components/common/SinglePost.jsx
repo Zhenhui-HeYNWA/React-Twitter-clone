@@ -9,7 +9,7 @@ import CommentSkeleton from '../skeletons/CommentSkeleton';
 import usePostMutations from '../../hooks/usePostMutations';
 
 import RenderSubComments from './RenderSubComments';
-import CreateCommentForm from './CreateCommentForm';
+
 import ListFunction from './PostCommon/ListFunction';
 
 import QuotePost from './QuotePost';
@@ -18,6 +18,8 @@ import PostFunctions from './PostFunctions';
 
 import PostHeader from './PostCommon/PostHeader';
 import RenderText from './PostCommon/RenderText';
+import PostAuthorDetail from './PostCommon/PostAuthorDetail';
+import CreateCommentForm from './Comments/CreateCommentForm';
 
 const SinglePost = () => {
   const { data: authUser } = useQuery({
@@ -107,7 +109,7 @@ const SinglePost = () => {
           {!isPostLoading && post && (
             <div className='flex flex-col flex-1'>
               <div className='flex flex-row gap-2 items-center justify-between'>
-                <div className='flex  gap-4'>
+                <div className='flex  gap-4 w-full'>
                   <div className='avatar'>
                     {/* Avatar */}
                     {isOriginalPost && (
@@ -135,48 +137,24 @@ const SinglePost = () => {
                       </Link>
                     )}
                   </div>
-                  <div className='flex flex-col justify-start'>
-                    {/* fullName */}
-                    {isOriginalPost && (
-                      <Link
-                        to={`/profile/${post.user.username}`}
-                        className='font-bold'>
-                        {post.user.fullName}
-                      </Link>
-                    )}
-                    {!isOriginalPost && (
-                      <Link
-                        to={`/profile/${post.repost.postOwner.username}`}
-                        className='font-bold'>
-                        {post.repost.postOwner.fullName}
-                      </Link>
-                    )}
 
-                    <span className='text-gray-500 flex gap-1 text-sm'>
-                      <Link
-                        to={`/profile/${
-                          isOriginalPost
-                            ? post.user.username
-                            : post.repost.postOwner.username
-                        }`}>
-                        @
-                        {isOriginalPost
-                          ? post.user.username
-                          : post.repost.postOwner.username}
-                      </Link>
-                    </span>
+                  <div className='flex w-full justify-between'>
+                    {isOriginalPost ? (
+                      <PostAuthorDetail postUser={post?.user} />
+                    ) : (
+                      <PostAuthorDetail postUser={post.repost.postOwner} />
+                    )}
+                    <div className='list-function-drop'>
+                      <ListFunction
+                        id={postId}
+                        isBelongsToAuthUser={isMyPost}
+                        owner={post?.user}
+                        authUser={authUser}
+                        isOriginal={isOriginalPost}
+                        onDeleteClick={() => handlePostDeleteClick(post._id)}
+                      />
+                    </div>
                   </div>
-                </div>
-
-                <div className=' flex justify-end items-center'>
-                  <ListFunction
-                    id={postId}
-                    isBelongsToAuthUser={isMyPost}
-                    owner={post?.user}
-                    authUser={authUser}
-                    isOriginal={isOriginalPost}
-                    onDeleteClick={() => handlePostDeleteClick(post._id)}
-                  />
                 </div>
               </div>
               <div className='flex flex-col gap-3  mt-2 '>
@@ -237,6 +215,7 @@ const SinglePost = () => {
           authUser={authUser}
           type={'ReplyToPost'}
           buttonType={'Reply'}
+          
         />
         {/* POST COMMENT */}
         <div className=''>

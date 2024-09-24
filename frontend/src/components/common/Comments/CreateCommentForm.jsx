@@ -1,12 +1,15 @@
 import { useRef, useState } from 'react';
-import usePostMutations from '../../hooks/usePostMutations';
+
 import { useParams } from 'react-router-dom';
 
-import useCommentMutations from '../../hooks/useCommentMutations';
-import CreatePostControls from './PostCommon/CreatePostControls';
 import toast from 'react-hot-toast';
 import { IoCloseSharp } from 'react-icons/io5';
-import CustomMention from './MentionComponent';
+
+import usePostMutations from '../../../hooks/usePostMutations';
+
+import CreatePostControls from '../PostCommon/CreatePostControls';
+import useCommentMutations from '../../../hooks/useCommentMutations';
+import CustomMention from '../MentionComponent';
 
 const CreateCommentForm = ({
   post,

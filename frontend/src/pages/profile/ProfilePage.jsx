@@ -8,12 +8,11 @@ import { IoCalendarOutline } from 'react-icons/io5';
 import ProfileHeaderSkeleton from '../../components/skeletons/ProfileHeaderSkeleton';
 import EditProfileModal from './EditProfileModal';
 import Posts from '../../components/common/Posts';
-
+import CommentSections from '../../components/common/Comments/CommentSections';
 import { useQuery } from '@tanstack/react-query';
 import { formatMemberSinceDate } from '../../utils/date';
 import useFollow from '../../hooks/useFollow';
 import useUpdateProfile from '../../hooks/useUpdateProfile';
-import CommentSections from '../../components/common/CommentSections';
 
 const ProfilePage = () => {
   const [coverImg, setCoverImg] = useState(null);

@@ -3,13 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './LoadingSpinner';
 import { FaTrash } from 'react-icons/fa';
 
-import { formatDateTime, formatPostDate } from '../../utils/date';
+import { formatDateTime } from '../../utils/date';
 import { useEffect, useState } from 'react';
 import useCommentMutations from '../../hooks/useCommentMutations';
-import CommentFunction from './CommentFunction';
+import CommentFunction from './Comments/CommentFunction';
 
 import RenderImg from './RenderImg/RenderImg';
 import RenderText from './PostCommon/RenderText';
+import PostAuthorDetail from './PostCommon/PostAuthorDetail';
 
 const RenderComments = ({ comment }) => {
   const { data: authUser } = useQuery({
@@ -42,7 +43,7 @@ const RenderComments = ({ comment }) => {
         user: currentComment.parentId.user,
         imgs: currentComment.parentId.imgs,
         replies: currentComment.parentId.replies,
-        createdAt: formatPostDate(currentComment.parentId.createdAt),
+        createdAt: currentComment.parentId.createdAt,
         isDeleted: currentComment.parentId.isDeleted,
         likes: currentComment.parentId.likes,
       });
@@ -114,27 +115,12 @@ const RenderComments = ({ comment }) => {
 
                           <div className='flex flex-col w-full gap-1'>
                             <div className='flex items-center justify-between '>
-                              <div className='flex flex-row items-center justify-start gap-1'>
-                                <Link
-                                  to={`/profile/${structuredComment?.user.username}`}
-                                  className='font-bold truncate'>
-                                  {structuredComment?.user.fullName}
-                                </Link>
+                              <PostAuthorDetail
+                                postUser={structuredComment?.user}
+                                date={structuredComment?.createdAt}
+                                type={'main'}
+                              />
 
-                                {/* username */}
-                                <span className='text-gray-500 flex gap-1 text-base truncate max-w-20 md:max-w-52'>
-                                  <Link
-                                    to={`/profile/${structuredComment?.user.username}`}>
-                                    @{structuredComment?.user.username}
-                                  </Link>
-                                </span>
-                                <span className='text-base text-gray-500 text-nowrap'>
-                                  ·
-                                </span>
-                                <span className='text-base text-gray-500 flex gap-1 text-nowrap'>
-                                  {structuredComment?.createdAt}
-                                </span>
-                              </div>
                               {isMyStructuredComment && (
                                 <div className='flex justify-end items-center'>
                                   <span className='flex justify-end flex-1'>
@@ -208,9 +194,9 @@ const RenderComments = ({ comment }) => {
 
                 <div className='flex flex-col  w-full '>
                   <div className='flex flex-row justify-between items-center w-full'>
-                    <div className=' font-bold '>{comment?.user.username}</div>
+                    <PostAuthorDetail postUser={comment?.user} />
                     {isMyComment && (
-                      <div className='flex  '>
+                      <div className=' justify-end  '>
                         <span className='flex justify-end  '>
                           {!isCommentDeleting && (
                             <FaTrash
@@ -223,12 +209,6 @@ const RenderComments = ({ comment }) => {
                       </div>
                     )}
                   </div>
-
-                  <Link to={`/profile/${comment?.user.username}`}>
-                    <div className='text-gray-500 flex text-base'>
-                      @{comment?.user.fullName}
-                    </div>
-                  </Link>
                 </div>
               </div>
             </div>

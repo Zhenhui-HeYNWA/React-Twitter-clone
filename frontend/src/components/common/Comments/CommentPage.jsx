@@ -1,25 +1,26 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { FaArrowLeft } from 'react-icons/fa';
+
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import usePostMutations from '../../hooks/usePostMutations';
-import { formatPostDate } from '../../utils/date';
-import { BiRepost } from 'react-icons/bi';
-import PostSkeleton from '../skeletons/PostSkeleton';
 
-import CommentSkeleton from '../skeletons/CommentSkeleton';
-import userHighlightMentions from '../../hooks/userHighlightMentions';
+import PostSkeleton from '../../skeletons/PostSkeleton';
 
-import RenderSubComments from './RenderSubComments';
-import SingleCommentSkeleton from '../skeletons/SingleCommentSkeleton';
+import CommentSkeleton from '../../skeletons/CommentSkeleton';
 
-import CreateCommentForm from './CreateCommentForm';
+import RenderSubComments from '../RenderSubComments';
+import SingleCommentSkeleton from '../../skeletons/SingleCommentSkeleton';
 
-import RenderComments from './RenderComments';
+import CreateCommentForm from '../Comments/CreateCommentForm';
 
-import PostFunctions from './PostFunctions';
-import ListFunction from './PostCommon/ListFunction';
-import RenderImg from './RenderImg/RenderImg';
+import RenderComments from '../RenderComments';
+
+import PostFunctions from '../PostFunctions';
+import ListFunction from '../PostCommon/ListFunction';
+import RenderImg from '../RenderImg/RenderImg';
+import RenderText from '../PostCommon/RenderText';
+import PostHeader from '../PostCommon/PostHeader';
+import PostAuthorDetail from '../PostCommon/PostAuthorDetail';
+import usePostMutations from '../../../hooks/usePostMutations';
 
 const CommentPage = () => {
   const { data: authUser } = useQuery({
@@ -44,10 +45,8 @@ const CommentPage = () => {
   //Post checked
   const isMyPost = authUser._id === post?.user._id;
 
-  const isAuthUserRepost = post?.user._id === authUser._id;
   const isOriginalPost = post?.repost?.originalPost == null;
 
-  const formattedPostDate = post ? formatPostDate(post.createdAt) : '';
   const navigate = useNavigate();
   const { data: postComment, isLoading: isPostCommentLoading } = useQuery({
     queryKey: ['comment', commentId],
@@ -111,16 +110,7 @@ const CommentPage = () => {
 
   return (
     <div className='flex-[4_4_0] border-r border-gray-200 dark:border-gray-700 min-h-screen  w-full '>
-      <div className='sticky top-0   z-10 w-full   backdrop-blur-2xl px-4 py-2 '>
-        <div className='flex gap-10  py-1 items-center'>
-          <Link to='/'>
-            <FaArrowLeft className='w-4 h-4' />
-          </Link>
-          <div className='flex flex-col'>
-            <p className='font-bold text-lg'>Post</p>
-          </div>
-        </div>
-      </div>
+      <PostHeader post={post} authUser={authUser} />
       <div className='flex flex-col  '>
         <div className=''>
           {/* Post Sections */}
@@ -130,24 +120,10 @@ const CommentPage = () => {
               {!isPostLoading && !post && (
                 <p className='text-center text-lg mt-4'>Post not found</p>
               )}
-              {!isOriginalPost && !isAuthUserRepost && (
-                <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-                  {' '}
-                  <BiRepost className='w-4 h-4  text-slate-500' />
-                  {post.user.username} reposted
-                </span>
-              )}
 
-              {!isOriginalPost && isAuthUserRepost && (
-                <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-                  {' '}
-                  <BiRepost className='w-4 h-4  text-slate-500' />
-                  You reposted
-                </span>
-              )}
               {!isPostLoading && post && (
                 <div className='flex flex-col w-full'>
-                  <div className='flex flex-col gap-2 items-center justify-between  '>
+                  <div className='flex flex-col gap-1 items-center justify-between  '>
                     <div className='flex  gap-4  w-full '>
                       <div className=' flex flex-col items-center '>
                         <div className='avatar'>
@@ -183,43 +159,20 @@ const CommentPage = () => {
 
                       <div className='flex flex-col  w-full gap-1  '>
                         <div className='flex  items-center justify-between  w-full '>
-                          <div className='flex flex-row items-center  justify-start gap-1 '>
-                            {/* fullName */}
-                            {isOriginalPost && (
-                              <Link
-                                to={`/profile/${post.user.username}`}
-                                className='font-bold truncate'>
-                                {post.user.fullName}
-                              </Link>
-                            )}
-                            {!isOriginalPost && (
-                              <Link
-                                to={`/profile/${post.repost.postOwner.username}`}
-                                className='font-bold text-nowrap'>
-                                {post.repost.postOwner.fullName}
-                              </Link>
-                            )}
-                            {/* username */}
-                            <span className='text-gray-500 text-base truncate max-w-20 md:max-w-52'>
-                              <Link
-                                to={`/profile/${
-                                  isOriginalPost
-                                    ? post.user.username
-                                    : post.repost.postOwner.username
-                                }`}>
-                                @
-                                {isOriginalPost
-                                  ? post.user.username
-                                  : post.repost.postOwner.username}
-                              </Link>
-                            </span>
-                            <span className='text-base  text-gray-500 text-nowrap'>
-                              ·
-                            </span>
-                            <span className='text-base  text-gray-500  text-nowrap'>
-                              {formattedPostDate}
-                            </span>
-                          </div>
+                          {isOriginalPost ? (
+                            <PostAuthorDetail
+                              postUser={post.user}
+                              date={post.createdAt}
+                              type={'main'}
+                            />
+                          ) : (
+                            <PostAuthorDetail
+                              postUser={post.repost.postOwner}
+                              date={post.createdAt}
+                              type={'main'}
+                            />
+                          )}
+
                           <div className=' flex justify-end items-center'>
                             <ListFunction
                               id={postId}
@@ -237,15 +190,12 @@ const CommentPage = () => {
                         <div className='flex flex-col overflow-hidden  '>
                           {isOriginalPost && (
                             <span className='text-lg whitespace-pre-wrap word-wrap '>
-                              {userHighlightMentions(post.text, post.user.name)}{' '}
+                              <RenderText text={post.text} />
                             </span>
                           )}
                           {!isOriginalPost && (
                             <span className='text-lg whitespace-pre-wrap word-wrap '>
-                              {userHighlightMentions(
-                                post.repost.originalText,
-                                post.user.name
-                              )}
+                              <RenderText text={post.repost.originalText} />
                             </span>
                           )}
                           {isOriginalPost && post.imgs.length > 0 && (
@@ -278,7 +228,6 @@ const CommentPage = () => {
                           username={username}
                           postId={postId}
                         />
-                      
                       </div>
                     </div>
                   </div>
@@ -302,7 +251,6 @@ const CommentPage = () => {
                 comment={postComment}
                 isLoading={isCommentsLoading}
               />
-              
             )}
           </div>
         </div>

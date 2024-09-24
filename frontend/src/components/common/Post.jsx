@@ -4,8 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { BiRepost } from 'react-icons/bi';
 
-import { formatPostDate } from '../../utils/date';
-
 import PostFunctions from './PostFunctions';
 import RenderImg from './RenderImg/RenderImg';
 
@@ -18,6 +16,7 @@ import LoadingSpinner from './LoadingSpinner';
 import useFollow from '../../hooks/useFollow';
 
 import RenderText from './PostCommon/RenderText';
+import PostAuthorDetail from './PostCommon/PostAuthorDetail';
 
 // Function to check the existence of mentioned users
 
@@ -82,7 +81,7 @@ const Post = ({ post, posts, user, feedType }) => {
   const isAuthUserRepost = post.user._id === authUser._id; // Check if the repost was made by the authenticated user
 
   const isMyPost = authUser._id === post.user._id; // Check if the post belongs to the authenticated user
-  const formattedDate = formatPostDate(post.createdAt); // Format the post creation date
+
   const isQuote = !!(
     post?.quote &&
     post?.quote.originalPost &&
@@ -137,12 +136,10 @@ const Post = ({ post, posts, user, feedType }) => {
           </span>
         )}
         <div className='flex gap-4 items-start py-2 border-b border-gray-200 dark:border-gray-700 justify-center px-4 '>
-          <div className='avatar'>
+          <div className=' w-12 h-12 rounded-full overflow-hidden'>
             {/* Avatar */}
             {isOriginalPost && (
-              <Link
-                to={`/profile/${post.user.username}`}
-                className='w-12 h-12 rounded-full overflow-hidden'>
+              <Link to={`/profile/${post.user.username}`}>
                 <img
                   src={post.user.profileImg || '/avatar-placeholder.png'}
                   alt={`${post.user.profileImg}'s avatar`}
@@ -150,9 +147,7 @@ const Post = ({ post, posts, user, feedType }) => {
               </Link>
             )}
             {!isOriginalPost && (
-              <Link
-                to={`/profile/${post.repost.postOwner?.username}`}
-                className='w-12 h-12 rounded-full overflow-hidden'>
+              <Link to={`/profile/${post.repost.postOwner?.username}`}>
                 <img
                   src={
                     post.repost.postOwner?.profileImg ||
@@ -165,45 +160,21 @@ const Post = ({ post, posts, user, feedType }) => {
 
           <div className='flex flex-col flex-1  '>
             <div className='flex   justify-between items-center w-full  '>
-              <div className='flex flex-row gap-1 items-center max-w-sm '>
-                {/* fullName */}
-                {isOriginalPost && (
-                  <Link to={`/profile/${post.user.username}`}>
-                    <span className=' font-bold text-nowrap '>
-                      {post.user.fullName}
-                    </span>
-                  </Link>
-                )}
-                {!isOriginalPost && (
-                  <Link to={`/profile/${post.repost.postOwner.username}`}>
-                    <span className=' font-bold text-nowrap'>
-                      {post.repost.postOwner.fullName}
-                    </span>
-                  </Link>
-                )}
+              {isOriginalPost ? (
+                <PostAuthorDetail
+                  postUser={post?.user}
+                  date={post?.createdAt}
+                  type={'main'}
+                />
+              ) : (
+                <PostAuthorDetail
+                  postUser={post.repost.postOwner}
+                  date={post?.createdAt}
+                  type={'main'}
+                />
+              )}
 
-                <span className=' flex gap-1 text-basic '>
-                  <span className='text-gray-500 truncate max-w-16 md:max-w-52 text-basic'>
-                    <Link
-                      to={`/profile/${
-                        isOriginalPost
-                          ? post.user.username
-                          : post.repost.postOwner.username
-                      }`}>
-                      {isOriginalPost ? (
-                        <span>@{post.user.username}</span>
-                      ) : (
-                        <span>@{post.repost.postOwner.username}</span>
-                      )}
-                    </Link>
-                  </span>
-                  <span className='text-gray-500 text-nowrap'>·</span>
-                  <span className='text-gray-500 text-nowrap'>
-                    {formattedDate}
-                  </span>
-                </span>
-              </div>
-              <div>
+              <div className='z-10'>
                 {isDeleting || isPinning || isPending ? (
                   <LoadingSpinner size='sm' />
                 ) : (

@@ -18,6 +18,9 @@ export default {
       maxHeight: {
         128: '32rem',
       },
+      zIndex: {
+        9999: '9999',
+      },
     },
   },
   plugins: [daisyui],

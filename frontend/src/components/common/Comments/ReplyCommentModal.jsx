@@ -6,8 +6,6 @@ import useCommentMutations from '../../../hooks/useCommentMutations';
 import toast from 'react-hot-toast';
 
 const ReplyCommentModal = (comment, authUser) => {
-  console.log(comment);
-
   const [imgs, setImgs] = useState([]);
 
   const [replyToComment, setReplyToComment] = useState('');

@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import CommentSkeleton from '../skeletons/CommentSkeleton';
-import RenderSubComments from './RenderSubComments';
+import CommentSkeleton from '../../skeletons/CommentSkeleton';
+import RenderSubComments from '../RenderSubComments';
 
 const CommentSections = ({ userId }) => {
   const { data, isLoading, isFetchingNextPage, fetchNextPage, hasNextPage } =

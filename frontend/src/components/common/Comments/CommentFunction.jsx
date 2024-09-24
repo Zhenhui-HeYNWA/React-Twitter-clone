@@ -1,17 +1,19 @@
-import { useEffect, useState } from 'react';
-import LoadingSpinner from './LoadingSpinner';
+import { useState } from 'react';
+import LoadingSpinner from '../LoadingSpinner';
 import { BiComment, BiRepost } from 'react-icons/bi';
 import { FaBookmark, FaRegBookmark, FaRegHeart } from 'react-icons/fa';
-import useCommentMutations from '../../hooks/useCommentMutations';
-import { formatPostDate } from '../../utils/date';
+import useCommentMutations from '../../../hooks/useCommentMutations';
+
 import { useQuery } from '@tanstack/react-query';
 import { RiShare2Line } from 'react-icons/ri';
 import { AiOutlineLink } from 'react-icons/ai';
 import toast from 'react-hot-toast';
 
-import CommentsControls from './Comments/CommentsControls';
+import CommentsControls from './CommentsControls';
 import { IoCloseSharp } from 'react-icons/io5';
-import CustomMention from './MentionComponent';
+import CustomMention from '../MentionComponent';
+import RenderText from '../PostCommon/RenderText';
+import PostAuthorDetail from '../PostCommon/PostAuthorDetail';
 
 const CommentFunction = ({ postComment, size }) => {
   const { data: authUser } = useQuery({
@@ -20,7 +22,7 @@ const CommentFunction = ({ postComment, size }) => {
 
   const [imgs, setImgs] = useState([]);
   const [reply, setReplies] = useState('');
-  const [structuredComments, setStructuredComments] = useState([]);
+  // const [structuredComments, setStructuredComments] = useState([]);
 
   const {
     replyComment,
@@ -31,7 +33,7 @@ const CommentFunction = ({ postComment, size }) => {
     isMarking,
   } = useCommentMutations();
 
-  const isSubComment = postComment?.parentId !== null;
+  // const isSubComment = postComment?.parentId !== null;
 
   const onEmojiSelect = (emoji) => {
     setReplies((prevText) => prevText + emoji.native);
@@ -64,33 +66,6 @@ const CommentFunction = ({ postComment, size }) => {
     (bookmark) =>
       bookmark.onModel === 'Comment' && bookmark.item === postComment._id
   );
-
-  function getParentCommentsIterative(postComment) {
-    const result = [];
-
-    let currentComment = postComment;
-    while (currentComment?.parentId) {
-      result.push({
-        _id: currentComment.parentId._id,
-        text: currentComment.parentId.text,
-        imgs: currentComment.parentId.imgs,
-        user: currentComment.parentId.user,
-        replies: currentComment.parentId.replies,
-        createdAt: formatPostDate(currentComment.parentId.createdAt),
-        isDeleted: currentComment.parentId.isDeleted,
-      });
-      currentComment = currentComment.parentId;
-    }
-
-    return result.reverse();
-  }
-
-  useEffect(() => {
-    if (isSubComment) {
-      const structured = getParentCommentsIterative(postComment);
-      setStructuredComments(structured);
-    }
-  }, [postComment, isSubComment]);
 
   //ReplyComment
   const handleReplyComment = (e, commentId) => {
@@ -186,21 +161,16 @@ const CommentFunction = ({ postComment, size }) => {
 
                 <div className=' flex flex-row items-center'>
                   <div className=' flex flex-col  justify-start '>
-                    <div className=' flex flex-row gap-2'>
-                      <div className=' font-bold truncate'>
-                        {postComment?.user?.fullName}
-                      </div>
-                      <div className='text-gray-500 overflow-hidden'>
-                        @{postComment?.user?.username}
-                      </div>
-                      <div className='text-gray-500'>·</div>
-                      <div className='text-gray-500'>
-                        {formatPostDate(postComment?.createdAt)}
-                      </div>
+                    <PostAuthorDetail
+                      postUser={postComment?.user}
+                      date={postComment?.createdAt}
+                      type={'main'}
+                    />
+                    <div className='text-base '>
+                      <RenderText text={postComment?.text} />
                     </div>
-                    <div className='text-base '>{postComment?.text}</div>
                     <div className='mt-2 text-gray-500'>
-                      Replying to 123
+                      Replying to
                       <span className='text-sky-600'>
                         @{postComment?.user?.username}
                       </span>
@@ -360,11 +330,7 @@ const CommentFunction = ({ postComment, size }) => {
                     handleShareLink(
                       `/${postComment?.postId}/comment/${postComment?.user?.username}/${postComment?._id}`
                     )
-                  }
-                  // onClick={
-                  //   () => handleShareLink(postComment) // Pass the whole postComment object
-                  // }
-                >
+                  }>
                   <>
                     <span className='text-slate-700 dark:text-slate-200'>
                       {' '}

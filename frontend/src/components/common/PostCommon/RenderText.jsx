@@ -6,7 +6,7 @@ const RenderText = ({ text }) => {
   const [mentionedUsersExistence, setMentionedUsersExistence] = useState({});
   const navigate = useNavigate();
 
-  // Memoize the fetch function
+  // Memoize the fetch function with the correct dependency array
   const fetchMentionedExistence = useCallback(async (usernames) => {
     try {
       const res = await fetch('/api/users/check-user', {
@@ -23,7 +23,7 @@ const RenderText = ({ text }) => {
       console.error('Error fetching mentioned users:', error);
       return {}; // Return an empty object in case of error
     }
-  });
+  }, []); // Add an empty dependency array to ensure this function is memoized
 
   useEffect(() => {
     const mentionedUsernames = [];
@@ -42,41 +42,75 @@ const RenderText = ({ text }) => {
         setMentionedUsersExistence(data);
       });
     }
-  }, [text, fetchMentionedExistence]);
+  }, [text, fetchMentionedExistence]); // Add fetchMentionedExistence as a dependency
 
-  const highlightMentions = (text) => {
-    const regex = /@\w+/g;
+  // Regex to detect URLs
+  const urlRegex = /https?:\/\/[^\s/$.?#].[^\s]*/g;
 
-    const handleClick = (e, path) => {
-      e.stopPropagation();
-      navigate(path);
-    };
+  const highlightMentionsAndUrls = (text) => {
+    // First, replace URLs with clickable links
+    const parts = text.split(urlRegex);
 
-    return text?.split(regex).reduce((acc, part, index) => {
-      if (index === 0) {
-        return [part];
-      }
-      const match = text.match(regex)[index - 1];
-      const mentionedUsername = match.substring(1);
+    return parts.reduce((acc, part, index) => {
+      // Process mentions
+      const regex = /@\w+/g;
+      const handleClick = (e, path) => {
+        e.stopPropagation();
+        navigate(path);
+      };
 
-      if (mentionedUsersExistence[mentionedUsername]) {
+      // Find URL matches
+      const matchUrl = text.match(urlRegex);
+      const url = matchUrl ? matchUrl[index - 1] : null;
+
+      // Handle URL
+      if (url) {
         acc.push(
-          <span
+          <a
             key={uuidv4()}
-            className='mentioned-highlight text-sky-500 hover:underline hover:text-sky-700 cursor-pointer'
-            onClick={(e) => handleClick(e, `/profile/${mentionedUsername}`)}>
-            {match}
-          </span>
+            href={url}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-blue-500 hover:underline'>
+            {url}
+          </a>
         );
-      } else {
-        acc.push(<span key={uuidv4()}>{match}</span>);
       }
-      acc.push(part);
-      return acc;
+
+      // Process mentions
+      const mentionParts = part
+        .split(regex)
+        .reduce((subAcc, subPart, subIndex) => {
+          if (subIndex === 0) {
+            return [subPart];
+          }
+
+          const match = part.match(regex)[subIndex - 1];
+          const mentionedUsername = match.substring(1);
+
+          if (mentionedUsersExistence[mentionedUsername]) {
+            subAcc.push(
+              <span
+                key={uuidv4()}
+                className='mentioned-highlight text-sky-500 hover:underline hover:text-sky-700 cursor-pointer'
+                onClick={(e) =>
+                  handleClick(e, `/profile/${mentionedUsername}`)
+                }>
+                {match}
+              </span>
+            );
+          } else {
+            subAcc.push(<span key={uuidv4()}>{match}</span>);
+          }
+          subAcc.push(subPart);
+          return subAcc;
+        }, []);
+
+      return acc.concat(mentionParts);
     }, []);
   };
 
-  return <div>{highlightMentions(text)}</div>;
+  return <div>{highlightMentionsAndUrls(text)}</div>;
 };
 
 export default RenderText;

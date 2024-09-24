@@ -39,5 +39,7 @@ textarea {
 }
 
 em-emoji-picker {
+  position: relative;
+  z-index: 50;
   height: 300px;
 }

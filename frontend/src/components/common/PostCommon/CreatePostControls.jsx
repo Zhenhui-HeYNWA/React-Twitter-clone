@@ -18,34 +18,40 @@ const CreatePostControls = ({
 }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const imgRef = useRef(null);
-  console.log(type);
 
   return (
-    <div className='flex justify-between border-t py-2   border-gray-200  dark:border-slate-700  sticky bottom-0 bg-slate-100 dark:bg-[#15202B]  w-full'>
-      <div className='flex gap-1 items-center '>
+    <div className='flex justify-between border-t py-2   border-gray-200  dark:border-slate-700    bottom-0 bg-slate-100 dark:bg-[#15202B]  w-full relative '>
+      <div className='flex gap-1 items-center  '>
         <CiImageOn
           className='fill-primary w-6 h-6 cursor-pointer'
           onClick={() => imgRef.current.click()}
         />
+
         <BsEmojiSmileFill
-          className='fill-primary w-5 h-5 cursor-pointer'
+          className='fill-primary w-5 h-5 cursor-pointer '
           onClick={() => setShowEmojiPicker((prev) => !prev)}
         />
+
         {showEmojiPicker && (
           <div
             className={`${
               type === 'post'
-                ? 'absolute top-10  right-2 md:top-10 md:left-10 z-10'
-                : 'absolute top-10  sm:bottom-5 md:left-0 z-10'
+                ? ' absolute top-10  right-2 md:top-10 md:left-10 z-50'
+                : ' absolute top-10  sm:bottom-5 md:left-0 z-50'
             }`}>
             <Picker
+              className={`${
+                type === 'post'
+                  ? ' absolute top-10  right-2 md:top-10 md:left-10 z-50'
+                  : ' absolute top-10  sm:bottom-5 md:left-0 z-50'
+              }`}
               data={data}
               onEmojiSelect={onEmojiSelect}
-              className='bg-slate-100 dark:bg-current'
               theme={theme === 'dark' ? 'dark' : 'light'}
             />
           </div>
         )}
+
         {type === 'Reply' ? (
           ''
         ) : !isFetchingLocation ? (

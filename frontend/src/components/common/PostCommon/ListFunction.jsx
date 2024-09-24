@@ -18,7 +18,7 @@ const ListFunction = ({
   const isFollowing = authUser?.followings.includes(owner?._id);
 
   return (
-    <div className='dropdown dropdown-bottom dropdown-end'>
+    <div className='dropdown dropdown-bottom dropdown-end z-1 relative'>
       <BsThreeDots tabIndex={2} role='button' className='active:fill-sky-600' />
       <ul
         tabIndex={2}

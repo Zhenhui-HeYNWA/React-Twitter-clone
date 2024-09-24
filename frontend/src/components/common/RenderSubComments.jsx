@@ -6,9 +6,10 @@ import LoadingSpinner from './LoadingSpinner';
 import { formatPostDate } from '../../utils/date';
 import useCommentMutations from '../../hooks/useCommentMutations';
 import { useEffect, useState } from 'react';
-import CommentFunction from './CommentFunction';
+import CommentFunction from './Comments/CommentFunction';
 import RenderImg from './RenderImg/RenderImg';
 import RenderText from './PostCommon/RenderText';
+import PostAuthorDetail from './PostCommon/PostAuthorDetail';
 
 const RenderSubComments = ({ pageType, postComment }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
@@ -24,9 +25,6 @@ const RenderSubComments = ({ pageType, postComment }) => {
     postComment?.parentId && postComment.parentId.user !== null;
 
   const navigate = useNavigate();
-  const formattedPostDate = postComment
-    ? formatPostDate(postComment.createdAt)
-    : '';
 
   function getParentCommentsIterative(comment) {
     const result = [];
@@ -185,26 +183,12 @@ const RenderSubComments = ({ pageType, postComment }) => {
 
           <div className='flex flex-col w-full gap-1'>
             <div className='flex items-center justify-between '>
-              <div className='flex flex-row items-center justify-start gap-1'>
-                <span className='truncate'>
-                  <Link
-                    to={`/profile/${postComment?.user.username}`}
-                    className='font-bold '>
-                    {postComment?.user.fullName}
-                  </Link>
-                </span>
+              <PostAuthorDetail
+                postUser={postComment?.user}
+                date={postComment.createdAt}
+                type={'main'}
+              />
 
-                {/* username */}
-                <span className='text-gray-500 flex gap-1 text-base truncate'>
-                  <Link to={`/profile/${postComment?.user?.username}`}>
-                    @{postComment?.user.username}
-                  </Link>
-                </span>
-                <span className='text-base text-gray-500'>·</span>
-                <span className='text-base text-gray-500 flex gap-1'>
-                  {formattedPostDate}
-                </span>
-              </div>
               {isMyComment && (
                 <div className='flex justify-end items-center'>
                   <span className='flex justify-end flex-1'>
