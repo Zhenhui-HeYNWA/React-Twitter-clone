@@ -72,7 +72,7 @@ const PostFunctions = ({
       repostPost({ actionType: 'remove' });
       return;
     }
-    repostPost({ actionType: 'repost' });
+    repostPost({ actionType: 'repost', onModel: 'Post' });
     return;
   };
 
@@ -174,7 +174,7 @@ const PostFunctions = ({
                       handleRepost();
                     }}>
                     <button className='text-red-500'>
-                      <BiRepost className='w-7 h-7' />
+                      <BiRepost className='w-5 h-5' />
                       Undo repost
                     </button>
                   </li>
@@ -190,7 +190,7 @@ const PostFunctions = ({
                         openQuoteModel(post._id);
                       }}>
                       <PiPencilLine size={18} />
-                      Quote Post
+                      Quote
                     </span>
                   </li>
                 </>
@@ -198,7 +198,7 @@ const PostFunctions = ({
                 <>
                   <li>
                     <span
-                      className='items-center'
+                      className='items-center '
                       onClick={() => {
                         const activeElement = document.activeElement;
                         if (activeElement) {
@@ -207,8 +207,8 @@ const PostFunctions = ({
 
                         handleRepost();
                       }}>
-                      <BiRepost className='w-7 h-7' />
-                      Repost Post
+                      <BiRepost className='w-5 h-5 ' />
+                      Repost
                     </span>
                   </li>
                   <li>
@@ -222,8 +222,8 @@ const PostFunctions = ({
 
                         openQuoteModel(post._id);
                       }}>
-                      <PiPencilLine size={18} />
-                      Quote Post
+                      <PiPencilLine size={20} />
+                      Quote
                     </span>
                   </li>
                 </>
@@ -233,7 +233,7 @@ const PostFunctions = ({
             {isReposting && <LoadingSpinner size='sm' />}
 
             {isOriginalPost && (
-              <div className='flex flex-row items-center gap-1 w-12 z-auto'>
+              <div className='flex flex-row items-center w-12 z-auto justify-center '>
                 {!isReposting && (
                   <BiRepost
                     className={`w-6 h-6 ${
@@ -246,7 +246,7 @@ const PostFunctions = ({
                 <span
                   className={`${
                     size === 'lg' ? 'text-base' : 'text-sm'
-                  } font-normal ${
+                  } font-normal  ${
                     isRepostedByAuthUser
                       ? ' text-green-500 group-hover:text-red-600'
                       : ' text-slate-500 group-hover:text-green-500'
@@ -256,7 +256,7 @@ const PostFunctions = ({
               </div>
             )}
             {!isOriginalPost && (
-              <div className='flex  items-center  w-12 '>
+              <div className='flex flex-row items-center  w-12 z-auto justify-center '>
                 {!isReposting && (
                   <BiRepost
                     className={`w-6 h-6 ${

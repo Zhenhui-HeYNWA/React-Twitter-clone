@@ -1,40 +1,18 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { formatPostDate } from '../../utils/date';
+
 import RenderImg from './RenderImg/RenderImg';
+import PostAuthorDetail from './PostCommon/PostAuthorDetail';
+import RenderText from './PostCommon/RenderText';
 
 const QuotePost = ({ post, isOriginalPost }) => {
   const quotePost = post?.quote;
+  console.log('post?.originalCreatedAt', post);
+  console.log(quotePost.onModel === 'Comment');
 
-  const formattedDate = formatPostDate(post?.originalCreatedAt);
   const navigate = useNavigate();
   const handleModalImgClick = (e, index) => {
     e.stopPropagation(); // This will prevent event propagation
     document.getElementById(`my_modal_${index}`).showModal(); // Open the modal
-  };
-  const RenderQuotePostLink = ({ text }) => {
-    const validText = text || '';
-
-    const regexLink = /(\/[a-zA-Z0-9_]+\/status\/[a-zA-Z0-9]+)/;
-
-    const parts = validText.split(regexLink);
-    return (
-      <div>
-        {parts.map((part, index) => {
-          if (regexLink.test(part)) {
-            return (
-              <Link
-                key={index}
-                to={part}
-                className='text-blue-500 hover:underline'>
-                {part}
-              </Link>
-            );
-          }
-
-          return <span key={index}>{part}</span>;
-        })}
-      </div>
-    );
   };
 
   // Check if either post.imgs or post.repost.originalImgs have images
@@ -48,7 +26,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
     isOriginalPost && quotePost.originalImgs.length > 0 && postHasImgs; // 条件1和3
 
   const shouldShowRepostImgs =
-    !isOriginalPost && quotePost.repost.originalImgs?.length > 0 && postHasImgs;
+    !isOriginalPost && quotePost.originalImgs?.length > 0 && postHasImgs;
 
   return (
     <>
@@ -63,22 +41,12 @@ const QuotePost = ({ post, isOriginalPost }) => {
                 />
               </div>
 
-              <div className=' flex  w-full gap-1  '>
-                <span className='font-bold  text-ellipsis   text-nowrap overflow-hidden w-fit max-w-28 sm:max-w-fit flex-1 '>
-                  {quotePost?.originalUser.fullName}
-                </span>
-                <div className=' flex-1 flex gap-1 '>
-                  <span className='text-gray-500 truncate overflow-hidden     max-w-12 sm:max-w-52  '>
-                    @{quotePost?.originalUser.username}
-                  </span>
-                  <div className=' flex-1 gap-1 flex '>
-                    <span className='text-gray-500 text-nowrap '>·</span>
-                    <span className='text-gray-500  text-nowrap'>
-                      {formattedDate}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <PostAuthorDetail
+                postUser={quotePost.originalUser}
+                date={post?.originalCreatedAt}
+                type={'main'}
+              />
+              {post.quote.onModel === 'Comment' && <div>Replying to </div>}
             </div>
           </Link>
 
@@ -104,16 +72,14 @@ const QuotePost = ({ post, isOriginalPost }) => {
                   </div>
                   <div className='px-2 w-full  h-32 py-1  '>
                     <div className=' text-base w-full h-full  whitespace-pre-wrap word-wrap line-clamp-5 '>
-                      <RenderQuotePostLink text={quotePost?.originalText} />
+                      <RenderText text={quotePost?.originalText} />
                     </div>
                   </div>
                 </>
               )}
-              {!isOriginalPost && quotePost.repost.originalImgs?.length > 0 && (
+              {!isOriginalPost && quotePost.originalImgs?.length > 0 && (
                 <RenderImg
-                  imgs={
-                    quotePost?.originalImgs || quotePost?.repost?.originalImgs
-                  }
+                  imgs={quotePost?.originalImgs || quotePost?.originalImgs}
                   onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
                   size='sm'
                 />
@@ -121,7 +87,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
             </div>
             <div className='px-2 w-full  h-32 py-1  '>
               <div className=' text-base w-full h-full  whitespace-pre-wrap word-wrap line-clamp-5'>
-                <RenderQuotePostLink text={quotePost?.originalText} />
+                <RenderText text={quotePost?.originalText} />
               </div>
             </div>
           </div>
@@ -135,28 +101,27 @@ const QuotePost = ({ post, isOriginalPost }) => {
                 className='w-7 h-7 rounded-full'
               />
             </div>
-
-            <div className=' flex  w-full gap-1  '>
-              <span className='font-bold  text-ellipsis   text-nowrap overflow-hidden w-fit max-w-28 sm:max-w-fit flex-1 '>
-                {quotePost?.originalUser.fullName}
-              </span>
-              <div className=' flex-1 flex gap-1 '>
-                <span className='text-gray-500 truncate overflow-hidden     max-w-12 sm:max-w-52  '>
-                  @{quotePost?.originalUser.username}
-                </span>
-                <div className=' flex-1 gap-1 flex '>
-                  <span className='text-gray-500 text-nowrap '>·</span>
-                  <span className='text-gray-500  text-nowrap'>
-                    {formattedDate}
-                  </span>
+            <div className='flex flex-col'>
+              <PostAuthorDetail
+                postUser={quotePost.originalUser}
+                date={quotePost?.originalCreatedAt}
+                type={'main'}
+              />
+              {quotePost?.onModel === 'Comment' && (
+                <div>
+                  {' '}
+                  Replying to{' '}
+                  <span className='text-sky-600'>
+                    @{quotePost?.replyToUser?.fullName}
+                  </span>{' '}
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
           <div className='py-2 px-4'>
             <div className=' text-base w-full h-full  whitespace-pre-wrap word-wrap line-clamp-5'>
-              <RenderQuotePostLink text={quotePost?.originalText} />{' '}
+              <RenderText text={quotePost?.originalText} />{' '}
             </div>
           </div>
           {isOriginalPost && quotePost?.originalImgs.length > 0 && (
@@ -167,11 +132,11 @@ const QuotePost = ({ post, isOriginalPost }) => {
             />
           )}
 
-          {!isOriginalPost && quotePost?.repost.originalImgs?.length > 0 && (
+          {!isOriginalPost && quotePost?.originalImgs?.length > 0 && (
             <RenderImg
               imgs={quotePost?.originalImgs || quotePost?.repost?.originalImgs}
               onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
-              size='sm'
+              size='lg'
             />
           )}
         </div>

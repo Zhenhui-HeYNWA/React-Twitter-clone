@@ -2,6 +2,7 @@ import { handleMentions } from '../lib/utils/mentionHelper.js';
 import Notification from '../models/notification.model.js';
 import Post from '../models/post.model.js';
 import User from '../models/user.model.js';
+import Comment from '../models/comment.model.js';
 import { v2 as cloudinary } from 'cloudinary';
 import mongoose from 'mongoose';
 
@@ -74,11 +75,14 @@ export const deletePost = async (req, res) => {
         .json({ message: 'You have no right to delete this post' });
     }
 
+    console.log('Deleting post:', post);
+
     // Delete images associated with the post (either original or quote post)
     if (post.imgs && post.imgs.length > 0) {
       for (const img of post.imgs) {
         const imgId = img.split('/').pop().split('.')[0];
         await cloudinary.uploader.destroy(imgId);
+        console.log(`Deleted image from cloudinary: ${imgId}`);
       }
     }
 
@@ -88,10 +92,21 @@ export const deletePost = async (req, res) => {
     if (post.repost && post.repost.originalPost) {
       originalPostId = post.repost.originalPost;
 
-      await Post.findByIdAndUpdate(
-        originalPostId,
-        { $inc: { repostByNum: -1 }, $pull: { repostBy: post.user } },
-        { session }
+      console.log(`Post is a repost of original post: ${originalPostId}`);
+
+      // Check if the repost is from a comment or post
+      const onModel = post.repost.onModel || 'Post';
+      const model = onModel === 'Comment' ? 'Comment' : 'Post';
+
+      await mongoose
+        .model(model)
+        .findByIdAndUpdate(
+          originalPostId,
+          { $inc: { repostByNum: -1 }, $pull: { repostBy: post.user } },
+          { session }
+        );
+      console.log(
+        `Decremented repostByNum for original ${model}: ${originalPostId}`
       );
 
       await User.updateMany(
@@ -99,19 +114,27 @@ export const deletePost = async (req, res) => {
         { $pull: { repostedPosts: originalPostId, userPosts: post._id } },
         { session }
       );
+      console.log(
+        `Updated users who reposted the original ${model}: ${originalPostId}`
+      );
     } else {
-      // If the post is the original post, handle all repost logic
+      originalPostId = post._id;
+      console.log(`Post is the original post: ${originalPostId}`);
+
       const reposts = await Post.find({
         'repost.originalPost': originalPostId,
       }).session(session);
 
       const repostIds = reposts.map((repost) => repost._id);
+      console.log('Reposts associated with the original post:', repostIds);
 
       await Post.deleteMany({ _id: { $in: repostIds } }).session(session);
+      console.log(`Deleted reposts: ${repostIds}`);
 
       await User.updateMany(
         { repostedPosts: originalPostId },
         {
+          $inc: { repostByNum: -1 },
           $pull: {
             repostedPosts: originalPostId,
             userPosts: { $in: repostIds.concat(originalPostId) },
@@ -119,14 +142,24 @@ export const deletePost = async (req, res) => {
         },
         { session }
       );
+      console.log(
+        `Updated users after deleting original post and reposts: ${originalPostId}`
+      );
     }
 
-    // If the post is a quote, decrement repostByNum of the original post
-    if (post.quote && post.quote.originalPost) {
-      await Post.findByIdAndUpdate(
+    // If the post is a quote referencing a Comment, decrement repostByNum of the original comment
+    if (
+      post.quote &&
+      post.quote.onModel === 'Comment' &&
+      post.quote.originalPost
+    ) {
+      await Comment.findByIdAndUpdate(
         post.quote.originalPost,
         { $inc: { repostByNum: -1 } },
         { session }
+      );
+      console.log(
+        `Decremented repostByNum for quoted original comment: ${post.quote.originalPost}`
       );
     }
 
@@ -136,12 +169,15 @@ export const deletePost = async (req, res) => {
       { $pull: { userPosts: req.params.id } },
       { session }
     );
+    console.log(`Removed post from user's post list: ${req.params.id}`);
 
     await Post.findByIdAndDelete(req.params.id).session(session);
+    console.log(`Deleted post from database: ${req.params.id}`);
 
     await session.commitTransaction();
     session.endSession();
 
+    console.log('Transaction committed successfully');
     res.status(200).json({
       message:
         'Post and all related reposts have been deleted from the database',
@@ -251,38 +287,30 @@ export const bookmarkUnBookmark = async (req, res) => {
   }
 };
 
-export const repostPost = async (req, res) => {
+export const repost = async (req, res) => {
   try {
-    const { id: postId } = req.params; // ID of the post to be reposted
-    const userId = req.user._id; // ID of the current user
+    const { id: originalId, onModel } = req.params; // ID of the original content (post or comment) and onModel to determine its type (Post or Comment)
+    const userId = req.user._id; // Current user's ID
 
-    // Find the post to be reposted
-    const repostPost = await Post.findById(postId).populate(
-      'user',
-      'username fullName profileImg'
-    );
-    if (!repostPost) {
-      return res.status(404).json({ message: 'Post not found' });
+    // Ensure onModel is either Post or Comment
+    if (!['Post', 'Comment'].includes(onModel)) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid content type for repost' });
     }
 
-    // Determine the original post ID
-    const originalPostId = repostPost.repost?.originalPost || postId;
-
-    // Find the original post
-    const originalPost = await Post.findById(originalPostId);
-    if (!originalPost) {
-      return res.status(404).json({ message: 'Original post not found' });
+    // Find the original content (either a post or comment)
+    const originalContent = await mongoose
+      .model(onModel)
+      .findById(originalId)
+      .populate('user');
+    if (!originalContent) {
+      return res.status(404).json({ message: `${onModel} not found` });
     }
 
-    // Find the original post's user
-    const originalUser = await User.findById(originalPost.user);
-    if (!originalUser) {
-      return res.status(404).json({ message: 'Original post user not found' });
-    }
-
-    // Check if the user has already reposted the original post
+    // Check if the user has already reposted the original content
     const existingRepost = await Post.findOne({
-      'repost.originalPost': originalPostId,
+      'repost.originalPost': originalId,
       user: userId,
     });
 
@@ -290,16 +318,20 @@ export const repostPost = async (req, res) => {
       // If a repost already exists, delete it
       await Post.findByIdAndDelete(existingRepost._id);
 
-      // Update the original post's repost count and remove the user from repostBy
-      await Post.findByIdAndUpdate(originalPostId, {
+      // Update the repost count and remove the user from repostBy of the original content
+      await mongoose.model(onModel).findByIdAndUpdate(originalId, {
         $inc: { repostByNum: -1 }, // Decrement repost count
         $pull: { repostBy: userId }, // Remove the user from repostBy array
       });
 
-      // Update the user's repostedPosts and userPosts arrays
+      // Update the user's repostedPosts or repostedComments and userPosts arrays
+      const updateFields = {
+        repostedPosts: originalId,
+      };
+      // Use repostedComments for comments
       await User.findByIdAndUpdate(userId, {
         $pull: {
-          repostedPosts: originalPostId, // Remove the original post ID
+          ...updateFields, // Remove the original post/comment ID from the appropriate array
           userPosts: existingRepost._id, // Remove the repost ID
         },
       });
@@ -307,78 +339,106 @@ export const repostPost = async (req, res) => {
       return res.status(200).json({ message: 'Repost successfully removed' });
     }
 
-    // Create a new repost
-    const newRepost = new Post({
+    // If no repost exists, create a new repost
+    const repostData = {
       user: userId,
       repost: {
-        originalPost: originalPostId,
+        originalPost: originalId,
         postOwner: {
-          _id: originalUser._id,
-          username: originalUser.username,
-          fullName: originalUser.fullName,
-          profileImg: originalUser.profileImg,
+          _id: originalContent.user._id,
+          username: originalContent.user.username,
+          fullName: originalContent.user.fullName,
+          profileImg: originalContent.user.profileImg,
         },
-        originalText: originalPost.text,
-        originalImgs: originalPost.imgs,
+        originalText: originalContent.text,
+        originalImgs: originalContent.imgs || [],
         repostUser: userId,
         repostNum: 1, // Initial repost count
+        onModel, // Specify if it's a repost of a post or a comment
       },
       repostBy: [userId], // Add the current user to repostBy array
-    });
+    };
 
+    // 如果是 Comment 转发，则查找评论的 postId，并添加到 repost.commentId 中
+    if (onModel === 'Comment') {
+      const commentPostId = originalContent.postId;
+      if (!commentPostId) {
+        return res
+          .status(404)
+          .json({ message: 'Post for this comment not found' });
+      }
+      repostData.repost.commentId = commentPostId; // 添加评论所属的 postId 到 repost.commentId
+    }
+
+    // 检查是否有引用内容 (quote)，如果是引用，则一起添加
+    if (originalContent.quote) {
+      repostData.quote = {
+        originalPost: originalContent.quote.originalPost,
+        originalUser: originalContent.quote.originalUser,
+        originalText: originalContent.quote.originalText,
+        originalImgs: originalContent.quote.originalImgs,
+        originalCreatedAt: originalContent.quote.originalCreatedAt,
+      };
+    }
+
+    const newRepost = new Post(repostData);
     await newRepost.save();
 
-    // Update the original post's repost count and add the user to repostBy array
-    await Post.findByIdAndUpdate(originalPostId, {
+    // Update the repost count and add the user to repostBy array of the original content
+    await mongoose.model(onModel).findByIdAndUpdate(originalId, {
       $inc: { repostByNum: 1 }, // Increment repost count
       $addToSet: { repostBy: userId }, // Add the user to repostBy array
     });
 
-    // Add the original post ID and the new repost ID to the user's repostedPosts and userPosts arrays
+    // Update the user's repostedPosts or repostedComments and userPosts arrays
+    const addFields = { repostedPosts: originalId };
+    // Use repostedComments for comments
     await User.findByIdAndUpdate(userId, {
       $addToSet: {
-        repostedPosts: originalPostId, // Ensure the original post ID is unique
+        ...addFields, // Add the original post/comment ID to the appropriate array
         userPosts: newRepost._id, // Ensure the repost ID is unique
       },
     });
 
     res.status(201).json(newRepost); // Return the newly created repost
   } catch (error) {
-    console.log('Error in repostPost controller:', error);
+    console.log('Error in repost controller:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const quotePost = async (req, res) => {
   const { text, imgs = [], location } = req.body;
-  const { id: originalPostId } = req.params;
+  const { id: originalId, onModel } = req.params;
   const userId = req.user._id;
 
   try {
-    if (!userId) {
-      return res.status(400).json({ error: 'User ID is required' });
+    if (!['Post', 'Comment'].includes(onModel)) {
+      return res
+        .status(400)
+        .json({ message: 'Invalid content type for quote' });
+    }
+
+    const originalContent = await mongoose
+      .model(onModel)
+      .findById(originalId)
+      .populate('user');
+
+    if (!originalContent) {
+      return res.status(404).json({ message: `${onModel} not found` });
     }
 
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-
     if (!text && (!imgs || imgs.length === 0)) {
-      return res.status(400).json({ error: 'Post must have text or images' });
+      return res.status(400).json({ error: 'Quote must have text or images' });
     }
-
     if (imgs.length > 4) {
       return res
         .status(400)
         .json({ error: 'You can upload a maximum of 4 images' });
-    }
-
-    const originalPost = await Post.findById(originalPostId).populate('user');
-    console.log('123', originalPost);
-
-    if (!originalPost) {
-      return res.status(404).json({ message: 'Original post not found' });
     }
 
     let uploadedImages = [];
@@ -389,42 +449,37 @@ export const quotePost = async (req, res) => {
       }
     }
 
-    const isRepost = !!originalPost.repost.originalPost;
+    const quoteData = {
+      originalPost: originalId,
+      originalUser: {
+        _id: originalContent.user._id,
+        username: originalContent.user.username,
+        fullName: originalContent.user.fullName,
+        profileImg: originalContent.user.profileImg,
+      },
+      originalText: originalContent.text,
+      originalImgs: originalContent.imgs || [],
+      originalCreatedAt: originalContent.createdAt,
+      onModel,
+    };
 
-    // 检查帖子是否已经是引用的帖子
-    const isAlreadyQuote = !!originalPost.quote?.originalPost;
+    if (onModel === 'Comment' && originalContent.parentId) {
+      const parentComment = await Comment.findById(
+        originalContent.parentId
+      ).populate({
+        path: 'user', // 确保查询出 user 数据
+        select: 'username fullName profileImg',
+      });
 
-    const quoteData = isRepost
-      ? {
-          originalPost: originalPost.repost.originalPost,
-          originalUser: {
-            _id: originalPost.repost.postOwner._id,
-            username: originalPost.repost.postOwner.username,
-            fullName: originalPost.repost.postOwner.fullName,
-            profileImg: originalPost.repost.postOwner.profileImg,
-          },
-          originalText: originalPost.repost.originalText,
-          originalImgs: originalPost.repost.originalImgs,
-        }
-      : {
-          originalPost: originalPost._id,
-          originalUser: {
-            _id: originalPost.user._id,
-            username: originalPost.user.username,
-            fullName: originalPost.user.fullName,
-            profileImg: originalPost.user.profileImg,
-          },
-          originalText: originalPost.text,
-          originalImgs: originalPost.imgs,
+      if (parentComment && parentComment.user) {
+        quoteData.replyToUser = {
+          _id: parentComment.user._id,
+          username: parentComment.user.username,
+          fullName: parentComment.user.fullName,
+          profileImg: parentComment.user.profileImg,
         };
-
-    // 如果原始帖子已经是引用帖，添加链接到最初的帖子
-    if (isAlreadyQuote) {
-      quoteData.originalText =
-        originalPost.text +
-        ` /${originalPost.quote.originalUser.username}/status/${originalPost._id}`;
+      }
     }
-
     const postLocation = location && location.trim() ? location : 'Earth';
 
     const newQuotePost = new Post({
@@ -437,19 +492,10 @@ export const quotePost = async (req, res) => {
 
     const savedQuotePost = await newQuotePost.save();
 
-    originalPost.repostByNum += 1;
-
-    if (isRepost) {
-      const originalOriginalPost = await Post.findById(
-        originalPost.repost.originalPost
-      );
-      if (originalOriginalPost) {
-        originalOriginalPost.repostByNum += 1;
-        await originalOriginalPost.save();
-      }
-    }
-
-    await originalPost.save();
+    await mongoose.model(onModel).findByIdAndUpdate(originalId, {
+      $inc: { repostByNum: 1 },
+      $addToSet: { repostBy: userId },
+    });
 
     await User.findByIdAndUpdate(
       userId,

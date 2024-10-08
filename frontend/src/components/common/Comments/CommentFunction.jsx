@@ -14,8 +14,11 @@ import { IoCloseSharp } from 'react-icons/io5';
 import CustomMention from '../MentionComponent';
 import RenderText from '../PostCommon/RenderText';
 import PostAuthorDetail from '../PostCommon/PostAuthorDetail';
+import { PiPencilLine } from 'react-icons/pi';
 
-const CommentFunction = ({ postComment, size }) => {
+import QuoteCommentModal from './QuoteCommentModal';
+
+const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
@@ -24,10 +27,13 @@ const CommentFunction = ({ postComment, size }) => {
   const [reply, setReplies] = useState('');
   // const [structuredComments, setStructuredComments] = useState([]);
 
+  const isOriginalComment = true;
   const {
     replyComment,
     isReplying,
     likeUnlikeComment,
+    repostComment,
+    isReposting,
     isLiking,
     bookmarkComment,
     isMarking,
@@ -81,6 +87,17 @@ const CommentFunction = ({ postComment, size }) => {
       modal.close();
     }
   };
+
+  const handleRepost = (commentId) => {
+    if (isReposting) return;
+
+    if (isRepostedByAuthUser) {
+      repostComment({ actionType: 'remove', onModel: 'Comment', commentId });
+      return;
+    }
+    repostComment({ actionType: 'repost', onModel: 'Comment', commentId });
+    return;
+  };
   const handleLikeUnlikeComment = (commentId) => {
     if (isLiking) return;
     likeUnlikeComment(commentId);
@@ -108,6 +125,15 @@ const CommentFunction = ({ postComment, size }) => {
       }
       toast.error('Failed to Copy');
       console.log(error);
+    }
+  };
+
+  const openQuoteModel = (id) => {
+    console.log(id);
+
+    const dialog = document.getElementById(`QuoteModel${id}`);
+    if (dialog) {
+      dialog.showModal();
     }
   };
   return (
@@ -253,17 +279,141 @@ const CommentFunction = ({ postComment, size }) => {
             </form>
           </dialog>
 
-          <div className='flex items-center group cursor-pointer gap-1 w-12 '>
-            <BiRepost
-              className={`${
-                size === 'lg' ? 'w-7 h-7' : 'h-6 w-6'
-              } text-slate-500 group-hover:text-green-500`}
-            />
-            <span
-              className='text-sm font-normal group-hover:text-green-500 
-      text-slate-500'>
-              0
-            </span>
+          <div
+            className={` dropdown   dropdown-top 
+           `}>
+            <div
+              tabIndex={0}
+              role={'button'}
+              className={`flex gap-1 items-center group cursor-pointer  
+                    
+                        btn rounded-none  btn-ghost btn-xs  p-0 border-none hover:bg-inherit
+                    
+                     `}
+              // onClick={!isRepostedByAuthUser ? handleRepost : undefined}
+            >
+              <ul
+                tabIndex={0}
+                className='dropdown-content menu bg-gray-100 dark:bg-[#1E2732]  border-gray-200 border rounded-box z-10 w-52 p-2 shadow  '>
+                {isRepostedByAuthUser ? (
+                  <>
+                    <li
+                      onClick={() => {
+                        const elem = document.activeElement;
+                        if (elem) {
+                          elem?.blur();
+                        }
+                        handleRepost(postComment._id);
+                      }}>
+                      <button className='text-red-500'>
+                        <BiRepost className='w-5 h-5' />
+                        Undo repost
+                      </button>
+                    </li>
+                    <li>
+                      <span
+                        className='items-center'
+                        onClick={() => {
+                          const activeElement = document.activeElement;
+                          if (activeElement) {
+                            activeElement.blur();
+                          }
+
+                          openQuoteModel(postComment._id);
+                        }}>
+                        <PiPencilLine size={18} />
+                        Quote
+                      </span>
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <span
+                        className='items-center '
+                        onClick={() => {
+                          const elem = document.activeElement;
+                          if (elem) {
+                            elem?.blur();
+                          }
+                          handleRepost(postComment._id);
+                        }}>
+                        <BiRepost className='w-5 h-5 ' />
+                        Repost
+                      </span>
+                    </li>
+                    <li>
+                      <span
+                        className='items-center'
+                        onClick={() => {
+                          const activeElement = document.activeElement;
+                          if (activeElement) {
+                            activeElement.blur();
+                          }
+
+                          openQuoteModel(postComment._id);
+                        }}>
+                        <PiPencilLine size={20} />
+                        Quote
+                      </span>
+                    </li>
+                  </>
+                )}
+              </ul>
+
+              {isReposting && <LoadingSpinner size='sm' />}
+
+              {isOriginalComment && (
+                <div className='flex flex-row items-center w-12 z-auto justify-center '>
+                  {!isReposting && (
+                    <BiRepost
+                      className={`w-6 h-6 ${
+                        isRepostedByAuthUser
+                          ? ' text-green-500 group-hover:text-red-600'
+                          : ' text-slate-500 group-hover:text-green-500'
+                      }`}
+                    />
+                  )}
+                  <span
+                    className={`${
+                      size === 'lg' ? 'text-base' : 'text-sm'
+                    } font-normal  ${
+                      isRepostedByAuthUser
+                        ? ' text-green-500 group-hover:text-red-600'
+                        : ' text-slate-500 group-hover:text-green-500'
+                    }`}>
+                    {postComment.repostByNum}
+                  </span>
+                </div>
+              )}
+              {!isOriginalComment && (
+                <div className='flex flex-row items-center  w-12 z-auto justify-center '>
+                  {!isReposting && (
+                    <BiRepost
+                    // className={`w-6 h-6 ${
+                    //   isRepostedByAuthUser
+                    //     ? ' text-green-500 group-hover:text-red-600'
+                    //     : ' text-slate-500 group-hover:text-green-500'
+                    // }`}
+                    />
+                  )}
+
+                  <span
+                  // className={`${
+                  //   size === 'lg' ? 'text-base' : 'text-sm'
+                  // } font-normal
+                  //  ${
+                  //   isRepostedByAuthUser
+                  //     ? ' text-green-500 group-hover:text-red-600'
+                  //     : ' text-slate-500 group-hover:text-green-500'
+                  // }`
+                  // }
+                  >
+                    {postComment.repostByNum} 123
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* like post  */}
@@ -342,6 +492,7 @@ const CommentFunction = ({ postComment, size }) => {
               </ul>
             </div>
           </div>
+          <QuoteCommentModal authUser={authUser} comment={postComment} />
         </div>
       ) : (
         ''

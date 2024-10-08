@@ -427,3 +427,7 @@ export const bookmarkComment = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+export const repostComment = async(req, res)=>{
+  
+};

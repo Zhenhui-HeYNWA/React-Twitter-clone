@@ -1,12 +1,15 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 
-const RenderText = ({ text }) => {
+const RenderCombinedText = ({ text }) => {
   const [mentionedUsersExistence, setMentionedUsersExistence] = useState({});
   const navigate = useNavigate();
 
-  // Memoize the fetch function with the correct dependency array
+  // 确保传入的文本有效，如果没有则用空字符串代替
+  const validText = text || '';
+
+  // Memoized function to check mentioned users' existence
   const fetchMentionedExistence = useCallback(async (usernames) => {
     try {
       const res = await fetch('/api/users/check-user', {
@@ -23,94 +26,119 @@ const RenderText = ({ text }) => {
       console.error('Error fetching mentioned users:', error);
       return {}; // Return an empty object in case of error
     }
-  }, []); // Add an empty dependency array to ensure this function is memoized
+  }, []);
 
   useEffect(() => {
     const mentionedUsernames = [];
 
-    // Check for mentions in post text
-    if (text) {
-      mentionedUsernames.push(...(text.match(/@\w+/g) || []));
+    // 检查文本中的提及
+    if (validText) {
+      mentionedUsernames.push(...(validText.match(/@\w+/g) || []));
     }
 
-    // Remove the '@' symbol from the usernames
+    // 去除 @ 符号
     const usernamesWithoutAt = mentionedUsernames.map((m) => m.substring(1));
 
-    // If there are mentions, fetch user existence
+    // 如果有提及的用户名，检查用户是否存在
     if (usernamesWithoutAt.length > 0) {
       fetchMentionedExistence(usernamesWithoutAt).then((data) => {
         setMentionedUsersExistence(data);
       });
     }
-  }, [text, fetchMentionedExistence]); // Add fetchMentionedExistence as a dependency
+  }, [validText, fetchMentionedExistence]);
 
-  // Regex to detect URLs
+  // Regex patterns for URLs and quote status links
   const urlRegex = /https?:\/\/[^\s/$.?#].[^\s]*/g;
+  const quoteLinkRegex = /(\/[a-zA-Z0-9_]+\/status\/[a-zA-Z0-9]+)/;
+  const mentionRegex = /@\w+/g;
 
-  const highlightMentionsAndUrls = (text) => {
-    // First, replace URLs with clickable links
-    const parts = text.split(urlRegex);
+  // 处理点击事件
+  const handleClick = (e, path) => {
+    e.stopPropagation();
+    navigate(path);
+  };
 
-    return parts.reduce((acc, part, index) => {
-      // Process mentions
-      const regex = /@\w+/g;
-      const handleClick = (e, path) => {
-        e.stopPropagation();
-        navigate(path);
-      };
+  const processText = () => {
+    // 使用 .match() 提取所有的链接和提及
+    const matches = validText.match(
+      new RegExp(
+        `(${urlRegex.source}|${quoteLinkRegex.source}|${mentionRegex.source})`,
+        'g'
+      )
+    );
 
-      // Find URL matches
-      const matchUrl = text.match(urlRegex);
-      const url = matchUrl ? matchUrl[index - 1] : null;
+    if (!matches) {
+      // 如果没有匹配到任何链接或提及，直接返回原始文本
+      return <span>{validText}</span>;
+    }
 
-      // Handle URL
-      if (url) {
-        acc.push(
-          <a
-            key={uuidv4()}
-            href={url}
-            target='_blank'
-            rel='noopener noreferrer'
-            className='text-blue-500 hover:underline'>
-            {url}
-          </a>
+    let lastIndex = 0;
+    const elements = [];
+
+    matches.forEach((match) => {
+      const matchIndex = validText.indexOf(match, lastIndex);
+
+      // 插入匹配项之前的普通文本
+      if (matchIndex > lastIndex) {
+        elements.push(
+          <span key={uuidv4()}>{validText.slice(lastIndex, matchIndex)}</span>
         );
       }
 
-      // Process mentions
-      const mentionParts = part
-        .split(regex)
-        .reduce((subAcc, subPart, subIndex) => {
-          if (subIndex === 0) {
-            return [subPart];
-          }
+      // 处理 URL
+      if (urlRegex.test(match)) {
+        elements.push(
+          <a
+            key={uuidv4()}
+            href={match}
+            target='_blank'
+            rel='noopener noreferrer'
+            className='text-blue-500 hover:underline'>
+            {match}
+          </a>
+        );
+      }
+      // 处理 Quote 链接
+      else if (quoteLinkRegex.test(match)) {
+        elements.push(
+          <Link
+            key={uuidv4()}
+            to={match}
+            className='text-blue-500 hover:underline'>
+            {match}
+          </Link>
+        );
+      }
+      // 处理提及 @username
+      else if (mentionRegex.test(match)) {
+        const mentionedUsername = match.substring(1); // 去掉 @ 符号
 
-          const match = part.match(regex)[subIndex - 1];
-          const mentionedUsername = match.substring(1);
+        if (mentionedUsersExistence[mentionedUsername]) {
+          elements.push(
+            <span
+              key={uuidv4()}
+              className='mentioned-highlight text-sky-500 hover:underline hover:text-sky-700 cursor-pointer'
+              onClick={(e) => handleClick(e, `/profile/${mentionedUsername}`)}>
+              {match}
+            </span>
+          );
+        } else {
+          elements.push(<span key={uuidv4()}>{match}</span>);
+        }
+      }
 
-          if (mentionedUsersExistence[mentionedUsername]) {
-            subAcc.push(
-              <span
-                key={uuidv4()}
-                className='mentioned-highlight text-sky-500 hover:underline hover:text-sky-700 cursor-pointer'
-                onClick={(e) =>
-                  handleClick(e, `/profile/${mentionedUsername}`)
-                }>
-                {match}
-              </span>
-            );
-          } else {
-            subAcc.push(<span key={uuidv4()}>{match}</span>);
-          }
-          subAcc.push(subPart);
-          return subAcc;
-        }, []);
+      lastIndex = matchIndex + match.length;
+    });
 
-      return acc.concat(mentionParts);
-    }, []);
+    // 添加最后剩余的文本
+    if (lastIndex < validText.length) {
+      elements.push(<span key={uuidv4()}>{validText.slice(lastIndex)}</span>);
+    }
+
+    return elements;
   };
 
-  return <div>{highlightMentionsAndUrls(text)}</div>;
+  return <div className='text-base'>{processText()}</div>;
 };
 
-export default RenderText;
+export default RenderCombinedText;

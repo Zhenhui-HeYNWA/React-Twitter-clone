@@ -11,9 +11,9 @@ import {
   getUserPosts,
   likeUnlikePost,
   getSinglePost,
-  repostPost,
   pinPost,
   quotePost,
+  repost,
 } from '../controllers/post.controller.js';
 
 const router = express.Router();
@@ -27,9 +27,9 @@ router.get('/:username/status/:id', protectRoute, getSinglePost);
 
 router.post('/create', protectRoute, createPost);
 router.post('/like/:id', protectRoute, likeUnlikePost);
-router.post('/quote/:id', protectRoute, quotePost);
+router.post('/quote/:onModel/:id', protectRoute, quotePost);
 router.post('/bookmark/:id', protectRoute, bookmarkUnBookmark);
-router.post('/repost/:id', protectRoute, repostPost);
+router.post('/repost/:onModel/:id', protectRoute, repost);
 router.post('/pin/:id', protectRoute, pinPost);
 router.delete('/:id', protectRoute, deletePost);
 

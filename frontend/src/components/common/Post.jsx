@@ -2,14 +2,11 @@ import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { BiRepost } from 'react-icons/bi';
-
 import PostFunctions from './PostFunctions';
 import RenderImg from './RenderImg/RenderImg';
 
 import ListFunction from './PostCommon/ListFunction';
 import usePostMutations from '../../hooks/usePostMutations';
-import { TbPinnedFilled } from 'react-icons/tb';
 
 import QuotePost from './QuotePost';
 import LoadingSpinner from './LoadingSpinner';
@@ -17,13 +14,14 @@ import useFollow from '../../hooks/useFollow';
 
 import RenderText from './PostCommon/RenderText';
 import PostAuthorDetail from './PostCommon/PostAuthorDetail';
+import PostStatus from './PostCommon/PostStatus/PostStatus';
 
 // Function to check the existence of mentioned users
 
 // Post component
 const Post = ({ post, posts, user, feedType }) => {
   const navigate = useNavigate();
-
+  const repostComment = post?.repost.onModel === 'Comment';
   const username = post?.user.username;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false); // State to track if the post is reposted by the authenticated user
@@ -114,27 +112,12 @@ const Post = ({ post, posts, user, feedType }) => {
   return (
     <>
       <div className='flex flex-col'>
-        {!isOriginalPost && !isAuthUserRepost && (
-          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-            {' '}
-            <BiRepost className='w-4 h-4  text-slate-500' />
-            {post.user.username} reposted
-          </span>
-        )}
-        {!isOriginalPost && isAuthUserRepost && (
-          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-            {' '}
-            <BiRepost className='w-4 h-4  text-slate-500' />
-            You reposted
-          </span>
-        )}
-        {isOriginalPost && isPinnedPost && (
-          <span className='px-14 flex text-slate-500 text-xs font-bold mt-2 '>
-            {' '}
-            <TbPinnedFilled className='w-4 h-4  text-slate-500' />
-            Pinned post
-          </span>
-        )}
+        <PostStatus
+          isOriginalPost={isOriginalPost}
+          isAuthUserRepost={isAuthUserRepost}
+          postUser={post.user}
+          isPinnedPost={isPinnedPost}
+        />
         <div className='flex gap-4 items-start py-2 border-b border-gray-200 dark:border-gray-700 justify-center px-4 '>
           <div className=' w-12 h-12 rounded-full overflow-hidden'>
             {/* Avatar */}
@@ -207,9 +190,22 @@ const Post = ({ post, posts, user, feedType }) => {
               {!isOriginalPost && (
                 <span
                   className='nav-link'
-                  onClick={() =>
-                    navigate(`/${authUser.username}/status/${post._id}`)
-                  }>
+                  onClick={() => {
+                    if (post.repost.onModel === 'Comment') {
+                      // navigate(`/${authUser.username}/status/${post._id}`);
+                      navigate(
+                        `/${post?.repost.commentId}/comment/${post?.repost.postOwner.username}/${post.repost.originalPost}`
+                      );
+                    } else {
+                      navigate(`/${authUser.username}/status/${post._id}`);
+                    }
+                  }}>
+                  {repostComment && (
+                    <span className='text-gray-500 flex text-base  gap-1'>
+                      Replying to{' '}
+                      <p className=' text-sky-500'>@{post.user.username}</p>
+                    </span>
+                  )}
                   <span className='text-lg whitespace-pre-wrap word-wrap '>
                     {/* {highlightMentions(post.repost.originalText)}
                      */}

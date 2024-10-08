@@ -187,9 +187,11 @@ const usePostMutations = (postId, feedType, username) => {
     });
 
   const { mutate: repostPost, isPending: isReposting } = useMutation({
-    mutationFn: async ({ actionType }) => {
+    mutationFn: async ({ actionType, onModel }) => {
+      console.log(onModel);
+
       try {
-        const res = await fetch(`/api/posts/repost/${postId}`, {
+        const res = await fetch(`/api/posts/repost/${onModel}/${postId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -274,15 +276,17 @@ const usePostMutations = (postId, feedType, username) => {
     isError,
     error,
   } = useMutation({
-    mutationFn: async ({ text, imgs, locationName }) => {
+    mutationFn: async ({ text, imgs, locationName, onModel }) => {
       try {
-        const res = await fetch(`/api/posts/quote/${postId}`, {
+        const res = await fetch(`/api/posts/quote/${onModel}/${postId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ text, imgs, locationName }),
         });
+        console.log(postId);
+
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');
         return data;

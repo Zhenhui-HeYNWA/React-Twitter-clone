@@ -57,6 +57,96 @@ const useCommentMutations = () => {
     },
   });
 
+  const { mutate: repostComment, isPending: isReposting } = useMutation({
+    mutationFn: async ({ commentId, actionType, onModel }) => {
+      console.log(onModel);
+
+      try {
+        const res = await fetch(`/api/posts/repost/${onModel}/${commentId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ actionType }), // Send actionType to the server
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        return { data, actionType };
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: ({ commentId, actionType }) => {
+      toast.success(`Post ${actionType} successfully`);
+
+      // Update authUser's repostedPosts
+      queryClient.setQueryData(['authUser'], (oldData) => {
+        if (!oldData) return oldData;
+
+        const updatedRepostedPosts =
+          actionType === 'repost'
+            ? [...oldData.repostedPosts, commentId] // Add repost
+            : oldData.repostedPosts.filter((id) => id !== commentId); // Remove repost
+
+        return {
+          ...oldData,
+          repostedPosts: updatedRepostedPosts,
+        };
+      });
+
+      // Refresh post and authUser data
+      queryClient.invalidateQueries(['post', commentId]);
+      queryClient.invalidateQueries(['authUser']);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const {
+    mutate: quoteComment,
+    isPending: isQuoting,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: async ({ text, imgs, locationName, onModel, commentId }) => {
+      try {
+        const res = await fetch(`/api/posts/quote/${onModel}/${commentId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text, imgs, locationName }),
+        });
+        console.log(commentId);
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong');
+        return data;
+      } catch (error) {
+        throw new Error(error.message);
+      }
+    },
+    onSuccess: (commentId) => {
+      toast.success('Quote post successfully');
+      queryClient.setQueryData(['authUser'], (oldData) => {
+        if (!oldData) return oldData;
+
+        const updatedRepostedPosts = [...oldData.repostedPosts, commentId]; // Add repost
+
+        return {
+          ...oldData,
+          repostedPosts: updatedRepostedPosts,
+        };
+      });
+
+      // Refresh post and authUser data
+      queryClient.invalidateQueries(['comment', commentId]);
+      queryClient.invalidateQueries(['authUser']);
+    },
+  });
+
   const { mutate: likeUnlikeComment, isPending: isLiking } = useMutation({
     mutationFn: async (commentId) => {
       try {
@@ -98,7 +188,14 @@ const useCommentMutations = () => {
     isReplying,
     deleteComment,
     isCommentDeleting,
+    repostComment,
+    isReposting,
+    quoteComment,
+    isQuoting,
+    isError,
+    error,
     likeUnlikeComment,
+
     isLiking,
     bookmarkComment,
     isMarking,

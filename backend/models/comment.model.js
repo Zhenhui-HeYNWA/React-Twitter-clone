@@ -46,6 +46,8 @@ const commentSchema = new mongoose.Schema(
       },
     ],
     isDeleted: { type: Boolean, default: false },
+    repostByNum: { type: Number, default: 0 },
+    repostBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   },
 
   { timestamps: true }

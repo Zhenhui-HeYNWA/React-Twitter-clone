@@ -5,6 +5,7 @@ import Picker from '@emoji-mart/react';
 
 import data from '@emoji-mart/data';
 import LoadingSpinner from '../LoadingSpinner';
+import './CreatePostControls.css';
 
 const CreatePostControls = ({
   onImgsChange,
@@ -21,7 +22,7 @@ const CreatePostControls = ({
 
   return (
     <div className='flex justify-between border-t py-2   border-gray-200  dark:border-slate-700    bottom-0 bg-slate-100 dark:bg-[#15202B]  w-full relative '>
-      <div className='flex gap-1 items-center  '>
+      <div className='flex gap-1 items-center  relative  '>
         <CiImageOn
           className='fill-primary w-6 h-6 cursor-pointer'
           onClick={() => imgRef.current.click()}
@@ -37,17 +38,18 @@ const CreatePostControls = ({
             className={`${
               type === 'post'
                 ? ' absolute top-10  right-2 md:top-10 md:left-10 z-50'
-                : ' absolute top-10  sm:bottom-5 md:left-0 z-50'
+                : ' absolute top-8 -left-16  '
             }`}>
             <Picker
               className={`${
                 type === 'post'
                   ? ' absolute top-10  right-2 md:top-10 md:left-10 z-50'
-                  : ' absolute top-10  sm:bottom-5 md:left-0 z-50'
+                  : ' absolute top-10  sm:bottom-5 md:left-0 z-50 '
               }`}
               data={data}
               onEmojiSelect={onEmojiSelect}
               theme={theme === 'dark' ? 'dark' : 'light'}
+              previewPosition={'none'}
             />
           </div>
         )}

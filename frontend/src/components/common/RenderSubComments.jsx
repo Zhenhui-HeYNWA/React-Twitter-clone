@@ -14,6 +14,22 @@ import PostAuthorDetail from './PostCommon/PostAuthorDetail';
 const RenderSubComments = ({ pageType, postComment }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
+  const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
+  console.log(isRepostedByAuthUser, 'authUser');
+
+  useEffect(() => {
+    if (authUser) {
+      // 查找源帖子 ID（如果是转发的帖子）
+      const originalPostId = postComment?._id;
+      console.log(originalPostId, 'originalPostId');
+      // 检查当前用户是否在转发列表中
+      const isReposted = authUser.repostedPosts.includes(originalPostId);
+      setIsRepostedByAuthUser(isReposted);
+    } else {
+      setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
+    }
+  }, [authUser, postComment]);
+
   console.log('postComment', postComment);
 
   const [structuredComments, setStructuredComments] = useState([]);
@@ -36,6 +52,7 @@ const RenderSubComments = ({ pageType, postComment }) => {
         text: currentComment.parentId.text,
         user: currentComment.parentId.user,
         replies: currentComment.parentId.replies,
+        repostByNum: currentComment.parentId.repostByNum,
         createdAt: formatPostDate(currentComment.parentId.createdAt),
         isDeleted: currentComment.parentId.isDeleted,
         likes: currentComment.parentId.likes,
@@ -159,7 +176,10 @@ const RenderSubComments = ({ pageType, postComment }) => {
 
                     {/* comment functions section */}
 
-                    <CommentFunction postComment={structuredComment} />
+                    <CommentFunction
+                      postComment={structuredComment}
+                      isRepostedByAuthUser={isRepostedByAuthUser}
+                    />
                   </div>
                 </div>
               </div>
@@ -229,7 +249,10 @@ const RenderSubComments = ({ pageType, postComment }) => {
             </div>
 
             {/* comment functions section*/}
-            <CommentFunction postComment={postComment} />
+            <CommentFunction
+              postComment={postComment}
+              isRepostedByAuthUser={isRepostedByAuthUser}
+            />
           </div>
         </div>
       </div>

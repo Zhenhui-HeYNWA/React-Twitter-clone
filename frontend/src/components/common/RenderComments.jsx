@@ -12,10 +12,31 @@ import RenderImg from './RenderImg/RenderImg';
 import RenderText from './PostCommon/RenderText';
 import PostAuthorDetail from './PostCommon/PostAuthorDetail';
 
+import { BiRepost } from 'react-icons/bi';
+
 const RenderComments = ({ comment }) => {
   const { data: authUser } = useQuery({
     queryKey: ['authUser'],
   });
+
+  console.log(comment);
+  const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
+  console.log(authUser.repostedPosts, 'authUser');
+
+  useEffect(() => {
+    if (authUser) {
+      // 查找源帖子 ID（如果是转发的帖子）
+      const originalPostId = comment?._id;
+      console.log(originalPostId, 'originalPostId');
+      // 检查当前用户是否在转发列表中
+      const isReposted = authUser.repostedPosts.includes(originalPostId);
+      setIsRepostedByAuthUser(isReposted);
+    } else {
+      setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
+    }
+  }, [authUser, comment]);
+
+  console.log(isRepostedByAuthUser, 'isRepostedByAuthUser');
 
   const [structuredComments, setStructuredComments] = useState([]);
 
@@ -34,6 +55,7 @@ const RenderComments = ({ comment }) => {
 
   function getParentCommentsIterative(comment) {
     const result = [];
+    console.log(comment.parentId, 'comment.parentId');
 
     let currentComment = comment;
     while (currentComment?.parentId) {
@@ -43,6 +65,7 @@ const RenderComments = ({ comment }) => {
         user: currentComment.parentId.user,
         imgs: currentComment.parentId.imgs,
         replies: currentComment.parentId.replies,
+        repostByNum: currentComment.parentId.repostByNum,
         createdAt: currentComment.parentId.createdAt,
         isDeleted: currentComment.parentId.isDeleted,
         likes: currentComment.parentId.likes,
@@ -71,6 +94,7 @@ const RenderComments = ({ comment }) => {
       <div className='w-full'>
         {isSubComment &&
           structuredComments?.map((structuredComment) => {
+            console.log(structuredComment, 'structuredComment');
             const isMyStructuredComment =
               authUser._id === structuredComment?.user?._id;
             structuredComment;
@@ -180,6 +204,7 @@ const RenderComments = ({ comment }) => {
                   {isSubComment && !isSubCommentAvailable && (
                     <div className='  w-0.5 h-3 mt-0.5 dark:bg-slate-700  bg-gray-400  mb-1'></div>
                   )}
+
                   <div className=' avatar'>
                     <Link className='w-12 h-12 rounded-full overflow-hidden block'>
                       <img
@@ -193,7 +218,14 @@ const RenderComments = ({ comment }) => {
                 </div>
 
                 <div className='flex flex-col  w-full '>
-                  <div className='flex flex-row justify-between items-center w-full'>
+                  {isRepostedByAuthUser && (
+                    <span className=' flex text-slate-500 text-xs font-bold mt-2'>
+                      <BiRepost className='w-4 h-4  text-slate-500' />
+                      You reposted
+                    </span>
+                  )}
+
+                  <div className='flex  flex-row justify-between items-center w-full'>
                     <PostAuthorDetail postUser={comment?.user} />
                     {isMyComment && (
                       <div className=' justify-end  '>
@@ -233,7 +265,11 @@ const RenderComments = ({ comment }) => {
                 {formatDateTime(comment?.createdAt)}
               </div>
               <div className='border-y-2  dark:border-gray-700 py-2'>
-                <CommentFunction postComment={comment} size={'lg'} />
+                <CommentFunction
+                  postComment={comment}
+                  size={'lg'}
+                  isRepostedByAuthUser={isRepostedByAuthUser}
+                />
               </div>
             </div>
           </div>

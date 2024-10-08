@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
-import { TbPinnedFilled } from 'react-icons/tb';
-import { BiRepost } from 'react-icons/bi';
+
+import PostStatus from './PostStatus/PostStatus';
 
 const PostHeader = ({ post, authUser }) => {
   const isOriginalPost = post?.repost?.originalPost == null;
@@ -21,25 +21,13 @@ const PostHeader = ({ post, authUser }) => {
         </div>
       </div>
 
-      {post && !isOriginalPost && !isAuthUserRepost && (
-        <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-          <BiRepost className='w-4 h-4 text-slate-500' />
-          {post.user.username} reposted
-        </span>
-      )}
-
-      {post && !isOriginalPost && isAuthUserRepost && (
-        <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-          <BiRepost className='w-4 h-4 text-slate-500' />
-          You reposted
-        </span>
-      )}
-
-      {post && isOriginalPost && isPinnedPost && (
-        <span className='px-14 flex text-slate-500 text-xs font-bold mt-2'>
-          <TbPinnedFilled className='w-4 h-4 text-slate-500' />
-          Pinned post
-        </span>
+      {post && (
+        <PostStatus
+          isOriginalPost={isOriginalPost}
+          isAuthUserRepost={isAuthUserRepost}
+          postUser={post.user}
+          isPinnedPost={isPinnedPost}
+        />
       )}
     </>
   );

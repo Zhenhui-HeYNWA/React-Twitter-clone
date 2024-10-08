@@ -38,7 +38,7 @@ const postSchema = new mongoose.Schema(
     repost: {
       originalPost: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Post',
+        refPath: 'repost.onModel', // 动态引用 `Post` 或 `Comment`
       },
       postOwner: {
         _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -50,6 +50,18 @@ const postSchema = new mongoose.Schema(
       originalImgs: [{ type: String }],
       repostUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       repostNum: { type: Number, default: 0 },
+      commentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+
+      onModel: {
+        type: String,
+        enum: ['Post', 'Comment'], // 可以是 'Post' 或 'Comment'
+      },
+      replyToUser: {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // 用户的 ID
+        username: { type: String },
+        fullName: { type: String },
+        profileImg: { type: String },
+      },
     },
     repostByNum: { type: Number, default: 0 },
     repostBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -68,6 +80,17 @@ const postSchema = new mongoose.Schema(
       originalText: { type: String },
       originalImgs: [{ type: String }],
       originalCreatedAt: { type: Date },
+      commentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
+      onModel: {
+        type: String,
+        enum: ['Post', 'Comment'], // 可以是 'Post' 或 'Comment'
+      },
+      replyToUser: {
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // 用户的 ID
+        username: { type: String },
+        fullName: { type: String },
+        profileImg: { type: String },
+      },
     },
 
     postLocation: {
@@ -76,7 +99,6 @@ const postSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 const Post = mongoose.model('Post', postSchema);
 
 export default Post;

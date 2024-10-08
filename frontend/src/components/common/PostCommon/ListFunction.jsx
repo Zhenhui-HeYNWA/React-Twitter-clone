@@ -27,7 +27,7 @@ const ListFunction = ({
           <>
             <li>
               <span
-                className='flex items-center hover:text-red-500 '
+                className='flex items-center hover:text-red-500  '
                 onClick={() => {
                   const elem = document.activeElement;
                   if (elem) {
@@ -36,7 +36,7 @@ const ListFunction = ({
 
                   onDeleteClick(id);
                 }}>
-                <FaTrash className='cursor-pointer  ' />
+                <FaTrash size={16} className='cursor-pointer  ' />
 
                 <a>Delete post</a>
               </span>
