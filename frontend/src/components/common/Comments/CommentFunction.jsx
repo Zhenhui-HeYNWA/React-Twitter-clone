@@ -129,8 +129,6 @@ const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
   };
 
   const openQuoteModel = (id) => {
-    console.log(id);
-
     const dialog = document.getElementById(`QuoteModel${id}`);
     if (dialog) {
       dialog.showModal();

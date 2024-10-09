@@ -59,8 +59,6 @@ const useCommentMutations = () => {
 
   const { mutate: repostComment, isPending: isReposting } = useMutation({
     mutationFn: async ({ commentId, actionType, onModel }) => {
-      console.log(onModel);
-
       try {
         const res = await fetch(`/api/posts/repost/${onModel}/${commentId}`, {
           method: 'POST',
@@ -119,7 +117,7 @@ const useCommentMutations = () => {
           },
           body: JSON.stringify({ text, imgs, locationName }),
         });
-        console.log(commentId);
+       
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');

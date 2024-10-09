@@ -45,8 +45,6 @@ const usePostMutations = (postId, feedType, username) => {
 
       // Update the 'posts' query data
       queryClient.setQueryData(['posts', feedType, username], (oldData) => {
-        console.log(feedType);
-
         // Debugging line
         if (oldData) {
           return oldData.map((p) => {
@@ -188,8 +186,6 @@ const usePostMutations = (postId, feedType, username) => {
 
   const { mutate: repostPost, isPending: isReposting } = useMutation({
     mutationFn: async ({ actionType, onModel }) => {
-      console.log(onModel);
-
       try {
         const res = await fetch(`/api/posts/repost/${onModel}/${postId}`, {
           method: 'POST',
@@ -285,7 +281,6 @@ const usePostMutations = (postId, feedType, username) => {
           },
           body: JSON.stringify({ text, imgs, locationName }),
         });
-        console.log(postId);
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Something went wrong');

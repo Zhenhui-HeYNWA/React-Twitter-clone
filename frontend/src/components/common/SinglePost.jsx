@@ -39,7 +39,6 @@ const SinglePost = () => {
       return data;
     },
   });
-  console.log(post);
 
   const isQuote = !!(
     post?.quote &&
@@ -50,9 +49,6 @@ const SinglePost = () => {
   const isMyPost = authUser._id === post?.user._id;
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
-  console.log(isRepostedByAuthUser, 'isRepostedByAuthUser');
-  console.log(authUser, 'authUser');
-  console.log(post, 'post');
 
   const isOriginalPost = post?.repost?.originalPost == null;
 
@@ -60,7 +56,7 @@ const SinglePost = () => {
     if (authUser) {
       // 查找源帖子 ID（如果是转发的帖子）
       const originalPostId = post?.repost?.originalPost || post?._id;
-      console.log(originalPostId, 'originalPostId');
+
       // 检查当前用户是否在转发列表中
       const isReposted = authUser.repostedPosts.includes(originalPostId);
       setIsRepostedByAuthUser(isReposted);

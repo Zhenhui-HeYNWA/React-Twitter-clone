@@ -19,15 +19,13 @@ const RenderComments = ({ comment }) => {
     queryKey: ['authUser'],
   });
 
-  console.log(comment);
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
-  console.log(authUser.repostedPosts, 'authUser');
 
   useEffect(() => {
     if (authUser) {
       // 查找源帖子 ID（如果是转发的帖子）
       const originalPostId = comment?._id;
-      console.log(originalPostId, 'originalPostId');
+
       // 检查当前用户是否在转发列表中
       const isReposted = authUser.repostedPosts.includes(originalPostId);
       setIsRepostedByAuthUser(isReposted);
@@ -35,8 +33,6 @@ const RenderComments = ({ comment }) => {
       setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
     }
   }, [authUser, comment]);
-
-  console.log(isRepostedByAuthUser, 'isRepostedByAuthUser');
 
   const [structuredComments, setStructuredComments] = useState([]);
 
@@ -55,7 +51,6 @@ const RenderComments = ({ comment }) => {
 
   function getParentCommentsIterative(comment) {
     const result = [];
-    console.log(comment.parentId, 'comment.parentId');
 
     let currentComment = comment;
     while (currentComment?.parentId) {
@@ -94,7 +89,6 @@ const RenderComments = ({ comment }) => {
       <div className='w-full'>
         {isSubComment &&
           structuredComments?.map((structuredComment) => {
-            console.log(structuredComment, 'structuredComment');
             const isMyStructuredComment =
               authUser._id === structuredComment?.user?._id;
             structuredComment;

@@ -3,7 +3,6 @@ import { formatPostDate } from '../../../utils/date';
 
 const PostAuthorDetail = ({ postUser, date, type }) => {
   const formattedDate = formatPostDate(date);
-  console.log(date);
 
   return (
     <div>

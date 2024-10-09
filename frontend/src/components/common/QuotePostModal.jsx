@@ -28,8 +28,6 @@ const QuotePostModal = ({ authUser, post }) => {
   const formattedDate = formatPostDate(post?.createdAt);
   const isReposted = post?.repost.repostNum > 0;
 
-  console.log('Quote post modal', post);
-
   const isQuote = !!(
     post?.quote &&
     post?.quote.originalPost &&

@@ -15,13 +15,12 @@ const RenderSubComments = ({ pageType, postComment }) => {
   const { data: authUser } = useQuery({ queryKey: ['authUser'] });
 
   const [isRepostedByAuthUser, setIsRepostedByAuthUser] = useState(false);
-  console.log(isRepostedByAuthUser, 'authUser');
 
   useEffect(() => {
     if (authUser) {
       // 查找源帖子 ID（如果是转发的帖子）
       const originalPostId = postComment?._id;
-      console.log(originalPostId, 'originalPostId');
+
       // 检查当前用户是否在转发列表中
       const isReposted = authUser.repostedPosts.includes(originalPostId);
       setIsRepostedByAuthUser(isReposted);
@@ -29,8 +28,6 @@ const RenderSubComments = ({ pageType, postComment }) => {
       setIsRepostedByAuthUser(false); // 如果没有 authUser, 默认设置为 false
     }
   }, [authUser, postComment]);
-
-  console.log('postComment', postComment);
 
   const [structuredComments, setStructuredComments] = useState([]);
 
@@ -83,7 +80,6 @@ const RenderSubComments = ({ pageType, postComment }) => {
     if (isCommentDeleting) return;
     deleteComment({ commentId });
   };
-  console.log(postComment);
 
   return (
     <div className='border-b  border-gray-200 dark:border-gray-700 flex flex-col flex-1 justify-center py-2 '>

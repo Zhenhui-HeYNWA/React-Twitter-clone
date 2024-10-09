@@ -11,9 +11,6 @@ import toast from 'react-hot-toast';
 import { fetchLocation } from '../../../utils/location/location';
 import useCommentMutations from '../../../hooks/useCommentMutations';
 const QuoteCommentModal = ({ authUser, comment }) => {
-  console.log(comment._id, 'comment._id');
-  console.log(comment);
-
   const [quote, setQuote] = useState('');
   const [locationName, setLocationName] = useState('');
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);

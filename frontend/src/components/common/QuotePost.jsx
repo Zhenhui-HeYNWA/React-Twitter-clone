@@ -6,8 +6,6 @@ import RenderText from './PostCommon/RenderText';
 
 const QuotePost = ({ post, isOriginalPost }) => {
   const quotePost = post?.quote;
-  console.log('post?.originalCreatedAt', post);
-  console.log(quotePost.onModel === 'Comment');
 
   const navigate = useNavigate();
   const handleModalImgClick = (e, index) => {

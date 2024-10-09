@@ -75,8 +75,6 @@ export const deletePost = async (req, res) => {
         .json({ message: 'You have no right to delete this post' });
     }
 
-    console.log('Deleting post:', post);
-
     // Delete images associated with the post (either original or quote post)
     if (post.imgs && post.imgs.length > 0) {
       for (const img of post.imgs) {
@@ -92,8 +90,6 @@ export const deletePost = async (req, res) => {
     if (post.repost && post.repost.originalPost) {
       originalPostId = post.repost.originalPost;
 
-      console.log(`Post is a repost of original post: ${originalPostId}`);
-
       // Check if the repost is from a comment or post
       const onModel = post.repost.onModel || 'Post';
       const model = onModel === 'Comment' ? 'Comment' : 'Post';
@@ -105,31 +101,22 @@ export const deletePost = async (req, res) => {
           { $inc: { repostByNum: -1 }, $pull: { repostBy: post.user } },
           { session }
         );
-      console.log(
-        `Decremented repostByNum for original ${model}: ${originalPostId}`
-      );
 
       await User.updateMany(
         { repostedPosts: originalPostId },
         { $pull: { repostedPosts: originalPostId, userPosts: post._id } },
         { session }
       );
-      console.log(
-        `Updated users who reposted the original ${model}: ${originalPostId}`
-      );
     } else {
       originalPostId = post._id;
-      console.log(`Post is the original post: ${originalPostId}`);
 
       const reposts = await Post.find({
         'repost.originalPost': originalPostId,
       }).session(session);
 
       const repostIds = reposts.map((repost) => repost._id);
-      console.log('Reposts associated with the original post:', repostIds);
 
       await Post.deleteMany({ _id: { $in: repostIds } }).session(session);
-      console.log(`Deleted reposts: ${repostIds}`);
 
       await User.updateMany(
         { repostedPosts: originalPostId },

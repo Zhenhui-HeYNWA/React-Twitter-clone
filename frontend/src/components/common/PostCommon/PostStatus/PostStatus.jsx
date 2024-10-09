@@ -7,8 +7,6 @@ const PostStatus = ({
   postUser,
   isPinnedPost,
 }) => {
-  console.log(isOriginalPost);
-
   return (
     <>
       {!isOriginalPost && !isAuthUserRepost && (
