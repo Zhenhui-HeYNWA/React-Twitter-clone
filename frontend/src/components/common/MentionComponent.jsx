@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Mention } from 'primereact/mention';
-
+import { v4 as uuidv4 } from 'uuid';
 const CustomMention = ({ placeholderText, value, onChange }) => {
   const [suggestions, setSuggestions] = useState([]);
 
@@ -55,6 +55,7 @@ const CustomMention = ({ placeholderText, value, onChange }) => {
 
   return (
     <Mention
+      inputId={uuidv4()}
       value={value}
       onChange={onChange}
       suggestions={suggestions}

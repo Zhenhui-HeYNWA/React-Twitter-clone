@@ -143,6 +143,7 @@ const CreateCommentForm = ({
           onSubmit={handleCommentSubmit}>
           <div className='quote-post-container h-20 w-full'>
             <CustomMention
+              id='create-post-form'
               className='group textarea w-full p-0 text-2xl resize-none border-none focus:outline-none bg-inherit'
               placeholderText='Post your reply '
               value={replyPostComment}

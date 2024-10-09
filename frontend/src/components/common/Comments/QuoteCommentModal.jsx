@@ -2,7 +2,7 @@ import { useState } from 'react';
 import CustomMention from '../MentionComponent';
 import { IoCloseSharp } from 'react-icons/io5';
 import { CiLocationOn } from 'react-icons/ci';
-import usePostMutations from '../../../hooks/usePostMutations';
+
 import { formatPostDate } from '../../../utils/date';
 import CreatePostControls from '../PostCommon/CreatePostControls';
 import RenderText from '../PostCommon/RenderText';

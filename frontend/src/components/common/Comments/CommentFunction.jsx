@@ -217,6 +217,7 @@ const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
                     </div>
                     <div className='quote-post-container'>
                       <CustomMention
+                        id={`Comment-form` + postComment?._id}
                         className='textarea items-center p-0 w-2/3 h-2 bg-gray-100 dark:bg-[#15202B]   rounded text-md resize-none  focus:outline-none '
                         placeholderText='Post your reply'
                         value={reply}

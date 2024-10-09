@@ -68,6 +68,7 @@ const QuotePostModal = ({ authUser, post }) => {
       text: quote,
       imgs,
       locationName,
+      onModel: 'Post',
     });
 
     setQuote('');
