@@ -17,6 +17,7 @@ import PostAuthorDetail from '../PostCommon/PostAuthorDetail';
 import { PiPencilLine } from 'react-icons/pi';
 
 import QuoteCommentModal from './QuoteCommentModal';
+import RenderImg from '../RenderImg/RenderImg';
 
 const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
   const { data: authUser } = useQuery({
@@ -193,6 +194,12 @@ const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
                     <div className='text-base '>
                       <RenderText text={postComment?.text} />
                     </div>
+                    {postComment.imgs.length > 0 && (
+                      <div className='rounded-xl overflow-hidden w-fit mb-3'>
+                        <RenderImg imgs={postComment.imgs} size={'sm'} />
+                      </div>
+                    )}
+
                     <div className='mt-2 text-gray-500'>
                       Replying to
                       <span className='text-sky-600'>
