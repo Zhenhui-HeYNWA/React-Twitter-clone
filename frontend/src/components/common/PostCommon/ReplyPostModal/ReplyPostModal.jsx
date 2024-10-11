@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import usePostMutations from '../../../../hooks/usePostMutations';
 import RenderImg from '../../RenderImg/RenderImg';
 import './ReplyPostModal.css';
+import Compressor from 'compressorjs';
 
 const ReplyPostModal = ({ post, comments, theme, postId }) => {
   const [imgs, setImgs] = useState([]);
@@ -41,24 +42,55 @@ const ReplyPostModal = ({ post, comments, theme, postId }) => {
     );
   };
 
+  // const handleImgChange = (e) => {
+  //   const files = e.target.files;
+  //   if (files && files.length + imgs.length <= 4) {
+  //     const newImgs = [...imgs];
+  //     Array.from(files).forEach((file) => {
+  //       const reader = new FileReader();
+  //       reader.onload = () => {
+  //         newImgs.push(reader.result);
+  //         if (newImgs.length <= 4) {
+  //           setImgs(newImgs);
+  //         } else {
+  //           toast.error('You can upload up to 4 images.');
+  //         }
+  //       };
+  //       reader.readAsDataURL(file);
+  //     });
+  //   } else {
+  //     toast.error('You can upload up to 4 images.');
+  //   }
+  // };
   const handleImgChange = (e) => {
     const files = e.target.files;
     if (files && files.length + imgs.length <= 4) {
       const newImgs = [...imgs];
       Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          newImgs.push(reader.result);
-          if (newImgs.length <= 4) {
-            setImgs(newImgs);
-          } else {
-            toast.error('You can upload up to 4 images.');
-          }
-        };
-        reader.readAsDataURL(file);
+        new Compressor(file, {
+          quality: 0.6,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          success(compressedResult) {
+            const compressedFile = new File([compressedResult], file.name, {
+              type: compressedResult.type,
+              lastModified: Date.now(),
+            });
+            newImgs.push(compressedFile);
+            if (newImgs.length <= 4) {
+              setImgs(newImgs);
+            } else {
+              toast.error('You can upload up to 4 images.');
+            }
+          },
+          error(err) {
+            console.error('Compression error', err);
+            toast.error('Image compression failed');
+          },
+        });
       });
     } else {
-      toast.error('You can upload up to 4 images.');
+      toast.error('You can upload up to 4 images');
     }
   };
   return (
@@ -124,7 +156,7 @@ const ReplyPostModal = ({ post, comments, theme, postId }) => {
               <div className='flex gap-2'>
                 {imgs?.map((img, index) => (
                   <div
-                    key={img}
+                    key={index}
                     className='relative flex-shrink-0'
                     style={{
                       flex: imgs?.length > 1 ? '0 0 10rem' : '0 0 auto',
@@ -136,7 +168,7 @@ const ReplyPostModal = ({ post, comments, theme, postId }) => {
                       }}
                     />
                     <img
-                      src={img}
+                      src={URL.createObjectURL(img)}
                       className={` w-36 h-44 mx-auto  object-cover rounded-2xl`}
                       alt={`Preview ${index + 1}`}
                     />

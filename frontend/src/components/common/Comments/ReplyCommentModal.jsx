@@ -4,6 +4,7 @@ import CommentsControls from './CommentsControls';
 import { useState } from 'react';
 import useCommentMutations from '../../../hooks/useCommentMutations';
 import toast from 'react-hot-toast';
+import Compressor from 'compressorjs';
 
 const ReplyCommentModal = (comment, authUser) => {
   const [imgs, setImgs] = useState([]);
@@ -16,27 +17,58 @@ const ReplyCommentModal = (comment, authUser) => {
     setReplyToComment((prevText) => prevText + emoji.native);
   };
 
+  // const handleImgChange = (e) => {
+  //   const files = e.target.files;
+  //   if (files && files.length + imgs.length <= 4) {
+  //     const newImgs = [...imgs];
+  //     Array.from(files).forEach((file) => {
+  //       const reader = new FileReader();
+  //       reader.onload = () => {
+  //         newImgs.push(reader.result);
+  //         if (newImgs.length <= 4) {
+  //           setImgs(newImgs);
+  //         } else {
+  //           toast.error('You can upload up to 4 images.');
+  //         }
+  //       };
+  //       reader.readAsDataURL(file);
+  //     });
+  //   } else {
+  //     toast.error('You can upload up to 4 images.');
+  //   }
+  // };
+
   const handleImgChange = (e) => {
     const files = e.target.files;
     if (files && files.length + imgs.length <= 4) {
       const newImgs = [...imgs];
       Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          newImgs.push(reader.result);
-          if (newImgs.length <= 4) {
-            setImgs(newImgs);
-          } else {
-            toast.error('You can upload up to 4 images.');
-          }
-        };
-        reader.readAsDataURL(file);
+        new Compressor(file, {
+          quality: 0.6,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          success(compressedResult) {
+            const compressedFile = new File([compressedResult], file.name, {
+              type: compressedResult.type,
+              lastModified: Date.now(),
+            });
+            newImgs.push(compressedFile);
+            if (newImgs.length <= 4) {
+              setImgs(newImgs);
+            } else {
+              toast.error('You can upload up to 4 images.');
+            }
+          },
+          error(err) {
+            console.error('Compression error', err);
+            toast.error('Image compression failed');
+          },
+        });
       });
     } else {
-      toast.error('You can upload up to 4 images.');
+      toast.error('You can upload up to 4 images');
     }
   };
-
   const handleReplyComment = (e, commentId) => {
     e.preventDefault();
     if (isReplying) return;
@@ -120,7 +152,7 @@ const ReplyCommentModal = (comment, authUser) => {
                 <div className='flex gap-2'>
                   {imgs.map((img, index) => (
                     <div
-                      key={img}
+                      key={index}
                       className='relative flex-shrink-0 w-fit h-fit'
                       style={{
                         flex: imgs.length > 1 ? '0 0 9rem' : '0 0 auto',
@@ -132,7 +164,7 @@ const ReplyCommentModal = (comment, authUser) => {
                         }}
                       />
                       <img
-                        src={img}
+                        src={URL.createObjectURL(img)}
                         className={
                           imgs.length > 1
                             ? `w-44 h-48 object-cover rounded-2xl`

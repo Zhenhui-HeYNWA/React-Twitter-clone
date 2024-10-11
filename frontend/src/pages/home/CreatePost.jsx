@@ -4,6 +4,7 @@ import { IoCloseSharp } from 'react-icons/io5';
 import { CiLocationOn } from 'react-icons/ci';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
+import Compressor from 'compressorjs';
 
 import './CreatePost.css';
 import { useTheme } from '../../components/context/ThemeProvider';
@@ -32,13 +33,10 @@ const CreatePost = () => {
     isError,
     error,
   } = useMutation({
-    mutationFn: async ({ text, imgs, locationName }) => {
+    mutationFn: async (formData) => {
       const res = await fetch('/api/posts/create', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text, imgs, locationName }),
+        body: formData, // Send FormData
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
@@ -55,27 +53,68 @@ const CreatePost = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    createPost({ text, imgs, locationName });
+    const formData = new FormData();
+    formData.append('text', text);
+    formData.append('locationName', locationName);
+  
+    imgs.forEach((img) => {
+      formData.append('imgs', img);
+    });
+  
+    createPost(formData);
   };
+
+  // const handleImgChange = (e) => {
+  //   const files = e.target.files;
+  //   if (files && files.length + imgs.length <= 4) {
+
+  //     const newImgs = [...imgs];
+  //     Array.from(files).forEach((file) => {
+  //       const reader = new FileReader();
+  //       reader.onload = () => {
+  //         newImgs.push(reader.result);
+  //         if (newImgs.length <= 4) {
+  //           setImgs(newImgs);
+  //         } else {
+  //           toast.error('You can upload up to 4 images.');
+  //         }
+  //       };
+  //       reader.readAsDataURL(file);
+  //     });
+  //   } else {
+  //     toast.error('You can upload up to 4 images.');
+  //   }
+  // };
 
   const handleImgChange = (e) => {
     const files = e.target.files;
     if (files && files.length + imgs.length <= 4) {
       const newImgs = [...imgs];
       Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          newImgs.push(reader.result);
-          if (newImgs.length <= 4) {
-            setImgs(newImgs);
-          } else {
-            toast.error('You can upload up to 4 images.');
-          }
-        };
-        reader.readAsDataURL(file);
+        new Compressor(file, {
+          quality: 0.6,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          success(compressedResult) {
+            const compressedFile = new File([compressedResult], file.name, {
+              type: compressedResult.type,
+              lastModified: Date.now(),
+            });
+            newImgs.push(compressedFile);
+            if (newImgs.length <= 4) {
+              setImgs(newImgs);
+            } else {
+              toast.error('You can upload up to 4 images.');
+            }
+          },
+          error(err) {
+            console.error('Compression error', err);
+            toast.error('Image compression failed');
+          },
+        });
       });
     } else {
-      toast.error('You can upload up to 4 images.');
+      toast.error('You can upload up to 4 images');
     }
   };
 
@@ -134,7 +173,7 @@ const CreatePost = () => {
             <div className='flex gap-2'>
               {imgs.map((img, index) => (
                 <div
-                  key={img}
+                  key={index}
                   className='relative flex-shrink-0'
                   style={{ flex: imgs.length > 1 ? '0 0 10rem' : '0 0 auto' }}>
                   <IoCloseSharp
@@ -144,7 +183,7 @@ const CreatePost = () => {
                     }}
                   />
                   <img
-                    src={img}
+                    src={URL.createObjectURL(img)}
                     className={
                       imgs.length > 1
                         ? `w-full h-full object-cover rounded-2xl`

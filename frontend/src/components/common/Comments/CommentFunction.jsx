@@ -18,6 +18,7 @@ import { PiPencilLine } from 'react-icons/pi';
 
 import QuoteCommentModal from './QuoteCommentModal';
 import RenderImg from '../RenderImg/RenderImg';
+import Compressor from 'compressorjs';
 
 const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
   const { data: authUser } = useQuery({
@@ -46,26 +47,60 @@ const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
     setReplies((prevText) => prevText + emoji.native);
   };
 
+  // const handleImgChange = (e) => {
+  //   const files = e.target.files;
+  //   if (files && files.length + imgs.length <= 4) {
+  //     const newImgs = [...imgs];
+  //     Array.from(files).forEach((file) => {
+  //       const reader = new FileReader();
+  //       reader.onload = () => {
+  //         newImgs.push(reader.result);
+  //         if (newImgs.length <= 4) {
+  //           setImgs(newImgs);
+  //         } else {
+  //           toast.error('You can upload up to 4 images.');
+  //         }
+  //       };
+  //       reader.readAsDataURL(file);
+  //     });
+  //   } else {
+  //     toast.error('You can upload up to 4 images.');
+  //   }
+  // };
+
   const handleImgChange = (e) => {
     const files = e.target.files;
+
     if (files && files.length + imgs.length <= 4) {
       const newImgs = [...imgs];
       Array.from(files).forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          newImgs.push(reader.result);
-          if (newImgs.length <= 4) {
-            setImgs(newImgs);
-          } else {
-            toast.error('You can upload up to 4 images.');
-          }
-        };
-        reader.readAsDataURL(file);
+        new Compressor(file, {
+          quality: 0.6,
+          maxWidth: 1024,
+          maxHeight: 1024,
+          success(compressedResult) {
+            const compressedFile = new File([compressedResult], file.name, {
+              type: compressedResult.type,
+              lastModified: Date.now(),
+            });
+            newImgs.push(compressedFile);
+            if (newImgs.length <= 4) {
+              setImgs(newImgs);
+            } else {
+              toast.error('You can upload up to 4 images.');
+            }
+          },
+          error(err) {
+            console.error('Compression error', err);
+            toast.error('Image compression failed');
+          },
+        });
       });
     } else {
-      toast.error('You can upload up to 4 images.');
+      toast.error('You can upload up to 4 images');
     }
   };
+
   const commentLiked = authUser.likes.some(
     (like) => like.onModel === 'Comment' && like.item === postComment._id
   );
@@ -250,7 +285,7 @@ const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
                               }}
                             />
                             <img
-                              src={img}
+                              src={URL.createObjectURL(img)}
                               className={
                                 imgs.length > 1
                                   ? `w-44 h-48 object-cover rounded-2xl`

@@ -9,6 +9,7 @@ import userRoutes from './routes/user.route.js';
 import postRoutes from './routes/post.route.js';
 import commentRoutes from './routes/comment.route.js';
 import notificationRoutes from './routes/notification.route.js';
+import fileUpload from 'express-fileupload';
 
 import connectMongoDB from './db/connectMongoDB.js';
 
@@ -24,7 +25,14 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 const __dirname = path.resolve();
 
-app.use(express.json({ limit: '5mb' })); //to parse req.body
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: '/tmp/', // You can change this to a suitable temp directory
+    limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB (adjust as needed)
+  })
+);
+app.use(express.json());
 app.use(express.urlencoded({ extended: true })); //to parse from data
 
 app.use(cookieParser());

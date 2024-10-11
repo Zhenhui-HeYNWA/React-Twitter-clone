@@ -8,31 +8,61 @@ import mongoose from 'mongoose';
 
 export const createPost = async (req, res) => {
   try {
-    const { text, imgs, locationName } = req.body;
+    const { text, locationName } = req.body;
+    const imgs = req.files ? req.files.imgs : null; // Access uploaded files
 
-    // let { img } = req.body;
+    // Normalize imgs to an array
+    let filesArray = [];
+    if (imgs) {
+      if (Array.isArray(imgs)) {
+        filesArray = imgs;
+      } else {
+        filesArray = [imgs];
+      }
+    }
+
     const userId = req.user._id.toString();
     const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    if (!text && (!imgs || imgs.length === 0)) {
+
+    if (!text && filesArray.length === 0) {
       return res.status(400).json({ error: 'Post must have text or images' });
     }
 
-    if (imgs && imgs.length > 4) {
+    if (filesArray.length > 4) {
       return res
         .status(400)
         .json({ error: 'You can upload a maximum of 4 images' });
     }
+
     let uploadedImages = [];
-    if (imgs && imgs.length > 0) {
-      for (const img of imgs) {
-        const uploadedResponse = await cloudinary.uploader.upload(img);
-        uploadedImages.push(uploadedResponse.secure_url);
+    if (filesArray.length > 0) {
+      for (const file of filesArray) {
+        try {
+          // Upload image to Cloudinary
+          const uploadedResponse = await cloudinary.uploader.upload(
+            file.tempFilePath,
+            {
+              resource_type: 'image',
+              quality: 'auto:low',
+              fetch_format: 'auto',
+              width: 1024,
+              crop: 'limit',
+            }
+          );
+          uploadedImages.push(uploadedResponse.secure_url);
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          return res
+            .status(500)
+            .json({ error: 'Image upload failed, please try again.' });
+        }
       }
     }
+
     const location =
       locationName && locationName.trim() ? locationName : 'Earth';
     const newPost = new Post({
@@ -50,7 +80,7 @@ export const createPost = async (req, res) => {
     await handleMentions(text, userId);
     res.status(201).json(newPost);
   } catch (error) {
-    console.log('error in createPost controller', error);
+    console.error('Error in createPost controller', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
