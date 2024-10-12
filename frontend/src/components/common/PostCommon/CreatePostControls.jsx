@@ -37,7 +37,7 @@ const CreatePostControls = ({
           <div
             className={`${
               type === 'post'
-                ? ' absolute top-10  right-2 md:top-10 md:left-10 z-50'
+                ? ' absolute top-10  -left-10 md:top-10 md:left-10 z-50'
                 : ' absolute top-8 -left-16  '
             }`}>
             <Picker
