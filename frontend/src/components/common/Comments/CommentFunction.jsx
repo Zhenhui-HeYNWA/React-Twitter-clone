@@ -229,7 +229,7 @@ const CommentFunction = ({ postComment, size, isRepostedByAuthUser }) => {
                     <div className='text-base '>
                       <RenderText text={postComment?.text} />
                     </div>
-                    {postComment.imgs.length > 0 && (
+                    {postComment?.imgs?.length > 0 && (
                       <div className='rounded-xl overflow-hidden w-fit mb-3'>
                         <RenderImg imgs={postComment.imgs} size={'sm'} />
                       </div>

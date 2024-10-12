@@ -210,12 +210,12 @@ const Post = ({ post, posts, user, feedType }) => {
                     {/* {highlightMentions(post.repost.originalText)}
                      */}
 
-                    <RenderText text={post?.repost.originalText} />
+                    <RenderText text={post?.repost?.originalText} />
                   </span>
                 </span>
               )}
 
-              {isOriginalPost && post.imgs.length > 0 && (
+              {isOriginalPost && post?.imgs?.length > 0 && (
                 <div className='rounded-xl overflow-hidden w-fit mb-3'>
                   <RenderImg
                     imgs={post.imgs}
