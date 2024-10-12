@@ -217,24 +217,24 @@ const Post = ({ post, posts, user, feedType }) => {
 
               {isOriginalPost && post.imgs.length > 0 && (
                 <div className='rounded-xl overflow-hidden w-fit mb-3'>
-                  <RenderImg
+                  {/* <RenderImg
                     imgs={post.imgs}
                     onImgClick={() =>
                       handleImgClick(authUser.username, post._id)
                     }
                     size='lg'
-                  />
+                  /> */}
                 </div>
               )}
               {!isOriginalPost && post.repost.originalImgs?.length > 0 && (
                 <div className='rounded-xl overflow-hidden w-fit mb-3'>
-                  <RenderImg
+                  {/* <RenderImg
                     imgs={post.repost.originalImgs}
                     onImgClick={() =>
                       handleImgClick(authUser.username, post._id)
                     }
                     size='lg'
-                  />
+                  /> */}
                 </div>
               )}
             </div>
