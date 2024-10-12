@@ -166,7 +166,7 @@ const RenderComments = ({ comment }) => {
                               <span className='text-lg whitespace-pre-wrap'>
                                 {structuredComment?.text}
                               </span>
-                              {structuredComment.imgs.length > 0 && (
+                              {structuredComment?.imgs?.length > 0 && (
                                 <div className='rounded-xl overflow-hidden w-fit mb-3'>
                                   <RenderImg
                                     imgs={structuredComment.imgs}
