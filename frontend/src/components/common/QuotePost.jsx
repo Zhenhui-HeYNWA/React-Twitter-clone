@@ -59,14 +59,14 @@ const QuotePost = ({ post, isOriginalPost }) => {
               {isOriginalPost && quotePost.originalImgs.length > 0 && (
                 <>
                   <div className='w-32 h-32 rounded-2xl  pb-2 cursor-pointer'>
-                    {/* <RenderImg
+                    <RenderImg
                       imgs={
                         quotePost?.originalImgs ||
                         quotePost?.repost?.originalImgs
                       }
                       onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
                       size='sm'
-                    /> */}
+                    />
                   </div>
                   <div className='px-2 w-full  h-32 py-1  '>
                     <div className=' text-base w-full h-full  whitespace-pre-wrap word-wrap line-clamp-5 '>
@@ -122,21 +122,21 @@ const QuotePost = ({ post, isOriginalPost }) => {
               <RenderText text={quotePost?.originalText} />{' '}
             </div>
           </div>
-          {/* {isOriginalPost && quotePost?.originalImgs.length > 0 && (
+          {isOriginalPost && quotePost?.originalImgs.length > 0 && (
             <RenderImg
               imgs={quotePost?.originalImgs || quotePost?.repost?.originalImgs}
               onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
               size='lg'
             />
-          )} */}
-          {/* 
+          )}
+          
           {!isOriginalPost && quotePost?.originalImgs?.length > 0 && (
             <RenderImg
               imgs={quotePost?.originalImgs || quotePost?.repost?.originalImgs}
               onImgClick={(e, index) => handleModalImgClick(e, index)} // Pass the event and index
               size='lg'
             />
-          )} */}
+          )}
         </div>
       )}
     </>
