@@ -91,7 +91,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
           </div>
         </div>
       ) : (
-        <div className='border border-gray-200  dark:border-slate-700 rounded-2xl overflow-hidden  pt-4 mt-2 '>
+        <div className='border border-gray-200   dark:border-slate-700 rounded-2xl overflow-hidden  pt-4 mt-2 '>
           <div className='flex items-center gap-2 w-full px-3'>
             <div className='avatar w-7  '>
               <img
@@ -129,7 +129,7 @@ const QuotePost = ({ post, isOriginalPost }) => {
               size='lg'
             />
           )}
-          
+
           {!isOriginalPost && quotePost?.originalImgs?.length > 0 && (
             <RenderImg
               imgs={quotePost?.originalImgs || quotePost?.repost?.originalImgs}

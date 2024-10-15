@@ -56,11 +56,11 @@ const CreatePost = () => {
     const formData = new FormData();
     formData.append('text', text);
     formData.append('locationName', locationName);
-  
+
     imgs.forEach((img) => {
       formData.append('imgs', img);
     });
-  
+
     createPost(formData);
   };
 
@@ -148,7 +148,7 @@ const CreatePost = () => {
   };
 
   return (
-    <div className='    flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700 w-full h-fit '>
+    <div className='    flex px-4 py-4 items-start gap-4 border-b border-gray-200 dark:border-gray-700  w-full h-fit '>
       <div className='avatar'>
         <div className='w-8 rounded-full'>
           <img

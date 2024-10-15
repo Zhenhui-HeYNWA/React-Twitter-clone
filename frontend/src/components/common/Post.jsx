@@ -111,14 +111,14 @@ const Post = ({ post, posts, user, feedType }) => {
 
   return (
     <>
-      <div className='flex flex-col'>
+      <div className='flex flex-col '>
         <PostStatus
           isOriginalPost={isOriginalPost}
           isAuthUserRepost={isAuthUserRepost}
           postUser={post.user}
           isPinnedPost={isPinnedPost}
         />
-        <div className='flex gap-4 items-start py-2 border-b border-gray-200 dark:border-gray-700 justify-center px-4 '>
+        <div className='flex gap-4 items-start py-2 border-b border-gray-200 dark:border-gray-700 justify-center px-4'>
           <div className=' w-12 h-12 rounded-full overflow-hidden'>
             {/* Avatar */}
             {isOriginalPost && (
@@ -142,7 +142,7 @@ const Post = ({ post, posts, user, feedType }) => {
           </div>
 
           <div className='flex flex-col flex-1  '>
-            <div className='flex   justify-between items-center w-full  '>
+            <div className='flex   justify-between items-center w-full '>
               {isOriginalPost ? (
                 <PostAuthorDetail
                   postUser={post?.user}

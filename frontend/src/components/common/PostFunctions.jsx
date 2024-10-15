@@ -118,7 +118,7 @@ const PostFunctions = ({
 
   return (
     <div
-      className={`flex justify-between items-center  w-full ${
+      className={`flex justify-between items-center   w-full ${
         size === 'lg' ? '' : 'mt-3'
       } `}>
       <div className='flex gap-4 items-center w-full justify-between '>

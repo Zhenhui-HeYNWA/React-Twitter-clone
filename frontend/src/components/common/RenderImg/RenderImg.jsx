@@ -37,11 +37,11 @@ const RenderImg = ({ imgs, onImgClick, size }) => {
                 imgs.length === 1
                   ? ' object-cover  border-gray-700 h-full  w-full max-h-128'
                   : imgs.length === 2
-                  ? '  object-cover  border-gray-700 w-full h-full gap-1 '
+                  ? '  object-cover  border-gray-700  w-full h-full gap-1 '
                   : imgs.length === 3 && index === 0
                   ? 'col-span-2 row-span-2  object-cover border-gray-700 h-full  w-full'
                   : imgs.length === 3
-                  ? 'col-span-2 row-span-1 md:object-cover object-cover border-gray-700 h-full w-full'
+                  ? 'col-span-2 row-span-1 md:object-cover object-cover border-gray-700 h-full  w-full'
                   : imgs.length === 4
                   ? 'object-cover border-gray-700 w-full h-full aspect-square '
                   : 'object-cover rounded-lg border-gray-700 w-full'

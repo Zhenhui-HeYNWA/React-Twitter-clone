@@ -171,7 +171,7 @@ const QuotePostModal = ({ authUser, post }) => {
     <dialog
       id={`QuoteModel${post?._id}`}
       className='modal modal-middle mt-2 dialog-container    '>
-      <div className='modal-box  bg-slate-100 dark:bg-[#15202B] py-0 h-fit overflow-visible '>
+      <div className='modal-box  bg-slate-100 dark:bg-[#15202B] py-0 h-fit overflow-scroll '>
         <div className=' w-full h-10 sticky top-0 z-50 bg-slate-100 dark:bg-[#15202B]'>
           <form method='dialog' className=' z-auto'>
             {/* Close button */}
@@ -240,6 +240,16 @@ const QuotePostModal = ({ authUser, post }) => {
                   {error.message || 'Something went wrong'}
                 </div>
               )}
+              <CreatePostControls
+                onImgsChange={handleImgChange}
+                onEmojiSelect={handleEmojiSelect}
+                onLocationFetch={handleLocation}
+                isFetchingLocation={isFetchingLocation} // Replace with actual state
+                isPosting={isQuoting} // Replace with actual state
+                onSubmit={handleSubmit}
+                theme={theme}
+                type={'quote'}
+              />
               <div className='w-full  border  border-gray-300 dark:border-gray-700 h-fit   mt-2 rounded-xl  flex flex-col overflow-hidden '>
                 <div className='flex items-center gap-2 w-full   p-2'>
                   <div className='avatar w-8    rounded-full'>
@@ -271,16 +281,6 @@ const QuotePostModal = ({ authUser, post }) => {
                   {renderModalContent(post, isReposted, isQuote)}
                 </div>
               </div>
-              <CreatePostControls
-                onImgsChange={handleImgChange}
-                onEmojiSelect={handleEmojiSelect}
-                onLocationFetch={handleLocation}
-                isFetchingLocation={isFetchingLocation} // Replace with actual state
-                isPosting={isQuoting} // Replace with actual state
-                onSubmit={handleSubmit}
-                theme={theme}
-                type={'quote'}
-              />
             </div>
           </div>
         </div>
